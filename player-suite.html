@@ -29,7 +29,7 @@
 
     <div class="main-frame">
       <header class="topbar">
-        <div class="page-id"><span class="page-bracket"></span><div><strong>PLAYER SUITE / RECORDS</strong><span>REGISTRATION // ACTIONS // CANON</span></div></div>
+        <div class="page-id"><span class="page-bracket"></span><div><strong>PLAYER SUITE / OPERATIONS</strong><span>PERSONAL // FACTION // ACTIONS</span></div></div>
         <div class="top-telemetry"><span><i class="status-dot"></i>PLAYER LINK ACTIVE</span><span data-system-time>--:--:--</span></div>
       </header>
 
@@ -37,58 +37,93 @@
         <section class="hud-panel compact" style="margin-bottom:18px">
           <div class="section-head">
             <div><div class="section-code">NAVIGATION / 03</div><h2>Player Suite</h2></div>
-            <p>PLAYER OPERATIONS</p>
+            <p>PLAYER AUTHORITY ONLY</p>
           </div>
-          <p class="hero-copy" style="margin:0">Create or review your player record, submit formal actions for Game Master resolution, and reference the core gameplay structure.</p>
+          <p class="hero-copy" style="margin:0">Manage your own player identity, characters, economy, inventory, faction information, and actions. World-scale values are displayed as authoritative information and can only be changed by the Game Master unless your account is explicitly granted a faction permission.</p>
         </section>
 
         <div class="tabs" data-tabs>
           <button class="tab active" type="button" data-tab-target="suite-overview">OVERVIEW</button>
-          <button class="tab" type="button" data-tab-target="suite-registration">PLAYER REGISTRATION</button>
-          <button class="tab" type="button" data-tab-target="suite-action">SUBMIT ACTION</button>
-          <button class="tab" type="button" data-tab-target="suite-canon">CANON REFERENCE</button>
+          <button class="tab" type="button" data-tab-target="suite-account">ACCOUNT</button>
+          <button class="tab" type="button" data-tab-target="suite-economy">ECONOMY</button>
+          <button class="tab" type="button" data-tab-target="suite-inventory">INVENTORY</button>
+          <button class="tab" type="button" data-tab-target="suite-faction">FACTION</button>
+          <button class="tab" type="button" data-tab-target="suite-characters">CHARACTERS</button>
+          <button class="tab" type="button" data-tab-target="suite-actions">ACTIONS</button>
+          <button class="tab" type="button" data-tab-target="suite-canon">CANON</button>
         </div>
 
         <section class="panel active" id="suite-overview" data-tab-panel>
           <div class="content-grid">
             <article class="hud-panel compact">
-              <div class="section-code">PLAYER SUITE / OVERVIEW</div>
-              <h2 style="margin:5px 0 12px;text-transform:uppercase">Core Player Operations</h2>
+              <div class="section-code">PLAYER SUITE / CONTROL SURFACES</div>
+              <h2 style="margin:5px 0 12px;text-transform:uppercase">Your Account Systems</h2>
               <div class="command-list">
-                <div class="command-row"><div class="command-icon">01</div><div><h3>Player Registration</h3><p>Establish the player identity, interests, faction preference, and role connected to this account.</p></div><button class="hud-button secondary" type="button" data-open-tab="suite-registration">OPEN</button></div>
-                <div class="command-row"><div class="command-icon">02</div><div><h3>Action Submission</h3><p>Submit a formal attempt with an objective, method, committed resources, and intended result.</p></div><button class="hud-button secondary" type="button" data-open-tab="suite-action">OPEN</button></div>
-                <div class="command-row"><div class="command-icon">03</div><div><h3>Canon Reference</h3><p>Quick reference for the core game loop, player agency, characters, the Record, and major powers.</p></div><button class="hud-button secondary" type="button" data-open-tab="suite-canon">OPEN</button></div>
+                <div class="command-row"><div class="command-icon">A</div><div><h3>Account</h3><p>Player identity and game registration connected only to your login.</p></div><button class="hud-button secondary" type="button" data-open-tab="suite-account">OPEN</button></div>
+                <div class="command-row"><div class="command-icon">E</div><div><h3>Economy</h3><p>Your personal bank balance and transaction record.</p></div><button class="hud-button secondary" type="button" data-open-tab="suite-economy">OPEN</button></div>
+                <div class="command-row"><div class="command-icon">I</div><div><h3>Inventory</h3><p>Resources and assets currently owned by your player account.</p></div><button class="hud-button secondary" type="button" data-open-tab="suite-inventory">OPEN</button></div>
+                <div class="command-row"><div class="command-icon">F</div><div><h3>Faction</h3><p>Your faction membership, role, permissions, treasury, and faction resources.</p></div><button class="hud-button secondary" type="button" data-open-tab="suite-faction">OPEN</button></div>
+                <div class="command-row"><div class="command-icon">C</div><div><h3>Characters</h3><p>Create and manage characters that belong to your own account.</p></div><button class="hud-button secondary" type="button" data-open-tab="suite-characters">OPEN</button></div>
+                <div class="command-row"><div class="command-icon">X</div><div><h3>Actions</h3><p>Submit formal actions and review the status of your own requests.</p></div><button class="hud-button secondary" type="button" data-open-tab="suite-actions">OPEN</button></div>
               </div>
             </article>
+
             <aside class="stack">
               <article class="hud-panel compact">
-                <div class="hud-kicker">ACCOUNT RECORD</div>
+                <div class="hud-kicker">ACCOUNT TELEMETRY</div>
                 <div class="telemetry-stack">
-                  <div class="telemetry-row"><span>Player Registration</span><strong id="suiteProfileStatus">SCANNING</strong></div>
-                  <div class="telemetry-row"><span>Submitted Actions</span><strong id="suiteActionCount">--</strong></div>
-                  <div class="telemetry-row"><span>Draft Storage</span><strong>LOCAL</strong></div>
+                  <div class="telemetry-row"><span>Registration</span><strong id="suiteProfileStatus">SCANNING</strong></div>
+                  <div class="telemetry-row"><span>Personal Bank</span><strong id="suiteWallet">--</strong></div>
+                  <div class="telemetry-row"><span>Faction</span><strong id="suiteFaction">--</strong></div>
+                  <div class="telemetry-row"><span>Assets</span><strong id="suiteAssetCount">--</strong></div>
+                  <div class="telemetry-row"><span>Characters</span><strong id="suiteCharacterCount">--</strong></div>
+                  <div class="telemetry-row"><span>Actions</span><strong id="suiteActionCount">--</strong></div>
                 </div>
               </article>
-              <div class="notice" id="suiteNotice">PLAYER RECORD STATUS IS LOADING.</div>
+              <div class="notice" id="suiteNotice">PLAYER DATA IS LOADING.</div>
             </aside>
           </div>
         </section>
 
-        <section class="panel" id="suite-registration" data-tab-panel>
-          <article class="hud-panel">
+        <section class="panel" id="suite-account" data-tab-panel>
+          <div class="content-grid">
+            <article class="hud-panel">
+              <div class="section-head">
+                <div><div class="section-code">ACCOUNT / PLAYER IDENTITY</div><h2>Account Profile</h2></div>
+                <p>PLAYER CONTROLLED</p>
+              </div>
+              <form id="profileForm" class="form-shell">
+                <div class="form-grid">
+                  <label><span>Display Name</span><input name="display_name" maxlength="120"></label>
+                  <label><span>Handle</span><input name="handle" maxlength="80" placeholder="Optional unique player handle"></label>
+                </div>
+                <div class="form-actions"><button class="hud-button" type="submit">SAVE PROFILE</button></div>
+                <div class="form-state" id="profileState"></div>
+              </form>
+            </article>
+
+            <aside class="hud-panel compact">
+              <div class="section-code">AUTH / ACCOUNT</div>
+              <h2 style="margin:5px 0 12px;text-transform:uppercase">Protected Identity</h2>
+              <div class="telemetry-stack">
+                <div class="telemetry-row"><span>Email</span><strong data-user-email>--</strong></div>
+                <div class="telemetry-row"><span>User ID</span><strong id="accountUserId" style="max-width:180px;overflow-wrap:anywhere">--</strong></div>
+              </div>
+            </aside>
+          </div>
+
+          <article class="hud-panel" style="margin-top:18px">
             <div class="section-head">
-              <div><div class="section-code">PLAYER RECORD / REGISTRATION</div><h2>Player Registration</h2></div>
+              <div><div class="section-code">PLAYER RECORD / REGISTRATION</div><h2>Game Registration</h2></div>
               <p>ONE RECORD PER ACCOUNT</p>
             </div>
-            <p class="hero-copy" style="margin:0 0 24px">Use this record to establish how you want to participate in Gradari Mireris. Your account identity is attached automatically.</p>
-
             <form id="registrationForm" class="form-shell">
               <div class="form-grid">
                 <label><span>Discord Username *</span><input name="player" required maxlength="120"></label>
                 <label><span>Preferred Name</span><input name="preferred" maxlength="120"></label>
               </div>
               <label><span>What interests you about Gradari Mireris? *</span><textarea name="interests" required maxlength="2000"></textarea></label>
-              <label><span>Preferred Playstyle</span><textarea name="playstyle" maxlength="2000" placeholder="Politics, military strategy, diplomacy, roleplay, exploration, economics, worldbuilding, etc."></textarea></label>
+              <label><span>Preferred Playstyle</span><textarea name="playstyle" maxlength="2000"></textarea></label>
               <div class="form-grid">
                 <label><span>Faction Preference</span><input name="faction" maxlength="160"></label>
                 <label><span>Role You Might Like</span><input name="role" maxlength="160"></label>
@@ -98,61 +133,126 @@
               <div class="form-actions">
                 <button class="hud-button" type="submit">SUBMIT REGISTRATION</button>
                 <button class="hud-button secondary" type="button" data-preview-form="registrationForm">PREVIEW RECORD</button>
-                <button class="hud-button danger" type="button" data-clear-form="registrationForm">CLEAR DRAFT</button>
               </div>
-              <div class="form-state" id="registrationState" role="status" aria-live="polite"></div>
+              <div class="form-state" id="registrationState"></div>
             </form>
           </article>
         </section>
 
-        <section class="panel" id="suite-action" data-tab-panel>
-          <article class="hud-panel">
-            <div class="section-head">
-              <div><div class="section-code">FORMAL ACTION / SUBMISSION</div><h2>Submit Action</h2></div>
-              <p>GAME MASTER RESOLUTION</p>
-            </div>
-            <p class="hero-copy" style="margin:0 0 24px">State what you are attempting, how you are doing it, what you are committing, and the result you intend.</p>
-
-            <form id="actionForm" class="form-shell">
-              <div class="form-grid">
-                <label><span>Player / Faction *</span><input name="player" required maxlength="160"></label>
-                <label><span>Action Title *</span><input name="action_title" required maxlength="180"></label>
+        <section class="panel" id="suite-economy" data-tab-panel>
+          <div class="hero-grid">
+            <article class="hud-panel">
+              <div class="hud-kicker">PERSONAL ECONOMY</div>
+              <h2 style="margin:0;text-transform:uppercase">Personal Bank Account</h2>
+              <div class="metric-value" id="economyBalance" style="font-size:3.5rem;margin-top:26px">--</div>
+              <div class="metric-detail" id="economyCurrency">AUREUM</div>
+              <p class="hero-copy">This balance belongs to your player account. Transactions may be created by approved purchases, rewards, transfers, economic actions, or Game Master resolution. Players cannot directly overwrite their own balance.</p>
+            </article>
+            <aside class="hud-panel compact amber">
+              <div class="hud-kicker amber">ECONOMY AUTHORITY</div>
+              <div class="telemetry-stack">
+                <div class="telemetry-row"><span>View Balance</span><strong>PLAYER</strong></div>
+                <div class="telemetry-row"><span>View History</span><strong>PLAYER</strong></div>
+                <div class="telemetry-row"><span>Set Balance</span><strong>ADMIN</strong></div>
+                <div class="telemetry-row"><span>Automated Spending</span><strong>PLANNED</strong></div>
               </div>
-              <div class="form-grid">
-                <label><span>Action Category *</span>
-                  <select name="category" id="actionCategory" required>
-                    <option value="">Select Category</option>
-                    <option>Political</option><option>Diplomatic</option><option>Economic</option><option>Military</option>
-                    <option>Intelligence</option><option>Research</option><option>Expansion</option><option>Other</option>
-                  </select>
-                </label>
-                <label><span>Target / Location</span><input name="target" maxlength="240"></label>
-              </div>
-              <label><span>Objective *</span><textarea name="objective" required maxlength="3000"></textarea></label>
-              <label><span>Method *</span><textarea name="method" required maxlength="4000"></textarea></label>
-
-              <div>
-                <span class="form-label">Committed Resources *</span>
-                <div id="commitList" class="form-shell"></div>
-                <button class="hud-button secondary" id="addCommit" type="button">+ ADD COMMITMENT</button>
-              </div>
-
-              <label><span>Intent *</span><textarea name="intent" required maxlength="3000"></textarea></label>
-
-              <label class="checkbox-line"><input id="secretAction" name="secret" type="checkbox"><span>Classified / secret action</span></label>
-
-              <label id="coverWrap" hidden><span>Public Cover Story</span><textarea name="cover_story" maxlength="3000"></textarea></label>
-              <label id="ordersWrap" hidden><span>Operational Orders</span><textarea name="orders" maxlength="4000" placeholder="Instructions, restrictions, priorities, command intent, or operational detail."></textarea></label>
-              <label><span>Additional Notes</span><textarea name="notes" maxlength="3000"></textarea></label>
-
-              <div class="form-actions">
-                <button class="hud-button" type="submit">SUBMIT ACTION</button>
-                <button class="hud-button secondary" type="button" data-preview-form="actionForm">PREVIEW RECORD</button>
-                <button class="hud-button danger" type="button" data-clear-form="actionForm">CLEAR DRAFT</button>
-              </div>
-              <div class="form-state" id="actionState" role="status" aria-live="polite"></div>
-            </form>
+            </aside>
+          </div>
+          <article class="hud-panel compact">
+            <div class="section-head"><div><div class="section-code">ECONOMY / LEDGER</div><h2>Transaction History</h2></div><p>YOUR ACCOUNT ONLY</p></div>
+            <div class="table-wrap"><table class="data-table"><thead><tr><th>Date</th><th>Type</th><th>Description</th><th>Amount</th><th>Balance</th></tr></thead><tbody id="transactionRows"></tbody></table></div>
+            <div class="empty-state" id="transactionEmpty" hidden>NO TRANSACTIONS RECORDED.</div>
           </article>
+        </section>
+
+        <section class="panel" id="suite-inventory" data-tab-panel>
+          <article class="hud-panel">
+            <div class="section-head"><div><div class="section-code">PLAYER / INVENTORY</div><h2>Inventory & Resources</h2></div><p>YOUR ACCOUNT ONLY</p></div>
+            <p class="hero-copy" style="margin:0 0 20px">Assets listed here are assigned to your player account. The Game Master and future automated game systems control authoritative quantities.</p>
+            <div class="resource-list" id="playerAssetList"></div>
+            <div class="empty-state" id="playerAssetEmpty" hidden>NO PLAYER ASSETS OR RESOURCES ASSIGNED.</div>
+          </article>
+        </section>
+
+        <section class="panel" id="suite-faction" data-tab-panel>
+          <div class="content-grid">
+            <article class="hud-panel">
+              <div class="section-head"><div><div class="section-code">FACTION / MEMBERSHIP</div><h2 id="factionName">No Active Faction</h2></div><p id="factionCode">UNASSIGNED</p></div>
+              <p class="hero-copy" id="factionDescription" style="margin:0 0 20px">The Game Master assigns faction membership and faction authority.</p>
+              <div class="telemetry-stack">
+                <div class="telemetry-row"><span>Position</span><strong id="factionTitle">--</strong></div>
+                <div class="telemetry-row"><span>Rank</span><strong id="factionRank">--</strong></div>
+                <div class="telemetry-row"><span>Faction Treasury</span><strong id="factionTreasury">--</strong></div>
+              </div>
+              <div class="permission-list" id="permissionList"></div>
+            </article>
+            <aside class="hud-panel compact amber">
+              <div class="hud-kicker amber">FACTION AUTHORITY</div>
+              <p class="hero-copy" style="margin:0">Faction information is visible according to membership. Future controls will unlock only when your faction role explicitly carries that permission.</p>
+            </aside>
+          </div>
+          <article class="hud-panel compact" style="margin-top:18px">
+            <div class="section-head"><div><div class="section-code">FACTION / RESOURCES</div><h2>Faction Resources</h2></div><p>MEMBERSHIP REQUIRED</p></div>
+            <div class="resource-list" id="factionAssetList"></div>
+            <div class="empty-state" id="factionAssetEmpty" hidden>NO VISIBLE FACTION RESOURCES.</div>
+          </article>
+        </section>
+
+        <section class="panel" id="suite-characters" data-tab-panel>
+          <div class="content-grid">
+            <article class="hud-panel">
+              <div class="section-head"><div><div class="section-code">PLAYER / CHARACTERS</div><h2>Your Characters</h2></div><p>PLAYER CONTROLLED</p></div>
+              <div id="characterList" class="stack"></div>
+              <div class="empty-state" id="characterEmpty" hidden>NO CHARACTERS CREATED.</div>
+            </article>
+            <aside class="hud-panel compact">
+              <div class="section-code">CHARACTER / CREATE</div>
+              <h2 style="margin:5px 0 16px;text-transform:uppercase">New Character</h2>
+              <form id="characterForm" class="form-shell">
+                <label><span>Name *</span><input name="name" required maxlength="140"></label>
+                <label><span>Title</span><input name="title" maxlength="160"></label>
+                <label><span>Faction</span><select name="faction_id" id="characterFaction"><option value="">No faction</option></select></label>
+                <label class="checkbox-line"><input type="checkbox" name="is_main"><span>Main Character</span></label>
+                <label><span>Bio / Notes</span><textarea name="bio" maxlength="2500"></textarea></label>
+                <button class="hud-button" type="submit">CREATE CHARACTER</button>
+                <div class="form-state" id="characterState"></div>
+              </form>
+            </aside>
+          </div>
+        </section>
+
+        <section class="panel" id="suite-actions" data-tab-panel>
+          <div class="content-grid">
+            <article class="hud-panel">
+              <div class="section-head"><div><div class="section-code">FORMAL ACTION / SUBMISSION</div><h2>Submit Action</h2></div><p>GAME MASTER RESOLUTION</p></div>
+              <form id="actionForm" class="form-shell">
+                <div class="form-grid">
+                  <label><span>Player / Faction</span><input name="player" readonly></label>
+                  <label><span>Action Title *</span><input name="action_title" required maxlength="180"></label>
+                </div>
+                <div class="form-grid">
+                  <label><span>Action Category *</span><select name="category" id="actionCategory" required><option value="">Select Category</option><option>Political</option><option>Diplomatic</option><option>Economic</option><option>Military</option><option>Intelligence</option><option>Research</option><option>Expansion</option><option>Other</option></select></label>
+                  <label><span>Target / Location</span><input name="target" maxlength="240"></label>
+                </div>
+                <label><span>Objective *</span><textarea name="objective" required maxlength="3000"></textarea></label>
+                <label><span>Method *</span><textarea name="method" required maxlength="4000"></textarea></label>
+                <div><span class="form-label">Committed Resources *</span><div id="commitList" class="form-shell"></div><button class="hud-button secondary" id="addCommit" type="button">+ ADD COMMITMENT</button></div>
+                <label><span>Intent *</span><textarea name="intent" required maxlength="3000"></textarea></label>
+                <label class="checkbox-line"><input id="secretAction" name="secret" type="checkbox"><span>Classified / secret action</span></label>
+                <label id="coverWrap" hidden><span>Public Cover Story</span><textarea name="cover_story" maxlength="3000"></textarea></label>
+                <label id="ordersWrap" hidden><span>Operational Orders</span><textarea name="orders" maxlength="4000"></textarea></label>
+                <label><span>Additional Notes</span><textarea name="notes" maxlength="3000"></textarea></label>
+                <div class="form-actions"><button class="hud-button" type="submit">SUBMIT ACTION</button><button class="hud-button secondary" type="button" data-preview-form="actionForm">PREVIEW RECORD</button></div>
+                <div class="form-state" id="actionState"></div>
+              </form>
+            </article>
+            <aside class="hud-panel compact">
+              <div class="section-code">ACTIONS / YOUR RECORDS</div>
+              <h2 style="margin:5px 0 16px;text-transform:uppercase">Action Status</h2>
+              <div id="actionHistory" class="stack"></div>
+              <div class="empty-state" id="actionHistoryEmpty" hidden>NO ACTIONS SUBMITTED.</div>
+            </aside>
+          </div>
         </section>
 
         <section class="panel" id="suite-canon" data-tab-panel>
@@ -160,45 +260,23 @@
             <div class="section-code">CANON / PLAYER QUICK REFERENCE</div>
             <h2>Gradari Mireris</h2>
             <p><strong>Gradari Mireris</strong> is a persistent strategy, roleplaying, and 4X project. Strategic play concerns factions, governments, economies, territories, fleets, armies, colonies, diplomacy, infrastructure, and research. Roleplaying concerns the people living inside those systems. Narrative play connects the two.</p>
-
             <h3>Core Gameplay Cycle</h3>
             <p><strong>Observe → Plan → Act → Resolve → Record → Adapt.</strong> Players examine the situation, decide what they want to accomplish, act through roleplay or formal Actions, receive Game Master resolution, record meaningful consequences, and adapt to the resulting world.</p>
-
-            <h3>Player Agency</h3>
-            <p>Players are not limited to a fixed menu of actions. If something is reasonably possible within canon, it may be attempted. Greater ambitions normally require greater preparation, resources, authority, cooperation, or risk.</p>
-
-            <h3>Characters</h3>
-            <p>A player should normally maintain one Main Character and up to two active Side Characters. Each character remains limited by their own location, authority, knowledge, and responsibilities.</p>
-
-            <h3>Writing an Action</h3>
-            <p>A strong Action defines the <strong>Objective</strong>, <strong>Method</strong>, <strong>Resources</strong>, and <strong>Intent</strong>. These give the Game Master enough information to determine what happens and what consequences enter the Record.</p>
-
+            <h3>Player Authority</h3>
+            <p>Players control their own account, characters, permitted personal assets, and actions. Faction controls depend on assigned permissions. World-scale state is authoritative and controlled by the Game Master.</p>
             <h3>The Record</h3>
             <p>Meaningful outcomes persist. Territory can change hands. Resources can be spent. Characters can gain authority or die. Treaties can become binding. Discoveries can permanently alter what factions know.</p>
-
-            <h3>Game Master</h3>
-            <p>The Game Master resolves Actions, represents uncontrolled factions and characters, maintains hidden information and canon, and determines how the universe responds. The player determines the Action. The Game Master determines the response.</p>
-
-            <h3>Major Powers</h3>
-            <p><strong>Gradari Mireris Empire:</strong> the dominant Imperial power and center of the known political order. Its government balances Martial, Civil, and Doctrinal authority through the Praetora, Pilea, and Ethrenari.</p>
-            <p><strong>Luminark Core:</strong> a vast machine civilization governed by the Tri-Singularity and focused on continuity, reconstruction, archives, artificial populations, and controlled preservation.</p>
-            <p><strong>Accordant Spiral:</strong> a major non-Imperial power whose internal factions and relationships with the Empire shape a significant portion of regional politics.</p>
-            <p><strong>Virelac Enclave:</strong> an old and distinct civilization with its own interpretations of reality and the Immutable Laws.</p>
-            <p><strong>Caelestis Concordat:</strong> a solar-theocratic empire whose Solar Mandate binds religion, government, and warfare together.</p>
           </article>
         </section>
       </main>
     </div>
   </div>
 
-  <dialog id="recordPreview">
-    <div class="dialog-head">RECORD PREVIEW</div>
-    <div class="dialog-body" id="previewBody"></div>
-    <div class="dialog-foot"><button class="hud-button secondary" type="button" id="closePreview">CLOSE</button></div>
-  </dialog>
+  <dialog id="recordPreview"><div class="dialog-head">RECORD PREVIEW</div><div class="dialog-body" id="previewBody"></div><div class="dialog-foot"><button class="hud-button secondary" type="button" id="closePreview">CLOSE</button></div></dialog>
 
   <script src="auth.js"></script>
   <script src="ui.js"></script>
+  <script src="player-data.js"></script>
   <script src="player-suite.js"></script>
 </body>
 </html>
