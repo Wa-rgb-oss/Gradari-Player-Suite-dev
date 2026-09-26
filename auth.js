@@ -26,7 +26,9 @@
 
   function tokenExpiryMs(token) {
     try {
-      const payload = JSON.parse(atob(token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/")));
+      let encoded = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
+      encoded += "=".repeat((4 - encoded.length % 4) % 4);
+      const payload = JSON.parse(atob(encoded));
       return payload.exp ? payload.exp * 1000 : 0;
     } catch {
       return 0;
