@@ -19,6 +19,7 @@
     events: [],
     eventObjectives: [],
     eventParticipants: [],
+    eventAwards: [],
     territories: [],
     locationModifiers: [],
     factionTransactions: []
@@ -243,6 +244,7 @@
       GMAuth.api("game_events?select=*&order=created_at.desc"),
       GMAuth.api("event_objectives?select=*&order=sort_order.asc"),
       GMAuth.api("event_participants?select=*&order=joined_at.desc"),
+      GMAuth.api("event_awards?select=*&order=awarded_at.desc"),
       GMAuth.api("territories?select=*&order=location_ref.asc"),
       GMAuth.api("location_modifiers?select=*&order=created_at.desc"),
       GMAuth.api("faction_transactions?select=*&order=created_at.desc&limit=100")
@@ -251,8 +253,8 @@
       data.profiles,data.registrations,data.wallets,data.factions,data.memberships,
       data.catalog,data.playerAssets,data.factionAssets,data.actions,data.world,
       data.config,data.markets,data.marketListings,data.facilityTypes,data.facilities,
-      data.events,data.eventObjectives,data.eventParticipants,data.territories,
-      data.locationModifiers,data.factionTransactions
+      data.events,data.eventObjectives,data.eventParticipants,data.eventAwards,
+      data.territories,data.locationModifiers,data.factionTransactions
     ] = results;
   }
 
