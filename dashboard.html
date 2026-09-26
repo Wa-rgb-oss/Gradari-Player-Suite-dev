@@ -1,50 +1,157 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Player Dashboard | Gradari Mireris</title>
-<style>
-:root{--bg:#0b0d0f;--panel:#121519;--panel2:#171b20;--text:#e8e3d8;--muted:#9b9b96;--line:#30343a;--gold:#a9782b;--gold2:#d1a657}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Georgia,"Times New Roman",serif}
-header{padding:26px 5vw;border-bottom:1px solid var(--line);background:#0e1114;display:flex;justify-content:space-between;align-items:center;gap:20px}
-h1,h2,h3{color:var(--gold2)}h1{margin:0;letter-spacing:.08em}.muted{color:var(--muted)}
-nav{display:flex;gap:8px;flex-wrap:wrap}button,a.btn{background:#20242a;color:var(--text);border:1px solid #454a52;padding:9px 13px;font:inherit;text-decoration:none;cursor:pointer}
-main{max-width:1100px;margin:auto;padding:30px 5vw}.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.card{background:var(--panel);border:1px solid var(--line);padding:22px}
-.stat{font-size:1.8rem;color:var(--gold2)}.profile p{margin:8px 0}.state{color:var(--muted);line-height:1.5}
-@media(max-width:700px){header{align-items:flex-start;flex-direction:column}.grid{grid-template-columns:1fr}}
-</style></head><body>
-<header><div><h1>GRADARI MIRERIS</h1><div class="muted">PLAYER DASHBOARD</div></div>
-<nav><a class="btn" href="index.html">RETURN HOME</a><button id="logout">LOG OUT</button></nav></header>
-<main>
-<div class="card profile"><h2 id="welcome">PLAYER ACCOUNT</h2><div id="profileState" class="state">Loading account...</div>
-<div id="profile" hidden><p><strong>Preferred Name:</strong> <span id="preferred"></span></p><p><strong>Discord:</strong> <span id="discord"></span></p><p><strong>Faction Preference:</strong> <span id="faction"></span></p><p><strong>Role:</strong> <span id="role"></span></p></div></div>
-<div class="grid">
-<div class="card"><h3>ACTIONS</h3><div class="stat" id="actionCount">—</div><p class="muted">Submitted actions tied to your account.</p><a class="btn" href="index.html">SUBMIT ACTION</a></div>
-<div class="card"><h3>SOCIAL</h3><p class="muted">Friends and direct messaging will live here.</p><div class="state">Coming next.</div></div>
-<div class="card"><h3>CHARACTERS</h3><p class="muted">Your active characters will appear here once the character system is connected.</p></div>
-<div class="card"><h3>ACCOUNT</h3><p id="email" class="muted"></p><p id="uid" class="muted"></p></div>
-</div></main>
-<script>
-const U="https://tgszdvvitdijzkkbrlpl.supabase.co",K="sb_publishable_6GE5AFuO7AH1Ym7GU5qjoA_iUAoFAI2";
-const token=localStorage.getItem('gm_access_token'),user=JSON.parse(localStorage.getItem('gm_auth_user')||'null');
-if(!token||!user?.id) location.replace('login.html');
-document.getElementById('email').textContent='Email: '+(user?.email||'');
-document.getElementById('uid').textContent='Account ID: '+(user?.id||'');
-async function get(path){const r=await fetch(U+'/rest/v1/'+path,{headers:{apikey:K,Authorization:'Bearer '+token}});if(r.status===401){localStorage.removeItem('gm_access_token');localStorage.removeItem('gm_refresh_token');localStorage.removeItem('gm_auth_user');location.replace('login.html');throw new Error('Session expired')}if(!r.ok)throw new Error(await r.text());return r.json()}
-async function load(){
- try{
-  const p=await get('players_tab?user_id=eq.'+encodeURIComponent(user.id)+'&select=player,preferred,faction,role');
-  const s=document.getElementById('profileState');
-  if(!p[0]){s.textContent='Your login works, but this account is not linked to a Player Registration yet.';return}
-  const x=p[0],name=x.preferred||x.player||'Player';
-  document.getElementById('welcome').textContent='WELCOME, '+name.toUpperCase();
-  document.getElementById('preferred').textContent=x.preferred||'Not specified';
-  document.getElementById('discord').textContent=x.player||'Not specified';
-  document.getElementById('faction').textContent=x.faction||'Not specified';
-  document.getElementById('role').textContent=x.role||'Not specified';
-  document.getElementById('profile').hidden=false;s.textContent='';
-  const a=await get('actions_tab?user_id=eq.'+encodeURIComponent(user.id)+'&select=id');
-  document.getElementById('actionCount').textContent=a.length;
- }catch(e){document.getElementById('profileState').textContent='Dashboard error: '+e.message}
-}
-document.getElementById('logout').onclick=()=>{localStorage.removeItem('gm_access_token');localStorage.removeItem('gm_refresh_token');localStorage.removeItem('gm_auth_user');location.href='login.html'};
-load();
-</script></body></html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#050a0e">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Home | Gradari Mireris</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="auth-pending">
+  <div class="app-shell protected-page">
+    <aside class="sidebar">
+      <div class="brand-block">
+        <div class="brand-code"><span>PLAYER NETWORK</span>GRADARI MIRERIS</div>
+        <div class="brand-sub">PERSISTENT STRATEGY / ROLEPLAY / 4X PLAYER INTERFACE</div>
+      </div>
+
+      <nav class="primary-nav" aria-label="Primary">
+        <a class="active" href="dashboard.html"><span class="nav-index">01</span><span class="nav-label">HOME</span><span class="nav-arrow">›</span></a>
+        <a href="map.html"><span class="nav-index">02</span><span class="nav-label">MAP</span><span class="nav-arrow">›</span></a>
+        <a href="player-suite.html"><span class="nav-index">03</span><span class="nav-label">PLAYER SUITE</span><span class="nav-arrow">›</span></a>
+        <a href="about.html"><span class="nav-index">04</span><span class="nav-label">ABOUT</span><span class="nav-arrow">›</span></a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-readout"><strong>AUTHENTICATED PLAYER</strong><span data-user-email>Loading identity...</span></div>
+        <button class="signout-btn" type="button" data-signout>LOG OUT</button>
+      </div>
+    </aside>
+
+    <div class="main-frame">
+      <header class="topbar">
+        <div class="page-id">
+          <span class="page-bracket" aria-hidden="true"></span>
+          <div><strong>HOME / COMMAND OVERVIEW</strong><span>PLAYER DASHBOARD</span></div>
+        </div>
+        <div class="top-telemetry"><span><i class="status-dot"></i>NETWORK ACTIVE</span><span data-system-time>--:--:--</span></div>
+      </header>
+
+      <main class="page-content">
+        <section class="hero-grid">
+          <article class="hud-panel">
+            <div class="hud-kicker">PLAYER COMMAND INTERFACE // HOME</div>
+            <h1 class="hero-title"><small id="welcomeLine">AUTHENTICATED PLAYER</small>COMMAND<br>OVERVIEW</h1>
+            <p class="hero-copy">Your account, player record, submitted actions, and primary game interfaces are organized here. Use the navigation rail to move between the map, Player Suite, and project reference.</p>
+            <div class="hero-actions">
+              <a class="hud-button" href="player-suite.html">OPEN PLAYER SUITE</a>
+              <a class="hud-button secondary" href="map.html">OPEN MAP</a>
+            </div>
+          </article>
+
+          <aside class="hud-panel compact amber">
+            <div class="hud-kicker amber">ACCOUNT TELEMETRY</div>
+            <div class="telemetry-stack">
+              <div class="telemetry-row"><span>Session</span><strong>ACTIVE</strong></div>
+              <div class="telemetry-row"><span>Player Record</span><strong id="profileStatus">SCANNING</strong></div>
+              <div class="telemetry-row"><span>Action Records</span><strong id="telemetryActions">--</strong></div>
+              <div class="telemetry-row"><span>Map Build</span><strong>PLACEHOLDER</strong></div>
+              <div class="telemetry-row"><span>Interface</span><strong>DEV BUILD</strong></div>
+            </div>
+          </aside>
+        </section>
+
+        <section class="metric-grid">
+          <article class="metric-card"><div class="metric-label">Player Record</div><div class="metric-value" id="recordMetric">--</div><div class="metric-detail" id="recordDetail">CHECKING REGISTRATION</div></article>
+          <article class="metric-card"><div class="metric-label">Submitted Actions</div><div class="metric-value" id="actionCount">--</div><div class="metric-detail">LINKED TO THIS ACCOUNT</div></article>
+          <article class="metric-card"><div class="metric-label">Current Interface</div><div class="metric-value">04</div><div class="metric-detail">PRIMARY PAGES ONLINE</div></article>
+          <article class="metric-card"><div class="metric-label">Session State</div><div class="metric-value">ON</div><div class="metric-detail">PERSISTENT LOGIN ENABLED</div></article>
+        </section>
+
+        <section class="content-grid">
+          <article class="hud-panel compact">
+            <div class="section-head">
+              <div><div class="section-code">NAVIGATION / 01</div><h2>Player Systems</h2></div>
+              <p>PRIMARY ACCESS</p>
+            </div>
+            <div class="command-list">
+              <div class="command-row">
+                <div class="command-icon">M</div>
+                <div><h3>Galactic Map</h3><p>Temporary tactical display shell for the future interactive galaxy map.</p></div>
+                <a href="map.html">OPEN ›</a>
+              </div>
+              <div class="command-row">
+                <div class="command-icon">P</div>
+                <div><h3>Player Suite</h3><p>Player registration, action submission, and quick canon reference.</p></div>
+                <a href="player-suite.html">OPEN ›</a>
+              </div>
+              <div class="command-row">
+                <div class="command-icon">A</div>
+                <div><h3>About Gradari Mireris</h3><p>Project overview, core gameplay structure, and what the setting is built to support.</p></div>
+                <a href="about.html">OPEN ›</a>
+              </div>
+            </div>
+          </article>
+
+          <aside class="stack">
+            <article class="hud-panel compact">
+              <div class="section-code">PLAYER / RECORD</div>
+              <h2 id="playerName" style="margin:5px 0 16px;text-transform:uppercase;letter-spacing:.05em">NO RECORD LINKED</h2>
+              <div class="telemetry-stack">
+                <div class="telemetry-row"><span>Discord</span><strong id="discord">--</strong></div>
+                <div class="telemetry-row"><span>Faction</span><strong id="faction">--</strong></div>
+                <div class="telemetry-row"><span>Role</span><strong id="role">--</strong></div>
+              </div>
+            </article>
+            <article class="notice" id="dashboardNotice">PLAYER DATA IS LOADING.</article>
+          </aside>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <script src="auth.js"></script>
+  <script src="ui.js"></script>
+  <script>
+    (async () => {
+      const session = await GMUI.initProtected();
+      if (!session) return;
+
+      const notice = document.getElementById("dashboardNotice");
+      try {
+        const userId = encodeURIComponent(session.user.id);
+        const [profiles, actions] = await Promise.all([
+          GMAuth.api("players_tab?user_id=eq." + userId + "&select=player,preferred,faction,role,status&limit=1"),
+          GMAuth.api("actions_tab?user_id=eq." + userId + "&select=id")
+        ]);
+
+        const profile = profiles?.[0];
+        const count = actions?.length || 0;
+        document.getElementById("actionCount").textContent = count;
+        document.getElementById("telemetryActions").textContent = String(count).padStart(2, "0");
+
+        if (profile) {
+          const name = profile.preferred || profile.player || "PLAYER";
+          document.getElementById("welcomeLine").textContent = "WELCOME // " + name.toUpperCase();
+          document.getElementById("playerName").textContent = name;
+          document.getElementById("discord").textContent = profile.player || "NOT SET";
+          document.getElementById("faction").textContent = profile.faction || "UNASSIGNED";
+          document.getElementById("role").textContent = profile.role || "UNASSIGNED";
+          document.getElementById("profileStatus").textContent = (profile.status || "LINKED").toUpperCase();
+          document.getElementById("recordMetric").textContent = "01";
+          document.getElementById("recordDetail").textContent = "PLAYER RECORD LINKED";
+          notice.textContent = "PLAYER RECORD CONNECTED TO THIS ACCOUNT.";
+        } else {
+          document.getElementById("profileStatus").textContent = "NOT LINKED";
+          document.getElementById("recordMetric").textContent = "00";
+          document.getElementById("recordDetail").textContent = "REGISTRATION REQUIRED";
+          notice.innerHTML = 'NO PLAYER REGISTRATION IS LINKED TO THIS ACCOUNT. OPEN <a href="player-suite.html" style="color:var(--cyan)">PLAYER SUITE</a> TO CREATE ONE.';
+        }
+      } catch (error) {
+        notice.textContent = "DASHBOARD DATA ERROR // " + error.message;
+      }
+    })();
+  </script>
+</body>
+</html>
