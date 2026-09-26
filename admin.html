@@ -257,6 +257,15 @@
               </form>
             </section>
             <section class="hud-panel compact">
+              <div class="section-head"><div><div class="section-code">ECONOMY / CYCLE</div><h2>Production Cycle</h2></div><p>UPKEEP // OUTPUT // TAX</p></div>
+              <p class="hero-copy" style="margin:0 0 18px">Run one authoritative economic cycle. Active facilities pay Aureum upkeep, produce configured resources, apply territory and raid modifiers, and automatically route the controlling faction's resource tax.</p>
+              <form id="productionCycleForm" class="form-shell">
+                <label><span>Cycle Key *</span><input name="cycle_key" required placeholder="Example: A8746-C13-W1-D1"></label>
+                <button class="hud-button amber" type="submit">RUN PRODUCTION CYCLE</button>
+                <div class="form-state" id="productionCycleState"></div>
+              </form>
+            </section>
+            <section class="hud-panel compact">
               <div class="section-head"><div><div class="section-code">HOLDINGS / TYPES</div><h2>Facility Types</h2></div><p>COST // UPKEEP // OUTPUT</p></div>
               <div id="facilityTypeList" class="resource-list"></div>
               <form id="facilityTypeForm" class="form-shell" style="margin-top:18px">
