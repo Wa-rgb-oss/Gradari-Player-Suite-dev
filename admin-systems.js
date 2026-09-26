@@ -326,6 +326,23 @@
     }
   });
 
+  $("productionCycleForm")?.addEventListener("submit",async event => {
+    event.preventDefault();
+    const form=event.currentTarget;
+    try {
+      const result=await GMAuth.api("rpc/process_facility_cycle",{
+        method:"POST",
+        body:JSON.stringify({p_cycle_key:form.elements.cycle_key.value.trim()})
+      });
+      setState($("productionCycleState"),
+        "CYCLE COMPLETE // " + result.processed + " FACILITIES PROCESSED // " +
+        result.deactivated_for_upkeep + " DEACTIVATED FOR UPKEEP","success");
+      await refresh();
+    } catch (error) {
+      setState($("productionCycleState"),"PRODUCTION CYCLE FAILED // "+error.message,"error");
+    }
+  });
+
   $("facilityTypeForm")?.addEventListener("submit",async event => {
     event.preventDefault();
     const form=event.currentTarget;
