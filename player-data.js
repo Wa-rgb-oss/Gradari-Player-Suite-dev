@@ -5,23 +5,44 @@
     const userId = session.user.id;
     const uid = encode(userId);
 
-    const [profiles, registrations, wallets, memberships, factions, assets, catalog, characters, actions, transactions, world, news] = await Promise.all([
+    const [
+      profiles, registrations, wallets, memberships, factions, assets, catalog,
+      characters, actions, transactions, world, news, config, directory,
+      proposals, proposalMembers, factionInvitations, factionTransactions,
+      facilityTypes, facilities, markets, marketListings, events,
+      eventObjectives, eventParticipation
+    ] = await Promise.all([
       GMAuth.api("player_profiles?user_id=eq." + uid + "&select=*&limit=1"),
       GMAuth.api("players_tab?user_id=eq." + uid + "&select=*&limit=1"),
       GMAuth.api("player_wallets?user_id=eq." + uid + "&select=*&limit=1"),
       GMAuth.api("faction_memberships?user_id=eq." + uid + "&select=*&order=created_at.asc"),
-      GMAuth.api("factions?select=id,code,name,description,treasury,status&order=name.asc"),
+      GMAuth.api("factions?select=id,code,name,description,treasury,status,leader_user_id,tax_rate&order=name.asc"),
       GMAuth.api("player_assets?user_id=eq." + uid + "&select=*&order=updated_at.desc"),
       GMAuth.api("asset_catalog?select=id,code,name,kind,unit,description&order=name.asc"),
       GMAuth.api("characters?user_id=eq." + uid + "&select=*&order=is_main.desc,created_at.asc"),
       GMAuth.api("actions_tab?user_id=eq." + uid + "&select=id,action_title,category,status,created_at,resolution,resolved_at&order=created_at.desc"),
-      GMAuth.api("player_transactions?user_id=eq." + uid + "&select=id,amount,currency,kind,description,balance_after,created_at&order=created_at.desc&limit=20"),
+      GMAuth.api("player_transactions?user_id=eq." + uid + "&select=id,amount,currency,kind,description,balance_after,created_at&order=created_at.desc&limit=30"),
       GMAuth.api("world_state?select=key,label,category,value,updated_at&order=category.asc,key.asc"),
-      GMAuth.api("game_news?select=id,title,body,visibility,faction_id,published_at&order=published_at.desc&limit=12")
+      GMAuth.api("game_news?select=id,title,body,visibility,faction_id,published_at&order=published_at.desc&limit=12"),
+      GMAuth.api("game_config?select=*&limit=1"),
+      GMAuth.api("player_profiles?is_discoverable=eq.true&select=user_id,display_name,handle&order=display_name.asc"),
+      GMAuth.api("faction_proposals?select=*&order=created_at.desc"),
+      GMAuth.api("faction_proposal_members?select=*&order=created_at.asc"),
+      GMAuth.api("faction_invitations?select=*&order=created_at.desc"),
+      GMAuth.api("faction_transactions?select=*&order=created_at.desc&limit=40"),
+      GMAuth.api("facility_types?select=*&order=name.asc"),
+      GMAuth.api("facilities?select=*&order=created_at.desc"),
+      GMAuth.api("markets?select=*&order=name.asc"),
+      GMAuth.api("market_listings?select=*&order=created_at.asc"),
+      GMAuth.api("game_events?select=*&order=starts_at.asc,created_at.desc"),
+      GMAuth.api("event_objectives?select=*&order=sort_order.asc"),
+      GMAuth.api("event_participants?user_id=eq." + uid + "&select=*&order=joined_at.desc")
     ]);
 
-    const factionMap = new Map((factions || []).map(row => [row.id, row]));
-    const assetMap = new Map((catalog || []).map(row => [row.id, row]));
+    const factionMap = new Map((factions || []).map(row => [row.id,row]));
+    const assetMap = new Map((catalog || []).map(row => [row.id,row]));
+    const marketMap = new Map((markets || []).map(row => [row.id,row]));
+    const facilityTypeMap = new Map((facilityTypes || []).map(row => [row.id,row]));
 
     const enrichedMemberships = (memberships || []).map(row => ({
       ...row,
@@ -31,6 +52,25 @@
     const enrichedAssets = (assets || []).map(row => ({
       ...row,
       asset: assetMap.get(row.asset_id) || null
+    }));
+
+    const enrichedListings = (marketListings || []).map(row => ({
+      ...row,
+      market: marketMap.get(row.market_id) || null,
+      asset: assetMap.get(row.asset_id) || null
+    }));
+
+    const enrichedFacilities = (facilities || []).map(row => ({
+      ...row,
+      facility_type: facilityTypeMap.get(row.facility_type_id) || null,
+      controlling_faction: factionMap.get(row.controlling_faction_id) || null
+    }));
+
+    const eventMap = new Map((events || []).map(row => [row.id,row]));
+    const enrichedObjectives = (eventObjectives || []).map(row => ({
+      ...row,
+      event: eventMap.get(row.event_id) || null,
+      reward_asset: assetMap.get(row.reward_asset_id) || null
     }));
 
     return {
@@ -47,7 +87,20 @@
       actions: actions || [],
       transactions: transactions || [],
       world: world || [],
-      news: news || []
+      news: news || [],
+      config: config?.[0] || null,
+      directory: directory || [],
+      proposals: proposals || [],
+      proposalMembers: proposalMembers || [],
+      factionInvitations: factionInvitations || [],
+      factionTransactions: factionTransactions || [],
+      facilityTypes: facilityTypes || [],
+      facilities: enrichedFacilities,
+      markets: markets || [],
+      marketListings: enrichedListings,
+      events: events || [],
+      eventObjectives: enrichedObjectives,
+      eventParticipation: eventParticipation || []
     };
   }
 
