@@ -25,9 +25,18 @@
 }
 
 *{box-sizing:border-box}
-html{background:var(--bg);color-scheme:dark}
+html{
+  background:var(--bg);
+  color-scheme:dark;
+  width:100%;
+  max-width:100%;
+  -webkit-text-size-adjust:100%;
+  text-size-adjust:100%;
+}
 body{
   margin:0;
+  width:100%;
+  max-width:100%;
   min-width:320px;
   min-height:100vh;
   background:
