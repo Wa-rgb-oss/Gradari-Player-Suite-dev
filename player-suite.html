@@ -46,6 +46,7 @@
           <button class="tab active" type="button" data-tab-target="suite-overview">OVERVIEW</button>
           <button class="tab" type="button" data-tab-target="suite-account">ACCOUNT</button>
           <button class="tab" type="button" data-tab-target="suite-economy">ECONOMY</button>
+          <button class="tab" type="button" data-tab-target="suite-markets">MARKETS</button>
           <button class="tab" type="button" data-tab-target="suite-inventory">INVENTORY</button>
           <button class="tab" type="button" data-tab-target="suite-faction">FACTION</button>
           <button class="tab" type="button" data-tab-target="suite-characters">CHARACTERS</button>
@@ -165,12 +166,39 @@
           </article>
         </section>
 
+        <section class="panel" id="suite-markets" data-tab-panel>
+          <div class="content-grid">
+            <article class="hud-panel">
+              <div class="section-head"><div><div class="section-code">ECONOMY / MARKETS</div><h2>Exchange Markets</h2></div><p>PLAYER PURCHASING</p></div>
+              <p class="hero-copy" style="margin:0 0 20px">The Guilded Concord Exchange acts as the baseline NPC market so common resources remain obtainable even when player trade is thin. Faction markets can be added later and may offer better local prices.</p>
+              <div id="marketList" class="stack"></div>
+              <div class="empty-state" id="marketEmpty" hidden>NO ACTIVE MARKET LISTINGS ARE CURRENTLY AVAILABLE.</div>
+            </article>
+            <aside class="hud-panel compact amber">
+              <div class="hud-kicker amber">MARKET MODEL</div>
+              <div class="telemetry-stack">
+                <div class="telemetry-row"><span>NPC Baseline</span><strong>GUILDED CONCORD</strong></div>
+                <div class="telemetry-row"><span>Faction Markets</span><strong>FRAMEWORK READY</strong></div>
+                <div class="telemetry-row"><span>Player Listings</span><strong>LATER PHASE</strong></div>
+                <div class="telemetry-row"><span>Map Integration</span><strong>PLANNED</strong></div>
+              </div>
+            </aside>
+          </div>
+          <div class="form-state" id="marketState"></div>
+        </section>
+
         <section class="panel" id="suite-inventory" data-tab-panel>
           <article class="hud-panel">
             <div class="section-head"><div><div class="section-code">PLAYER / INVENTORY</div><h2>Inventory & Resources</h2></div><p>YOUR ACCOUNT ONLY</p></div>
             <p class="hero-copy" style="margin:0 0 20px">Assets listed here are assigned to your player account. The Game Master and future automated game systems control authoritative quantities.</p>
             <div class="resource-list" id="playerAssetList"></div>
             <div class="empty-state" id="playerAssetEmpty" hidden>NO PLAYER ASSETS OR RESOURCES ASSIGNED.</div>
+          </article>
+          <article class="hud-panel compact" style="margin-top:18px">
+            <div class="section-head"><div><div class="section-code">PLAYER / HOLDINGS</div><h2>Facilities & Holdings</h2></div><p>MAP-READY</p></div>
+            <p class="hero-copy" style="margin:0 0 18px">Mines, factories, refineries, trading posts, research sites, and other holdings will be constructed through the map. The Player Suite acts as the informational ledger for what you own, where it is, its upkeep, and its current status.</p>
+            <div id="facilityList" class="stack"></div>
+            <div class="empty-state" id="facilityEmpty" hidden>NO FACILITIES OR HOLDINGS ARE ASSIGNED TO THIS ACCOUNT.</div>
           </article>
         </section>
 
@@ -196,6 +224,72 @@
             <div class="resource-list" id="factionAssetList"></div>
             <div class="empty-state" id="factionAssetEmpty" hidden>NO VISIBLE FACTION RESOURCES.</div>
           </article>
+
+          <div id="factionNoMembership" class="content-grid" style="margin-top:18px" hidden>
+            <article class="hud-panel">
+              <div class="section-head"><div><div class="section-code">FACTION / FOUNDING</div><h2>Create a Faction</h2></div><p>PLAYER-FOUNDED</p></div>
+              <p class="hero-copy" style="margin:0 0 20px">Faction creation requires multiple real players and a shared Aureum commitment. Founder pledges are only charged when the faction successfully forms.</p>
+              <div class="metric-grid" style="grid-template-columns:repeat(3,minmax(0,1fr));margin-top:0">
+                <article class="metric-card"><div class="metric-label">Required Founders</div><div class="metric-value" id="founderRequirement">--</div><div class="metric-detail">REAL PLAYER ACCOUNTS</div></article>
+                <article class="metric-card"><div class="metric-label">Creation Cost</div><div class="metric-value" id="factionCreationCost">--</div><div class="metric-detail">AUREUM TOTAL</div></article>
+                <article class="metric-card"><div class="metric-label">Minimum Each</div><div class="metric-value" id="founderMinimum">--</div><div class="metric-detail">AUREUM PLEDGE</div></article>
+              </div>
+              <form id="factionProposalForm" class="form-shell">
+                <div class="form-grid"><label><span>Faction Name *</span><input name="name" required maxlength="180"></label><label><span>Code / Abbreviation</span><input name="code" maxlength="20"></label></div>
+                <label><span>Description</span><textarea name="description" maxlength="2500"></textarea></label>
+                <label><span>Your Founder Pledge *</span><input name="contribution" type="number" min="0" step="0.01" required></label>
+                <button class="hud-button" type="submit">CREATE FOUNDING PROPOSAL</button>
+                <div class="form-state" id="factionProposalState"></div>
+              </form>
+            </article>
+            <aside class="stack">
+              <article class="hud-panel compact">
+                <div class="section-code">FACTION / PROPOSALS</div><h2 style="margin:5px 0 16px;text-transform:uppercase">Founding Activity</h2>
+                <div id="factionProposalList" class="stack"></div>
+                <div class="empty-state" id="factionProposalEmpty" hidden>NO ACTIVE FOUNDING PROPOSALS.</div>
+              </article>
+              <article class="hud-panel compact">
+                <div class="section-code">FACTION / INVITATIONS</div><h2 style="margin:5px 0 16px;text-transform:uppercase">Membership Invitations</h2>
+                <div id="factionInvitationList" class="stack"></div>
+                <div class="empty-state" id="factionInvitationEmpty" hidden>NO PENDING FACTION INVITATIONS.</div>
+              </article>
+            </aside>
+          </div>
+
+          <div id="factionMemberControls" class="content-grid" style="margin-top:18px" hidden>
+            <article class="hud-panel">
+              <div class="section-head"><div><div class="section-code">FACTION / TREASURY</div><h2>Fund the Faction</h2></div><p>DIRECT CONTRIBUTION</p></div>
+              <p class="hero-copy" style="margin:0 0 20px">Any active member can move Aureum from their personal account into the faction treasury. Contributions are logged in both the personal and faction ledgers.</p>
+              <form id="factionFundingForm" class="form-shell">
+                <label><span>Contribution Amount</span><input name="amount" type="number" min="0.01" step="0.01" required></label>
+                <button class="hud-button" type="submit">TRANSFER TO FACTION</button>
+                <div class="form-state" id="factionFundingState"></div>
+              </form>
+              <div class="section-code" style="margin-top:24px">TREASURY / RECENT ACTIVITY</div>
+              <div id="factionLedger" class="stack"></div>
+              <div class="empty-state" id="factionLedgerEmpty" hidden>NO FACTION TRANSACTIONS RECORDED.</div>
+            </article>
+
+            <aside id="factionLeaderControls" class="stack" hidden>
+              <article class="hud-panel compact amber">
+                <div class="hud-kicker amber">FACTION LEADER CONTROLS</div>
+                <form id="factionIdentityForm" class="form-shell">
+                  <div class="form-grid"><label><span>Name</span><input name="name" required></label><label><span>Code</span><input name="code"></label></div>
+                  <label><span>Tax Rate %</span><input name="tax_rate" type="number" min="0" step="0.1"></label>
+                  <div class="form-actions"><button class="hud-button secondary" type="submit">SAVE IDENTITY</button><button class="hud-button amber" id="saveFactionTax" type="button">SAVE TAX RATE</button></div>
+                  <div class="form-state" id="factionLeaderState"></div>
+                </form>
+              </article>
+              <article class="hud-panel compact">
+                <div class="section-code">FACTION / MEMBERS</div><h2 style="margin:5px 0 16px;text-transform:uppercase">Membership & Permissions</h2>
+                <form id="factionMemberInviteForm" class="form-shell" style="margin-bottom:18px">
+                  <label><span>Invite Player</span><select name="user_id" id="factionInvitePlayer"></select></label>
+                  <button class="hud-button secondary" type="submit">SEND MEMBERSHIP INVITE</button>
+                </form>
+                <div id="factionMemberList" class="stack"></div>
+              </article>
+            </aside>
+          </div>
         </section>
 
         <section class="panel" id="suite-characters" data-tab-panel>
@@ -219,6 +313,12 @@
               </form>
             </aside>
           </div>
+          <article class="hud-panel compact" style="margin-top:18px">
+            <div class="section-head"><div><div class="section-code">CHARACTERS / LOCATION</div><h2>Physical Presence</h2></div><p>MAP-READY</p></div>
+            <p class="hero-copy" style="margin:0 0 18px">Characters have a physical game location. Other players are not automatically identified. When another visible character is at the same location, your character can receive a presence count such as “2 other characters present.”</p>
+            <div id="characterLocationList" class="stack"></div>
+            <div class="empty-state" id="characterLocationEmpty" hidden>NO CHARACTER LOCATION DATA AVAILABLE.</div>
+          </article>
         </section>
 
         <section class="panel" id="suite-actions" data-tab-panel>
@@ -278,5 +378,6 @@
   <script src="ui.js"></script>
   <script src="player-data.js"></script>
   <script src="player-suite.js"></script>
+  <script src="player-systems.js"></script>
 </body>
 </html>
