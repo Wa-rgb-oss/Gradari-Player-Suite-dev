@@ -10,7 +10,18 @@
     playerAssets: [],
     factionAssets: [],
     actions: [],
-    world: []
+    world: [],
+    config: [],
+    markets: [],
+    marketListings: [],
+    facilityTypes: [],
+    facilities: [],
+    events: [],
+    eventObjectives: [],
+    eventParticipants: [],
+    territories: [],
+    locationModifiers: [],
+    factionTransactions: []
   };
 
   const $ = id => document.getElementById(id);
@@ -223,9 +234,26 @@
       GMAuth.api("player_assets?select=*"),
       GMAuth.api("faction_assets?select=*"),
       GMAuth.api("actions_tab?select=*&order=created_at.desc"),
-      GMAuth.api("world_state?select=*&order=category.asc,key.asc")
+      GMAuth.api("world_state?select=*&order=category.asc,key.asc"),
+      GMAuth.api("game_config?select=*"),
+      GMAuth.api("markets?select=*&order=name.asc"),
+      GMAuth.api("market_listings?select=*&order=created_at.asc"),
+      GMAuth.api("facility_types?select=*&order=name.asc"),
+      GMAuth.api("facilities?select=*&order=created_at.desc"),
+      GMAuth.api("game_events?select=*&order=created_at.desc"),
+      GMAuth.api("event_objectives?select=*&order=sort_order.asc"),
+      GMAuth.api("event_participants?select=*&order=joined_at.desc"),
+      GMAuth.api("territories?select=*&order=location_ref.asc"),
+      GMAuth.api("location_modifiers?select=*&order=created_at.desc"),
+      GMAuth.api("faction_transactions?select=*&order=created_at.desc&limit=100")
     ]);
-    [data.profiles,data.registrations,data.wallets,data.factions,data.memberships,data.catalog,data.playerAssets,data.factionAssets,data.actions,data.world] = results;
+    [
+      data.profiles,data.registrations,data.wallets,data.factions,data.memberships,
+      data.catalog,data.playerAssets,data.factionAssets,data.actions,data.world,
+      data.config,data.markets,data.marketListings,data.facilityTypes,data.facilities,
+      data.events,data.eventObjectives,data.eventParticipants,data.territories,
+      data.locationModifiers,data.factionTransactions
+    ] = results;
   }
 
   function renderAll() {
@@ -237,6 +265,8 @@
     renderAssets();
     renderActions();
     renderWorld();
+    window.GMAdminData = data;
+    document.dispatchEvent(new CustomEvent("gm:admin-state",{detail:data}));
   }
 
   async function refreshData(message="DATA REFRESHED") {
@@ -249,6 +279,8 @@
       setState($("adminState"), "ADMIN DATA ERROR // " + error.message, "error");
     }
   }
+
+  window.GMAdminRefresh = refreshData;
 
   $("loginForm").addEventListener("submit", async event => {
     event.preventDefault();
