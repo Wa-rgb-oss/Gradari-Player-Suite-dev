@@ -1,0 +1,246 @@
+(() => {
+  const CONFIG = {
+    url: "https://tgszdvvitdijzkkbrlpl.supabase.co",
+    key: "sb_publishable_6GE5AFuO7AH1Ym7GU5qjoA_iUAoFAI2"
+  };
+
+  const KEYS = {
+    access: "gm_access_token",
+    refresh: "gm_refresh_token",
+    user: "gm_auth_user",
+    expires: "gm_access_expires_at"
+  };
+
+  const parseJSON = (value, fallback = null) => {
+    try { return JSON.parse(value); } catch { return fallback; }
+  };
+
+  function getStored() {
+    return {
+      access_token: localStorage.getItem(KEYS.access),
+      refresh_token: localStorage.getItem(KEYS.refresh),
+      user: parseJSON(localStorage.getItem(KEYS.user)),
+      expires_at: Number(localStorage.getItem(KEYS.expires) || 0)
+    };
+  }
+
+  function tokenExpiryMs(token) {
+    try {
+      const payload = JSON.parse(atob(token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/")));
+      return payload.exp ? payload.exp * 1000 : 0;
+    } catch {
+      return 0;
+    }
+  }
+
+  function saveSession(data) {
+    if (!data?.access_token || !data?.refresh_token) return null;
+    const expiresAt = data.expires_at
+      ? Number(data.expires_at) * 1000
+      : data.expires_in
+        ? Date.now() + Number(data.expires_in) * 1000
+        : tokenExpiryMs(data.access_token);
+
+    localStorage.setItem(KEYS.access, data.access_token);
+    localStorage.setItem(KEYS.refresh, data.refresh_token);
+    localStorage.setItem(KEYS.expires, String(expiresAt || 0));
+
+    if (data.user) {
+      localStorage.setItem(KEYS.user, JSON.stringify(data.user));
+    }
+
+    return getStored();
+  }
+
+  function clearSession() {
+    Object.values(KEYS).forEach(key => localStorage.removeItem(key));
+  }
+
+  async function request(path, options = {}) {
+    const headers = {
+      apikey: CONFIG.key,
+      "Content-Type": "application/json",
+      ...(options.headers || {})
+    };
+    const response = await fetch(CONFIG.url + path, { ...options, headers });
+    const text = await response.text();
+    let data = null;
+    try { data = text ? JSON.parse(text) : null; } catch { data = text; }
+    if (!response.ok) {
+      const message = data?.msg || data?.message || data?.error_description || data?.error || (typeof data === "string" ? data : "Request failed");
+      const error = new Error(message);
+      error.status = response.status;
+      throw error;
+    }
+    return data;
+  }
+
+  async function signIn(email, password) {
+    const data = await request("/auth/v1/token?grant_type=password", {
+      method: "POST",
+      body: JSON.stringify({ email, password })
+    });
+    return saveSession(data);
+  }
+
+  async function signUp(email, password) {
+    const redirectTo = new URL("login.html", window.location.href).href;
+    const data = await request("/auth/v1/signup?redirect_to=" + encodeURIComponent(redirectTo), {
+      method: "POST",
+      body: JSON.stringify({ email, password })
+    });
+    if (data?.access_token) saveSession(data);
+    return data;
+  }
+
+  async function refreshSession() {
+    const stored = getStored();
+    if (!stored.refresh_token) return null;
+
+    try {
+      const data = await request("/auth/v1/token?grant_type=refresh_token", {
+        method: "POST",
+        body: JSON.stringify({ refresh_token: stored.refresh_token })
+      });
+      return saveSession(data);
+    } catch (error) {
+      clearSession();
+      return null;
+    }
+  }
+
+  async function fetchUser(accessToken) {
+    return request("/auth/v1/user", {
+      method: "GET",
+      headers: { Authorization: "Bearer " + accessToken }
+    });
+  }
+
+  async function getSession() {
+    let stored = getStored();
+    if (!stored.access_token || !stored.refresh_token) return null;
+
+    const expiresSoon = !stored.expires_at || stored.expires_at - Date.now() < 90_000;
+    if (expiresSoon) {
+      const refreshed = await refreshSession();
+      if (!refreshed) return null;
+      stored = refreshed;
+    }
+
+    try {
+      const user = await fetchUser(stored.access_token);
+      if (user?.id) {
+        stored.user = user;
+        localStorage.setItem(KEYS.user, JSON.stringify(user));
+      }
+      return stored;
+    } catch (error) {
+      if (error.status === 401) {
+        const refreshed = await refreshSession();
+        if (!refreshed) return null;
+        try {
+          const user = await fetchUser(refreshed.access_token);
+          if (user?.id) {
+            refreshed.user = user;
+            localStorage.setItem(KEYS.user, JSON.stringify(user));
+          }
+          return refreshed;
+        } catch {
+          clearSession();
+          return null;
+        }
+      }
+      return stored.user?.id ? stored : null;
+    }
+  }
+
+  async function requireAuth(loginPath = "login.html") {
+    const session = await getSession();
+    if (!session?.user?.id) {
+      window.location.replace(loginPath);
+      return null;
+    }
+    document.body.classList.remove("auth-pending");
+    document.dispatchEvent(new CustomEvent("gm:authenticated", { detail: session }));
+    return session;
+  }
+
+  async function redirectIfAuthenticated(target = "dashboard.html") {
+    const session = await getSession();
+    if (session?.user?.id) {
+      window.location.replace(target);
+      return true;
+    }
+    document.body.classList.remove("auth-pending");
+    return false;
+  }
+
+  async function routeEntry(authTarget = "dashboard.html", guestTarget = "login.html") {
+    const session = await getSession();
+    window.location.replace(session?.user?.id ? authTarget : guestTarget);
+  }
+
+  async function signOut() {
+    const stored = getStored();
+    if (stored.access_token) {
+      try {
+        await request("/auth/v1/logout", {
+          method: "POST",
+          headers: { Authorization: "Bearer " + stored.access_token }
+        });
+      } catch {}
+    }
+    clearSession();
+  }
+
+  async function api(path, options = {}, retry = true) {
+    let session = await getSession();
+    if (!session?.access_token) {
+      const error = new Error("Authentication required");
+      error.status = 401;
+      throw error;
+    }
+
+    const headers = {
+      apikey: CONFIG.key,
+      Authorization: "Bearer " + session.access_token,
+      "Content-Type": "application/json",
+      ...(options.headers || {})
+    };
+
+    const response = await fetch(CONFIG.url + "/rest/v1/" + path, { ...options, headers });
+
+    if (response.status === 401 && retry) {
+      session = await refreshSession();
+      if (session?.access_token) return api(path, options, false);
+    }
+
+    const text = await response.text();
+    let data = null;
+    try { data = text ? JSON.parse(text) : null; } catch { data = text; }
+
+    if (!response.ok) {
+      const error = new Error(typeof data === "string" ? data : JSON.stringify(data));
+      error.status = response.status;
+      throw error;
+    }
+
+    return data;
+  }
+
+  window.GMAuth = {
+    CONFIG,
+    getStored,
+    saveSession,
+    clearSession,
+    signIn,
+    signUp,
+    signOut,
+    refreshSession,
+    getSession,
+    requireAuth,
+    redirectIfAuthenticated,
+    routeEntry,
+    api
+  };
+})();
