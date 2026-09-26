@@ -8,210 +8,210 @@
   <title>GM Administration | Gradari Mireris</title>
   <link rel="stylesheet" href="styles.css">
 </head>
-<body>
-  <main class="page-content" style="max-width:1320px">
+<body class="auth-pending">
+  <main class="page-content" style="max-width:1500px">
     <section class="hud-panel compact" style="margin-bottom:18px">
       <div class="section-head">
-        <div><div class="section-code">RESTRICTED / GAME MASTER</div><h2>GM Administration</h2></div>
-        <a class="hud-button secondary" href="dashboard.html">RETURN TO PLAYER INTERFACE</a>
+        <div><div class="section-code">RESTRICTED / GAME MASTER</div><h2>Gradari Administration</h2></div>
+        <a class="hud-button secondary" href="dashboard.html">PLAYER INTERFACE</a>
       </div>
-      <p class="hero-copy" style="margin:0">Restricted action record review and resolution interface.</p>
+      <p class="hero-copy" style="margin:0">Authoritative control surface for players, factions, economy, assets, actions, and world state. This interface is not available to normal player accounts.</p>
     </section>
 
     <section id="adminLogin" class="hud-panel" style="max-width:620px;margin:40px auto">
       <div class="hud-kicker amber">GM AUTHENTICATION</div>
       <h2 style="margin:0 0 10px;text-transform:uppercase">Restricted Access</h2>
-      <p class="hero-copy" style="margin:0 0 24px">Sign in with the authorized Game Master account.</p>
+      <p class="hero-copy" style="margin:0 0 24px">Sign in with an account authorized as a Gradari Game Master.</p>
       <form id="loginForm" class="form-shell">
         <label><span>Email</span><input id="email" type="email" autocomplete="username" required></label>
         <label><span>Password</span><input id="password" type="password" autocomplete="current-password" required></label>
-        <div class="form-actions">
-          <button class="hud-button amber" type="submit">SIGN IN</button>
-          <button class="hud-button secondary" id="forgotPassword" type="button">RESET PASSWORD</button>
-        </div>
+        <div class="form-actions"><button class="hud-button amber" type="submit">SIGN IN</button><button class="hud-button secondary" id="forgotPassword" type="button">RESET PASSWORD</button></div>
         <div class="form-state" id="loginState" role="status"></div>
       </form>
     </section>
 
-    <section id="adminDashboard" hidden>
+    <section id="adminDashboard" data-tab-scope hidden>
       <div class="hud-panel compact" style="margin-bottom:18px">
-        <div class="form-actions">
-          <button class="hud-button" id="refresh" type="button">REFRESH RECORDS</button>
-          <select id="statusFilter" style="width:auto;min-width:180px">
-            <option value="">ALL STATUS</option>
-            <option>Pending</option><option>Reviewing</option><option>Resolved</option><option>Rejected</option>
-          </select>
-          <button class="hud-button secondary" id="adminLogout" type="button">SIGN OUT GM</button>
+        <div class="split-actions">
+          <div class="user-readout"><strong>GAME MASTER SESSION</strong><span id="adminIdentity">AUTHORIZED</span></div>
+          <div class="form-actions"><button class="hud-button" id="refreshAdmin" type="button">REFRESH DATA</button><button class="hud-button secondary" id="adminLogout" type="button">SIGN OUT</button></div>
         </div>
-        <div class="form-state" id="dashState"></div>
+        <div class="form-state" id="adminState"></div>
       </div>
-      <div id="records" class="stack"></div>
+
+      <div class="tabs" data-tabs>
+        <button class="tab active" data-tab-target="admin-overview" type="button">OVERVIEW</button>
+        <button class="tab" data-tab-target="admin-players" type="button">PLAYERS</button>
+        <button class="tab" data-tab-target="admin-factions" type="button">FACTIONS</button>
+        <button class="tab" data-tab-target="admin-economy" type="button">ECONOMY</button>
+        <button class="tab" data-tab-target="admin-assets" type="button">ASSETS</button>
+        <button class="tab" data-tab-target="admin-actions" type="button">ACTIONS</button>
+        <button class="tab" data-tab-target="admin-world" type="button">WORLD</button>
+      </div>
+
+      <section class="panel active" id="admin-overview" data-tab-panel>
+        <section class="metric-grid">
+          <article class="metric-card"><div class="metric-label">Player Accounts</div><div class="metric-value" id="adminPlayerCount">--</div><div class="metric-detail">DATABASE PROFILES</div></article>
+          <article class="metric-card"><div class="metric-label">Factions</div><div class="metric-value" id="adminFactionCount">--</div><div class="metric-detail">AUTHORITATIVE RECORDS</div></article>
+          <article class="metric-card"><div class="metric-label">Pending Actions</div><div class="metric-value" id="adminPendingCount">--</div><div class="metric-detail">REQUIRING REVIEW</div></article>
+          <article class="metric-card"><div class="metric-label">Asset Types</div><div class="metric-value" id="adminAssetCount">--</div><div class="metric-detail">RESOURCE CATALOG</div></article>
+        </section>
+        <div class="content-grid">
+          <article class="hud-panel compact"><div class="section-head"><div><div class="section-code">CONTROL / MODEL</div><h2>Authority Layers</h2></div></div><div class="command-list">
+            <div class="command-row"><div class="command-icon">P</div><div><h3>Player</h3><p>Personal profile, characters, owned resources, wallet visibility, and submitted actions.</p></div></div>
+            <div class="command-row"><div class="command-icon">F</div><div><h3>Faction</h3><p>Membership, role permissions, faction treasury, and faction resources.</p></div></div>
+            <div class="command-row"><div class="command-icon">W</div><div><h3>World</h3><p>Authoritative state, global information, faction definitions, economy values, and GM resolution.</p></div></div>
+          </div></article>
+          <aside class="hud-panel compact amber"><div class="hud-kicker amber">ADMIN AUTHORITY</div><div class="telemetry-stack"><div class="telemetry-row"><span>Player Records</span><strong>CONTROL</strong></div><div class="telemetry-row"><span>Faction State</span><strong>CONTROL</strong></div><div class="telemetry-row"><span>World State</span><strong>CONTROL</strong></div><div class="telemetry-row"><span>Player Isolation</span><strong>ENFORCED</strong></div></div></aside>
+        </div>
+      </section>
+
+      <section class="panel" id="admin-players" data-tab-panel>
+        <div class="content-grid">
+          <article class="hud-panel compact">
+            <div class="section-head"><div><div class="section-code">ADMIN / PLAYERS</div><h2>Player Directory</h2></div><p>ALL ACCOUNTS</p></div>
+            <div class="table-wrap"><table class="data-table"><thead><tr><th>Player</th><th>Handle</th><th>Registration</th><th>Faction</th><th>Role</th><th>User ID</th></tr></thead><tbody id="adminPlayerRows"></tbody></table></div>
+          </article>
+          <aside class="stack">
+            <article class="hud-panel compact">
+              <div class="section-code">FACTION / ASSIGNMENT</div>
+              <h2 style="margin:5px 0 16px;text-transform:uppercase">Assign Player</h2>
+              <form id="membershipForm" class="form-shell">
+                <label><span>Player</span><select name="user_id" data-player-select required></select></label>
+                <label><span>Faction</span><select name="faction_id" data-faction-select required></select></label>
+                <div class="form-grid"><label><span>Title / Position</span><input name="title"></label><label><span>Rank</span><input name="rank"></label></div>
+                <label><span>Permissions</span><input name="permissions" placeholder="treasury, diplomacy, military"></label>
+                <button class="hud-button" type="submit">SAVE MEMBERSHIP</button>
+                <div class="form-state" id="membershipState"></div>
+              </form>
+            </article>
+          </aside>
+        </div>
+      </section>
+
+      <section class="panel" id="admin-factions" data-tab-panel>
+        <div class="content-grid">
+          <article class="hud-panel compact">
+            <div class="section-head"><div><div class="section-code">ADMIN / FACTIONS</div><h2>Faction Registry</h2></div><p>AUTHORITATIVE</p></div>
+            <div id="adminFactionList" class="stack"></div>
+          </article>
+          <aside class="hud-panel compact">
+            <div class="section-code">FACTION / CREATE</div><h2 style="margin:5px 0 16px;text-transform:uppercase">New Faction</h2>
+            <form id="factionForm" class="form-shell">
+              <div class="form-grid"><label><span>Code</span><input name="code" maxlength="20"></label><label><span>Name *</span><input name="name" required maxlength="180"></label></div>
+              <label><span>Description</span><textarea name="description"></textarea></label>
+              <label><span>Starting Treasury</span><input name="treasury" type="number" min="0" step="0.01" value="0"></label>
+              <button class="hud-button" type="submit">CREATE FACTION</button>
+              <div class="form-state" id="factionState"></div>
+            </form>
+          </aside>
+        </div>
+      </section>
+
+      <section class="panel" id="admin-economy" data-tab-panel>
+        <div class="content-grid">
+          <article class="hud-panel compact">
+            <div class="section-head"><div><div class="section-code">ADMIN / ECONOMY</div><h2>Player Balances</h2></div><p>AUTHORITATIVE</p></div>
+            <div class="table-wrap"><table class="data-table"><thead><tr><th>Player</th><th>Currency</th><th>Balance</th></tr></thead><tbody id="walletRows"></tbody></table></div>
+          </article>
+          <aside class="hud-panel compact">
+            <div class="section-code">ECONOMY / ADJUSTMENT</div><h2 style="margin:5px 0 16px;text-transform:uppercase">Set Balance</h2>
+            <form id="walletForm" class="form-shell">
+              <label><span>Player</span><select name="user_id" data-player-select required></select></label>
+              <div class="form-grid"><label><span>Balance</span><input name="balance" type="number" min="0" step="0.01" required></label><label><span>Currency</span><input name="currency" value="Aureum" required></label></div>
+              <label><span>Ledger Description</span><input name="description" placeholder="GM adjustment reason"></label>
+              <button class="hud-button" type="submit">APPLY BALANCE</button>
+              <div class="form-state" id="walletState"></div>
+            </form>
+          </aside>
+        </div>
+      </section>
+
+      <section class="panel" id="admin-assets" data-tab-panel>
+        <div class="content-grid">
+          <article class="hud-panel compact">
+            <div class="section-head"><div><div class="section-code">ADMIN / ASSETS</div><h2>Asset Catalog</h2></div><p>RESOURCES / ITEMS</p></div>
+            <div id="assetCatalogList" class="resource-list"></div>
+          </article>
+          <aside class="stack">
+            <article class="hud-panel compact">
+              <div class="section-code">ASSET / CREATE</div><h2 style="margin:5px 0 16px;text-transform:uppercase">New Asset Type</h2>
+              <form id="assetForm" class="form-shell">
+                <div class="form-grid"><label><span>Code</span><input name="code"></label><label><span>Name *</span><input name="name" required></label></div>
+                <div class="form-grid"><label><span>Kind</span><select name="kind"><option>resource</option><option>item</option><option>equipment</option><option>personnel</option><option>other</option></select></label><label><span>Unit</span><input name="unit" value="unit"></label></div>
+                <label><span>Description</span><textarea name="description"></textarea></label>
+                <button class="hud-button" type="submit">CREATE ASSET TYPE</button>
+                <div class="form-state" id="assetState"></div>
+              </form>
+            </article>
+            <article class="hud-panel compact">
+              <div class="section-code">ASSET / PLAYER ASSIGNMENT</div><h2 style="margin:5px 0 16px;text-transform:uppercase">Set Player Asset</h2>
+              <form id="playerAssetForm" class="form-shell">
+                <label><span>Player</span><select name="user_id" data-player-select required></select></label>
+                <label><span>Asset</span><select name="asset_id" data-asset-select required></select></label>
+                <label><span>Quantity</span><input name="quantity" type="number" min="0" step="0.0001" required></label>
+                <button class="hud-button" type="submit">SAVE PLAYER ASSET</button>
+                <div class="form-state" id="playerAssetState"></div>
+              </form>
+            </article>
+            <article class="hud-panel compact">
+              <div class="section-code">ASSET / FACTION ASSIGNMENT</div><h2 style="margin:5px 0 16px;text-transform:uppercase">Set Faction Asset</h2>
+              <form id="factionAssetForm" class="form-shell">
+                <label><span>Faction</span><select name="faction_id" data-faction-select required></select></label>
+                <label><span>Asset</span><select name="asset_id" data-asset-select required></select></label>
+                <label><span>Quantity</span><input name="quantity" type="number" min="0" step="0.0001" required></label>
+                <button class="hud-button" type="submit">SAVE FACTION ASSET</button>
+                <div class="form-state" id="factionAssetState"></div>
+              </form>
+            </article>
+          </aside>
+        </div>
+      </section>
+
+      <section class="panel" id="admin-actions" data-tab-panel>
+        <div class="hud-panel compact" style="margin-bottom:18px">
+          <div class="split-actions"><div class="section-code">ADMIN / ACTION QUEUE</div><select id="statusFilter" style="width:auto;min-width:180px"><option value="">ALL STATUS</option><option>Pending</option><option>Reviewing</option><option>Resolved</option><option>Rejected</option></select></div>
+        </div>
+        <div id="actionAdminList" class="stack"></div>
+      </section>
+
+      <section class="panel" id="admin-world" data-tab-panel>
+        <div class="content-grid">
+          <article class="hud-panel compact">
+            <div class="section-head"><div><div class="section-code">ADMIN / WORLD STATE</div><h2>Published State</h2></div><p>PLAYER INFORMATION</p></div>
+            <div id="worldStateList" class="stack"></div>
+          </article>
+          <aside class="stack">
+            <article class="hud-panel compact">
+              <div class="section-code">WORLD / STATE</div><h2 style="margin:5px 0 16px;text-transform:uppercase">Set World Value</h2>
+              <form id="worldForm" class="form-shell">
+                <div class="form-grid"><label><span>Key *</span><input name="key" required></label><label><span>Label *</span><input name="label" required></label></div>
+                <label><span>Category</span><input name="category" value="general"></label>
+                <label><span>Value</span><textarea name="value" placeholder='Text or JSON, e.g. {"cycle":13}'></textarea></label>
+                <label class="checkbox-line"><input name="player_visible" type="checkbox" checked><span>Visible to players</span></label>
+                <button class="hud-button" type="submit">SAVE WORLD STATE</button>
+                <div class="form-state" id="worldState"></div>
+              </form>
+            </article>
+            <article class="hud-panel compact">
+              <div class="section-code">WORLD / NEWS</div><h2 style="margin:5px 0 16px;text-transform:uppercase">Publish News</h2>
+              <form id="newsForm" class="form-shell">
+                <label><span>Title *</span><input name="title" required></label>
+                <label><span>Body *</span><textarea name="body" required></textarea></label>
+                <label><span>Visibility</span><select name="visibility"><option value="public">Public</option><option value="faction">Faction</option><option value="admin">Admin Only</option></select></label>
+                <label><span>Faction</span><select name="faction_id" data-faction-select><option value="">None</option></select></label>
+                <button class="hud-button" type="submit">PUBLISH NEWS</button>
+                <div class="form-state" id="newsState"></div>
+              </form>
+            </article>
+          </aside>
+        </div>
+      </section>
     </section>
   </main>
 
   <script src="auth.js"></script>
-  <script>
-    const TOKEN_KEY = "gm_admin_access_token";
-    const REFRESH_KEY = "gm_admin_refresh_token";
-    let accessToken = sessionStorage.getItem(TOKEN_KEY);
-    let allRows = [];
-
-    async function authApi(path, options = {}) {
-      const headers = {
-        apikey: GMAuth.CONFIG.key,
-        "Content-Type":"application/json",
-        ...(options.headers || {})
-      };
-      if (accessToken) headers.Authorization = "Bearer " + accessToken;
-      const response = await fetch(GMAuth.CONFIG.url + path, { ...options, headers });
-      const text = await response.text();
-      let data = null;
-      try { data = text ? JSON.parse(text) : null; } catch { data = text; }
-      if (!response.ok) throw new Error(typeof data === "string" ? data : (data?.message || data?.msg || "HTTP " + response.status));
-      return data;
-    }
-
-    async function signIn(email, password) {
-      return authApi("/auth/v1/token?grant_type=password", {
-        method:"POST",
-        body:JSON.stringify({ email, password })
-      });
-    }
-
-    function showDashboard() {
-      document.getElementById("adminLogin").hidden = true;
-      document.getElementById("adminDashboard").hidden = false;
-    }
-
-    function showLogin() {
-      document.getElementById("adminDashboard").hidden = true;
-      document.getElementById("adminLogin").hidden = false;
-    }
-
-    document.getElementById("loginForm").addEventListener("submit", async event => {
-      event.preventDefault();
-      const state = document.getElementById("loginState");
-      state.textContent = "AUTHENTICATING GM ACCOUNT...";
-      try {
-        const data = await signIn(document.getElementById("email").value.trim(), document.getElementById("password").value);
-        accessToken = data.access_token;
-        sessionStorage.setItem(TOKEN_KEY, data.access_token);
-        if (data.refresh_token) sessionStorage.setItem(REFRESH_KEY, data.refresh_token);
-        showDashboard();
-        state.textContent = "";
-        await loadRows();
-      } catch (error) {
-        state.textContent = "GM AUTHENTICATION FAILED // " + error.message;
-      }
-    });
-
-    document.getElementById("forgotPassword").addEventListener("click", async () => {
-      const state = document.getElementById("loginState");
-      const address = document.getElementById("email").value.trim();
-      if (!address) {
-        state.textContent = "ENTER THE GM EMAIL ADDRESS FIRST.";
-        return;
-      }
-      const redirectTo = new URL("reset-password.html", location.href).href;
-      try {
-        state.textContent = "SENDING RECOVERY LINK...";
-        await authApi("/auth/v1/recover?redirect_to=" + encodeURIComponent(redirectTo), {
-          method:"POST",
-          body:JSON.stringify({ email: address })
-        });
-        state.textContent = "RECOVERY EMAIL SENT.";
-      } catch (error) {
-        state.textContent = "RECOVERY FAILED // " + error.message;
-      }
-    });
-
-    async function loadRows() {
-      const state = document.getElementById("dashState");
-      state.textContent = "LOADING ACTION RECORDS...";
-      try {
-        allRows = await authApi("/rest/v1/actions_tab?select=*&order=created_at.desc");
-        renderRows();
-        state.textContent = allRows.length + " ACTION RECORD(S) LOADED";
-      } catch (error) {
-        state.textContent = "RECORD LOAD FAILED // " + error.message;
-      }
-    }
-
-    function esc(value) {
-      return String(value ?? "").replace(/[&<>"']/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
-    }
-
-    function renderRows() {
-      const filter = document.getElementById("statusFilter").value;
-      const rows = allRows.filter(row => !filter || (row.status || "Pending") === filter);
-      const root = document.getElementById("records");
-
-      root.innerHTML = rows.map(row => `
-        <article class="hud-panel compact">
-          <div class="section-head">
-            <div>
-              <div class="section-code">${row.secret ? "CLASSIFIED ACTION" : "ACTION RECORD"} // ${esc(row.category || "UNCATEGORIZED")}</div>
-              <h2>${esc(row.action_title || "Untitled Action")}</h2>
-            </div>
-            <p>${esc(row.created_at ? new Date(row.created_at).toLocaleString() : "NO TIMESTAMP")}</p>
-          </div>
-          <div class="form-grid">
-            <div class="notice"><strong>PLAYER / FACTION</strong><br>${esc(row.player || "Not specified")}</div>
-            <label><span>Status</span>
-              <select class="record-status" data-id="${esc(row.id)}">
-                <option ${(!row.status || row.status === "Pending") ? "selected" : ""}>Pending</option>
-                <option ${row.status === "Reviewing" ? "selected" : ""}>Reviewing</option>
-                <option ${row.status === "Resolved" ? "selected" : ""}>Resolved</option>
-                <option ${row.status === "Rejected" ? "selected" : ""}>Rejected</option>
-              </select>
-            </label>
-          </div>
-          <div class="form-grid" style="margin-top:14px">
-            <div class="notice"><strong>OBJECTIVE</strong><br>${esc(row.objective || "Not specified")}</div>
-            <div class="notice"><strong>TARGET / LOCATION</strong><br>${esc(row.target || "Not specified")}</div>
-          </div>
-          <div class="notice" style="margin-top:14px"><strong>METHOD</strong><br>${esc(row.method || "Not specified")}</div>
-          <div class="notice" style="margin-top:14px"><strong>COMMITMENTS</strong><br>${esc(row.commitments || "Not specified")}</div>
-          <div class="notice" style="margin-top:14px"><strong>INTENT</strong><br>${esc(row.intent || "Not specified")}</div>
-          ${row.secret ? '<div class="notice" style="margin-top:14px"><strong>PUBLIC COVER STORY</strong><br>' + esc(row.cover_story || "Not specified") + '</div>' : ""}
-          ${row.orders ? '<div class="notice" style="margin-top:14px"><strong>ORDERS</strong><br>' + esc(row.orders) + '</div>' : ""}
-          ${row.notes ? '<div class="notice" style="margin-top:14px"><strong>NOTES</strong><br>' + esc(row.notes) + '</div>' : ""}
-        </article>`).join("") || '<div class="notice">NO MATCHING ACTION RECORDS.</div>';
-
-      document.querySelectorAll(".record-status").forEach(select => {
-        select.addEventListener("change", () => updateStatus(select.dataset.id, select.value));
-      });
-    }
-
-    async function updateStatus(id, status) {
-      const state = document.getElementById("dashState");
-      try {
-        await authApi("/rest/v1/actions_tab?id=eq." + encodeURIComponent(id), {
-          method:"PATCH",
-          headers:{ Prefer:"return=minimal" },
-          body:JSON.stringify({ status })
-        });
-        const row = allRows.find(x => String(x.id) === String(id));
-        if (row) row.status = status;
-        state.textContent = "ACTION " + id + " UPDATED TO " + status.toUpperCase();
-      } catch (error) {
-        state.textContent = "STATUS UPDATE FAILED // " + error.message;
-      }
-    }
-
-    document.getElementById("refresh").addEventListener("click", loadRows);
-    document.getElementById("statusFilter").addEventListener("change", renderRows);
-    document.getElementById("adminLogout").addEventListener("click", () => {
-      accessToken = null;
-      sessionStorage.removeItem(TOKEN_KEY);
-      sessionStorage.removeItem(REFRESH_KEY);
-      showLogin();
-    });
-
-    if (accessToken) {
-      showDashboard();
-      loadRows();
-    }
-  </script>
+  <script src="ui.js"></script>
+  <script src="admin.js"></script>
 </body>
 </html>
