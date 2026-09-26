@@ -53,6 +53,7 @@
       faction:"suite-faction",
       characters:"suite-characters",
       actions:"suite-actions",
+      markets:"suite-markets",
       canon:"suite-canon"
     };
     if (map[hash]) openTab(map[hash], false);
@@ -307,6 +308,8 @@
     renderCharacters();
     renderActions();
     setActionIdentity();
+    window.GMPlayerSuiteState = state;
+    document.dispatchEvent(new CustomEvent("gm:player-state",{detail:state}));
   }
 
   profileForm.addEventListener("submit", async event => {
@@ -444,6 +447,8 @@
   $("addCommit").addEventListener("click", () => addCommitment());
   secretAction.addEventListener("change", conditionalFields);
   actionCategory.addEventListener("change", conditionalFields);
+
+  window.GMPlayerSuiteRefresh = refreshState;
 
   (async () => {
     session = await GMUI.initProtected();
