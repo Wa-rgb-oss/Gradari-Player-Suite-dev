@@ -15,14 +15,12 @@
         <div class="brand-code"><span>PLAYER NETWORK</span>GRADARI MIRERIS</div>
         <div class="brand-sub">PERSISTENT STRATEGY / ROLEPLAY / 4X PLAYER INTERFACE</div>
       </div>
-
       <nav class="primary-nav" aria-label="Primary">
         <a class="active" href="dashboard.html"><span class="nav-index">01</span><span class="nav-label">HOME</span><span class="nav-arrow">›</span></a>
         <a href="map.html"><span class="nav-index">02</span><span class="nav-label">MAP</span><span class="nav-arrow">›</span></a>
         <a href="player-suite.html"><span class="nav-index">03</span><span class="nav-label">PLAYER SUITE</span><span class="nav-arrow">›</span></a>
         <a href="about.html"><span class="nav-index">04</span><span class="nav-label">ABOUT</span><span class="nav-arrow">›</span></a>
       </nav>
-
       <div class="sidebar-footer">
         <div class="user-readout"><strong>AUTHENTICATED PLAYER</strong><span data-user-email>Loading identity...</span></div>
         <button class="signout-btn" type="button" data-signout>LOG OUT</button>
@@ -31,10 +29,7 @@
 
     <div class="main-frame">
       <header class="topbar">
-        <div class="page-id">
-          <span class="page-bracket" aria-hidden="true"></span>
-          <div><strong>HOME / COMMAND OVERVIEW</strong><span>PLAYER DASHBOARD</span></div>
-        </div>
+        <div class="page-id"><span class="page-bracket"></span><div><strong>HOME / COMMAND OVERVIEW</strong><span>PLAYER FRONTEND</span></div></div>
         <div class="top-telemetry"><span><i class="status-dot"></i>NETWORK ACTIVE</span><span data-system-time>--:--:--</span></div>
       </header>
 
@@ -43,7 +38,7 @@
           <article class="hud-panel">
             <div class="hud-kicker">PLAYER COMMAND INTERFACE // HOME</div>
             <h1 class="hero-title"><small id="welcomeLine">AUTHENTICATED PLAYER</small>COMMAND<br>OVERVIEW</h1>
-            <p class="hero-copy">Your account, player record, submitted actions, and primary game interfaces are organized here. Use the navigation rail to move between the map, Player Suite, and project reference.</p>
+            <p class="hero-copy">Your personal account, faction position, economy, inventory, characters, and submitted actions are presented here. World-scale information is authoritative and controlled by the Game Master.</p>
             <div class="hero-actions">
               <a class="hud-button" href="player-suite.html">OPEN PLAYER SUITE</a>
               <a class="hud-button secondary" href="map.html">OPEN MAP</a>
@@ -55,53 +50,58 @@
             <div class="telemetry-stack">
               <div class="telemetry-row"><span>Session</span><strong>ACTIVE</strong></div>
               <div class="telemetry-row"><span>Player Record</span><strong id="profileStatus">SCANNING</strong></div>
-              <div class="telemetry-row"><span>Action Records</span><strong id="telemetryActions">--</strong></div>
-              <div class="telemetry-row"><span>Map Build</span><strong>PLACEHOLDER</strong></div>
-              <div class="telemetry-row"><span>Interface</span><strong>DEV BUILD</strong></div>
+              <div class="telemetry-row"><span>Faction</span><strong id="factionStatus">UNASSIGNED</strong></div>
+              <div class="telemetry-row"><span>Pending Actions</span><strong id="pendingTelemetry">--</strong></div>
+              <div class="telemetry-row"><span>Interface</span><strong>PLAYER</strong></div>
             </div>
           </aside>
         </section>
 
         <section class="metric-grid">
-          <article class="metric-card"><div class="metric-label">Player Record</div><div class="metric-value" id="recordMetric">--</div><div class="metric-detail" id="recordDetail">CHECKING REGISTRATION</div></article>
-          <article class="metric-card"><div class="metric-label">Submitted Actions</div><div class="metric-value" id="actionCount">--</div><div class="metric-detail">LINKED TO THIS ACCOUNT</div></article>
-          <article class="metric-card"><div class="metric-label">Current Interface</div><div class="metric-value">04</div><div class="metric-detail">PRIMARY PAGES ONLINE</div></article>
-          <article class="metric-card"><div class="metric-label">Session State</div><div class="metric-value">ON</div><div class="metric-detail">PERSISTENT LOGIN ENABLED</div></article>
+          <article class="metric-card">
+            <div class="metric-label">Personal Bank</div>
+            <div class="metric-value" id="walletBalance">--</div>
+            <div class="metric-detail" id="walletCurrency">AUREUM</div>
+          </article>
+          <article class="metric-card">
+            <div class="metric-label">Faction</div>
+            <div class="metric-value" id="factionMetric">--</div>
+            <div class="metric-detail" id="factionRole">NO ACTIVE MEMBERSHIP</div>
+          </article>
+          <article class="metric-card">
+            <div class="metric-label">Inventory / Resources</div>
+            <div class="metric-value" id="assetCount">--</div>
+            <div class="metric-detail">ASSET TYPES HELD</div>
+          </article>
+          <article class="metric-card">
+            <div class="metric-label">Active / Pending Actions</div>
+            <div class="metric-value" id="actionCount">--</div>
+            <div class="metric-detail">AWAITING OR IN REVIEW</div>
+          </article>
         </section>
 
         <section class="content-grid">
           <article class="hud-panel compact">
             <div class="section-head">
-              <div><div class="section-code">NAVIGATION / 01</div><h2>Player Systems</h2></div>
-              <p>PRIMARY ACCESS</p>
+              <div><div class="section-code">PLAYER / CONTROL SURFACES</div><h2>Your Systems</h2></div>
+              <p>PLAYER AUTHORITY</p>
             </div>
             <div class="command-list">
-              <div class="command-row">
-                <div class="command-icon">M</div>
-                <div><h3>Galactic Map</h3><p>Temporary tactical display shell for the future interactive galaxy map.</p></div>
-                <a href="map.html">OPEN ›</a>
-              </div>
-              <div class="command-row">
-                <div class="command-icon">P</div>
-                <div><h3>Player Suite</h3><p>Player registration, action submission, and quick canon reference.</p></div>
-                <a href="player-suite.html">OPEN ›</a>
-              </div>
-              <div class="command-row">
-                <div class="command-icon">A</div>
-                <div><h3>About Gradari Mireris</h3><p>Project overview, core gameplay structure, and what the setting is built to support.</p></div>
-                <a href="about.html">OPEN ›</a>
-              </div>
+              <div class="command-row"><div class="command-icon">E</div><div><h3>Economy</h3><p>View your personal balance and transaction history.</p></div><a href="player-suite.html#economy">OPEN ›</a></div>
+              <div class="command-row"><div class="command-icon">I</div><div><h3>Inventory / Resources</h3><p>View resources and assets currently assigned to your account.</p></div><a href="player-suite.html#inventory">OPEN ›</a></div>
+              <div class="command-row"><div class="command-icon">F</div><div><h3>Faction</h3><p>View your faction, position, permissions, treasury, and faction resources.</p></div><a href="player-suite.html#faction">OPEN ›</a></div>
+              <div class="command-row"><div class="command-icon">A</div><div><h3>Actions</h3><p>Submit actions and review the status of your own action records.</p></div><a href="player-suite.html#actions">OPEN ›</a></div>
             </div>
           </article>
 
           <aside class="stack">
             <article class="hud-panel compact">
-              <div class="section-code">PLAYER / RECORD</div>
-              <h2 id="playerName" style="margin:5px 0 16px;text-transform:uppercase;letter-spacing:.05em">NO RECORD LINKED</h2>
+              <div class="section-code">PLAYER / IDENTITY</div>
+              <h2 id="playerName" style="margin:5px 0 16px;text-transform:uppercase;letter-spacing:.05em">LOADING</h2>
               <div class="telemetry-stack">
-                <div class="telemetry-row"><span>Discord</span><strong id="discord">--</strong></div>
-                <div class="telemetry-row"><span>Faction</span><strong id="faction">--</strong></div>
-                <div class="telemetry-row"><span>Role</span><strong id="role">--</strong></div>
+                <div class="telemetry-row"><span>Handle</span><strong id="playerHandle">--</strong></div>
+                <div class="telemetry-row"><span>Faction Position</span><strong id="playerRole">--</strong></div>
+                <div class="telemetry-row"><span>Characters</span><strong id="characterCount">--</strong></div>
               </div>
             </article>
             <article class="notice" id="dashboardNotice">PLAYER DATA IS LOADING.</article>
@@ -113,41 +113,50 @@
 
   <script src="auth.js"></script>
   <script src="ui.js"></script>
+  <script src="player-data.js"></script>
   <script>
     (async () => {
       const session = await GMUI.initProtected();
       if (!session) return;
-
       const notice = document.getElementById("dashboardNotice");
+
       try {
-        const userId = encodeURIComponent(session.user.id);
-        const [profiles, actions] = await Promise.all([
-          GMAuth.api("players_tab?user_id=eq." + userId + "&select=player,preferred,faction,role,status&limit=1"),
-          GMAuth.api("actions_tab?user_id=eq." + userId + "&select=id")
-        ]);
+        const state = await GMPlayerData.load(session);
+        const name = state.profile?.display_name || state.registration?.preferred || state.registration?.player || "PLAYER";
+        const handle = state.profile?.handle || state.registration?.player || "NOT SET";
+        const membership = state.primaryMembership;
+        const wallet = state.wallet;
+        const pending = state.actions.filter(a => !["Resolved","Rejected"].includes(a.status || "Pending"));
 
-        const profile = profiles?.[0];
-        const count = actions?.length || 0;
-        document.getElementById("actionCount").textContent = count;
-        document.getElementById("telemetryActions").textContent = String(count).padStart(2, "0");
+        document.getElementById("welcomeLine").textContent = "WELCOME // " + String(name).toUpperCase();
+        document.getElementById("playerName").textContent = name;
+        document.getElementById("playerHandle").textContent = handle;
+        document.getElementById("profileStatus").textContent = state.registration ? "REGISTERED" : "ACCOUNT ONLY";
 
-        if (profile) {
-          const name = profile.preferred || profile.player || "PLAYER";
-          document.getElementById("welcomeLine").textContent = "WELCOME // " + name.toUpperCase();
-          document.getElementById("playerName").textContent = name;
-          document.getElementById("discord").textContent = profile.player || "NOT SET";
-          document.getElementById("faction").textContent = profile.faction || "UNASSIGNED";
-          document.getElementById("role").textContent = profile.role || "UNASSIGNED";
-          document.getElementById("profileStatus").textContent = (profile.status || "LINKED").toUpperCase();
-          document.getElementById("recordMetric").textContent = "01";
-          document.getElementById("recordDetail").textContent = "PLAYER RECORD LINKED";
-          notice.textContent = "PLAYER RECORD CONNECTED TO THIS ACCOUNT.";
+        const balance = Number(wallet?.balance || 0);
+        document.getElementById("walletBalance").textContent = balance.toLocaleString(undefined,{maximumFractionDigits:2});
+        document.getElementById("walletCurrency").textContent = String(wallet?.currency || "Aureum").toUpperCase();
+
+        if (membership?.faction) {
+          document.getElementById("factionStatus").textContent = membership.faction.code || membership.faction.name;
+          document.getElementById("factionMetric").textContent = membership.faction.code || "01";
+          document.getElementById("factionRole").textContent = (membership.title || membership.rank || "MEMBER").toUpperCase();
+          document.getElementById("playerRole").textContent = membership.title || membership.rank || "Member";
         } else {
-          document.getElementById("profileStatus").textContent = "NOT LINKED";
-          document.getElementById("recordMetric").textContent = "00";
-          document.getElementById("recordDetail").textContent = "REGISTRATION REQUIRED";
-          notice.innerHTML = 'NO PLAYER REGISTRATION IS LINKED TO THIS ACCOUNT. OPEN <a href="player-suite.html" style="color:var(--cyan)">PLAYER SUITE</a> TO CREATE ONE.';
+          document.getElementById("factionStatus").textContent = "UNASSIGNED";
+          document.getElementById("factionMetric").textContent = "--";
+          document.getElementById("factionRole").textContent = "NO ACTIVE MEMBERSHIP";
+          document.getElementById("playerRole").textContent = "Unassigned";
         }
+
+        document.getElementById("assetCount").textContent = state.assets.length;
+        document.getElementById("actionCount").textContent = pending.length;
+        document.getElementById("pendingTelemetry").textContent = String(pending.length).padStart(2,"0");
+        document.getElementById("characterCount").textContent = state.characters.length;
+
+        notice.textContent = state.registration
+          ? "PLAYER ACCOUNT LINKED. PERSONAL DATA IS ISOLATED TO THIS AUTHENTICATED USER."
+          : "ACCOUNT ACTIVE. COMPLETE PLAYER REGISTRATION IN THE PLAYER SUITE WHEN READY.";
       } catch (error) {
         notice.textContent = "DASHBOARD DATA ERROR // " + error.message;
       }
