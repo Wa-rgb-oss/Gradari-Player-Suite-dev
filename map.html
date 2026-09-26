@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#050a0e">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Map | Gradari Mireris</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="auth-pending">
+  <div class="app-shell protected-page">
+    <aside class="sidebar">
+      <div class="brand-block">
+        <div class="brand-code"><span>PLAYER NETWORK</span>GRADARI MIRERIS</div>
+        <div class="brand-sub">PERSISTENT STRATEGY / ROLEPLAY / 4X PLAYER INTERFACE</div>
+      </div>
+      <nav class="primary-nav" aria-label="Primary">
+        <a href="dashboard.html"><span class="nav-index">01</span><span class="nav-label">HOME</span><span class="nav-arrow">›</span></a>
+        <a class="active" href="map.html"><span class="nav-index">02</span><span class="nav-label">MAP</span><span class="nav-arrow">›</span></a>
+        <a href="player-suite.html"><span class="nav-index">03</span><span class="nav-label">PLAYER SUITE</span><span class="nav-arrow">›</span></a>
+        <a href="about.html"><span class="nav-index">04</span><span class="nav-label">ABOUT</span><span class="nav-arrow">›</span></a>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="user-readout"><strong>AUTHENTICATED PLAYER</strong><span data-user-email>Loading identity...</span></div>
+        <button class="signout-btn" type="button" data-signout>LOG OUT</button>
+      </div>
+    </aside>
+
+    <div class="main-frame">
+      <header class="topbar">
+        <div class="page-id"><span class="page-bracket"></span><div><strong>MAP / GALACTIC DISPLAY</strong><span>TACTICAL INTERFACE PLACEHOLDER</span></div></div>
+        <div class="top-telemetry"><span><i class="status-dot"></i>DISPLAY ONLINE</span><span data-system-time>--:--:--</span></div>
+      </header>
+
+      <main class="page-content">
+        <section class="hud-panel compact" style="margin-bottom:18px">
+          <div class="section-head">
+            <div><div class="section-code">NAVIGATION / 02</div><h2>Galactic Map</h2></div>
+            <p>TEMPORARY DISPLAY BUILD</p>
+          </div>
+          <p class="hero-copy" style="margin:0">This page establishes the map interface and navigation structure. The interactive hex map, systems, colonies, faction borders, and selectable locations will be connected here later.</p>
+        </section>
+
+        <section class="map-frame" aria-label="Temporary galactic map display">
+          <div class="map-center" title="Gradari Mireris"></div>
+          <div class="map-node node-a">Luminark Core</div>
+          <div class="map-node node-b">Virelac Enclave</div>
+          <div class="map-node node-c">Accordant Spiral</div>
+          <div class="map-node node-d">Gradari Mireris</div>
+          <div class="map-watermark">TACTICAL CARTOGRAPHY // INTERACTIVE LAYER PENDING</div>
+        </section>
+
+        <section class="metric-grid">
+          <article class="metric-card"><div class="metric-label">Map State</div><div class="metric-value">DEV</div><div class="metric-detail">PLACEHOLDER DISPLAY</div></article>
+          <article class="metric-card"><div class="metric-label">Hex Selection</div><div class="metric-value">--</div><div class="metric-detail">NOT CONNECTED</div></article>
+          <article class="metric-card"><div class="metric-label">System Layer</div><div class="metric-value">--</div><div class="metric-detail">PENDING</div></article>
+          <article class="metric-card"><div class="metric-label">Faction Layer</div><div class="metric-value">--</div><div class="metric-detail">PENDING</div></article>
+        </section>
+      </main>
+    </div>
+  </div>
+  <script src="auth.js"></script>
+  <script src="ui.js"></script>
+  <script>GMUI.initProtected();</script>
+</body>
+</html>
