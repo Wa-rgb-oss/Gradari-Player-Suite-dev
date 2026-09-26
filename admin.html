@@ -238,6 +238,17 @@
                 <button class="hud-button" type="submit">ADD OBJECTIVE</button>
                 <div class="form-state" id="eventObjectiveState"></div>
               </form>
+            <article class="hud-panel compact">
+              <div class="section-code">EVENT / REWARD</div><h2 style="margin:5px 0 16px;text-transform:uppercase">Award Objective</h2>
+              <p class="hero-copy" style="margin:0 0 16px">Awarding an objective automatically adds its points, Aureum, and configured resource reward. The same objective cannot be awarded twice to the same player.</p>
+              <form id="eventRewardForm" class="form-shell">
+                <label><span>Event</span><select name="event_id" id="rewardEventSelect" required></select></label>
+                <label><span>Objective</span><select name="objective_id" id="rewardObjectiveSelect" required></select></label>
+                <label><span>Participant</span><select name="user_id" id="rewardParticipantSelect" required></select></label>
+                <button class="hud-button amber" type="submit">AWARD OBJECTIVE</button>
+                <div class="form-state" id="eventRewardState"></div>
+              </form>
+            </article>
             </article>
           </aside>
         </div>
