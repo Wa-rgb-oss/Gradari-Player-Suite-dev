@@ -60,8 +60,11 @@
     const root = $("adminEventList");
     if (!root) return;
 
-    $("adminEventSelect").innerHTML = '<option value="">Select event</option>' +
+    const eventOptions = '<option value="">Select event</option>' +
       (data.events || []).map(e => '<option value="' + esc(e.id) + '">' + esc(e.title) + '</option>').join("");
+    $("adminEventSelect").innerHTML = eventOptions;
+    $("rewardEventSelect").innerHTML = eventOptions;
+    updateRewardSelectors($("rewardEventSelect").value);
 
     if (!(data.events || []).length) {
       root.innerHTML = '<div class="empty-state">NO EVENTS CREATED.</div>';
@@ -142,6 +145,19 @@
         }
       });
     });
+  }
+
+  function updateRewardSelectors(eventId) {
+    const objectiveSelect=$("rewardObjectiveSelect");
+    const participantSelect=$("rewardParticipantSelect");
+    const objectives=(data?.eventObjectives||[]).filter(row=>row.event_id===eventId);
+    const participants=(data?.eventParticipants||[]).filter(row=>row.event_id===eventId && row.status!=="withdrawn");
+    objectiveSelect.innerHTML='<option value="">Select objective</option>' + objectives.map(row =>
+      '<option value="'+esc(row.id)+'">'+esc(row.title)+'</option>'
+    ).join("");
+    participantSelect.innerHTML='<option value="">Select participant</option>' + participants.map(row =>
+      '<option value="'+esc(row.user_id)+'">'+esc(profileName(row.user_id))+'</option>'
+    ).join("");
   }
 
   function renderConfig() {
@@ -303,6 +319,31 @@
       await refresh("EVENT OBJECTIVE ADDED",$("eventObjectiveState"));
     } catch (error) {
       setState($("eventObjectiveState"),"OBJECTIVE CREATE FAILED // "+error.message,"error");
+    }
+  });
+
+  $("rewardEventSelect")?.addEventListener("change",event => {
+    updateRewardSelectors(event.currentTarget.value);
+  });
+
+  $("eventRewardForm")?.addEventListener("submit",async event => {
+    event.preventDefault();
+    const form=event.currentTarget;
+    const d=Object.fromEntries(new FormData(form));
+    try {
+      const result=await GMAuth.api("rpc/award_event_objective",{
+        method:"POST",
+        body:JSON.stringify({
+          p_objective_id:d.objective_id,
+          p_user_id:d.user_id
+        })
+      });
+      setState($("eventRewardState"),
+        "OBJECTIVE AWARDED // " + fmt(result.points) + " POINTS // " +
+        fmt(result.reward_aureum) + " AUREUM","success");
+      await refresh();
+    } catch (error) {
+      setState($("eventRewardState"),"REWARD FAILED // "+error.message,"error");
     }
   });
 
