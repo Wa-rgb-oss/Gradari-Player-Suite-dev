@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#050a0e">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Player Suite | Gradari Mireris</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="auth-pending">
+  <div class="app-shell protected-page">
+    <aside class="sidebar">
+      <div class="brand-block">
+        <div class="brand-code"><span>PLAYER NETWORK</span>GRADARI MIRERIS</div>
+        <div class="brand-sub">PERSISTENT STRATEGY / ROLEPLAY / 4X PLAYER INTERFACE</div>
+      </div>
+      <nav class="primary-nav" aria-label="Primary">
+        <a href="dashboard.html"><span class="nav-index">01</span><span class="nav-label">HOME</span><span class="nav-arrow">›</span></a>
+        <a href="map.html"><span class="nav-index">02</span><span class="nav-label">MAP</span><span class="nav-arrow">›</span></a>
+        <a class="active" href="player-suite.html"><span class="nav-index">03</span><span class="nav-label">PLAYER SUITE</span><span class="nav-arrow">›</span></a>
+        <a href="about.html"><span class="nav-index">04</span><span class="nav-label">ABOUT</span><span class="nav-arrow">›</span></a>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="user-readout"><strong>AUTHENTICATED PLAYER</strong><span data-user-email>Loading identity...</span></div>
+        <button class="signout-btn" type="button" data-signout>LOG OUT</button>
+      </div>
+    </aside>
+
+    <div class="main-frame">
+      <header class="topbar">
+        <div class="page-id"><span class="page-bracket"></span><div><strong>PLAYER SUITE / RECORDS</strong><span>REGISTRATION // ACTIONS // CANON</span></div></div>
+        <div class="top-telemetry"><span><i class="status-dot"></i>PLAYER LINK ACTIVE</span><span data-system-time>--:--:--</span></div>
+      </header>
+
+      <main class="page-content" data-tab-scope>
+        <section class="hud-panel compact" style="margin-bottom:18px">
+          <div class="section-head">
+            <div><div class="section-code">NAVIGATION / 03</div><h2>Player Suite</h2></div>
+            <p>PLAYER OPERATIONS</p>
+          </div>
+          <p class="hero-copy" style="margin:0">Create or review your player record, submit formal actions for Game Master resolution, and reference the core gameplay structure.</p>
+        </section>
+
+        <div class="tabs" data-tabs>
+          <button class="tab active" type="button" data-tab-target="suite-overview">OVERVIEW</button>
+          <button class="tab" type="button" data-tab-target="suite-registration">PLAYER REGISTRATION</button>
+          <button class="tab" type="button" data-tab-target="suite-action">SUBMIT ACTION</button>
+          <button class="tab" type="button" data-tab-target="suite-canon">CANON REFERENCE</button>
+        </div>
+
+        <section class="panel active" id="suite-overview" data-tab-panel>
+          <div class="content-grid">
+            <article class="hud-panel compact">
+              <div class="section-code">PLAYER SUITE / OVERVIEW</div>
+              <h2 style="margin:5px 0 12px;text-transform:uppercase">Core Player Operations</h2>
+              <div class="command-list">
+                <div class="command-row"><div class="command-icon">01</div><div><h3>Player Registration</h3><p>Establish the player identity, interests, faction preference, and role connected to this account.</p></div><button class="hud-button secondary" type="button" data-open-tab="suite-registration">OPEN</button></div>
+                <div class="command-row"><div class="command-icon">02</div><div><h3>Action Submission</h3><p>Submit a formal attempt with an objective, method, committed resources, and intended result.</p></div><button class="hud-button secondary" type="button" data-open-tab="suite-action">OPEN</button></div>
+                <div class="command-row"><div class="command-icon">03</div><div><h3>Canon Reference</h3><p>Quick reference for the core game loop, player agency, characters, the Record, and major powers.</p></div><button class="hud-button secondary" type="button" data-open-tab="suite-canon">OPEN</button></div>
+              </div>
+            </article>
+            <aside class="stack">
+              <article class="hud-panel compact">
+                <div class="hud-kicker">ACCOUNT RECORD</div>
+                <div class="telemetry-stack">
+                  <div class="telemetry-row"><span>Player Registration</span><strong id="suiteProfileStatus">SCANNING</strong></div>
+                  <div class="telemetry-row"><span>Submitted Actions</span><strong id="suiteActionCount">--</strong></div>
+                  <div class="telemetry-row"><span>Draft Storage</span><strong>LOCAL</strong></div>
+                </div>
+              </article>
+              <div class="notice" id="suiteNotice">PLAYER RECORD STATUS IS LOADING.</div>
+            </aside>
+          </div>
+        </section>
+
+        <section class="panel" id="suite-registration" data-tab-panel>
+          <article class="hud-panel">
+            <div class="section-head">
+              <div><div class="section-code">PLAYER RECORD / REGISTRATION</div><h2>Player Registration</h2></div>
+              <p>ONE RECORD PER ACCOUNT</p>
+            </div>
+            <p class="hero-copy" style="margin:0 0 24px">Use this record to establish how you want to participate in Gradari Mireris. Your account identity is attached automatically.</p>
+
+            <form id="registrationForm" class="form-shell">
+              <div class="form-grid">
+                <label><span>Discord Username *</span><input name="player" required maxlength="120"></label>
+                <label><span>Preferred Name</span><input name="preferred" maxlength="120"></label>
+              </div>
+              <label><span>What interests you about Gradari Mireris? *</span><textarea name="interests" required maxlength="2000"></textarea></label>
+              <label><span>Preferred Playstyle</span><textarea name="playstyle" maxlength="2000" placeholder="Politics, military strategy, diplomacy, roleplay, exploration, economics, worldbuilding, etc."></textarea></label>
+              <div class="form-grid">
+                <label><span>Faction Preference</span><input name="faction" maxlength="160"></label>
+                <label><span>Role You Might Like</span><input name="role" maxlength="160"></label>
+              </div>
+              <label><span>What would you like to get out of the game?</span><textarea name="goals" maxlength="2000"></textarea></label>
+              <label><span>Additional Notes</span><textarea name="notes" maxlength="2000"></textarea></label>
+              <div class="form-actions">
+                <button class="hud-button" type="submit">SUBMIT REGISTRATION</button>
+                <button class="hud-button secondary" type="button" data-preview-form="registrationForm">PREVIEW RECORD</button>
+                <button class="hud-button danger" type="button" data-clear-form="registrationForm">CLEAR DRAFT</button>
+              </div>
+              <div class="form-state" id="registrationState" role="status" aria-live="polite"></div>
+            </form>
+          </article>
+        </section>
+
+        <section class="panel" id="suite-action" data-tab-panel>
+          <article class="hud-panel">
+            <div class="section-head">
+              <div><div class="section-code">FORMAL ACTION / SUBMISSION</div><h2>Submit Action</h2></div>
+              <p>GAME MASTER RESOLUTION</p>
+            </div>
+            <p class="hero-copy" style="margin:0 0 24px">State what you are attempting, how you are doing it, what you are committing, and the result you intend.</p>
+
+            <form id="actionForm" class="form-shell">
+              <div class="form-grid">
+                <label><span>Player / Faction *</span><input name="player" required maxlength="160"></label>
+                <label><span>Action Title *</span><input name="action_title" required maxlength="180"></label>
+              </div>
+              <div class="form-grid">
+                <label><span>Action Category *</span>
+                  <select name="category" id="actionCategory" required>
+                    <option value="">Select Category</option>
+                    <option>Political</option><option>Diplomatic</option><option>Economic</option><option>Military</option>
+                    <option>Intelligence</option><option>Research</option><option>Expansion</option><option>Other</option>
+                  </select>
+                </label>
+                <label><span>Target / Location</span><input name="target" maxlength="240"></label>
+              </div>
+              <label><span>Objective *</span><textarea name="objective" required maxlength="3000"></textarea></label>
+              <label><span>Method *</span><textarea name="method" required maxlength="4000"></textarea></label>
+
+              <div>
+                <span class="form-label">Committed Resources *</span>
+                <div id="commitList" class="form-shell"></div>
+                <button class="hud-button secondary" id="addCommit" type="button">+ ADD COMMITMENT</button>
+              </div>
+
+              <label><span>Intent *</span><textarea name="intent" required maxlength="3000"></textarea></label>
+
+              <label class="checkbox-line"><input id="secretAction" name="secret" type="checkbox"><span>Classified / secret action</span></label>
+
+              <label id="coverWrap" hidden><span>Public Cover Story</span><textarea name="cover_story" maxlength="3000"></textarea></label>
+              <label id="ordersWrap" hidden><span>Operational Orders</span><textarea name="orders" maxlength="4000" placeholder="Instructions, restrictions, priorities, command intent, or operational detail."></textarea></label>
+              <label><span>Additional Notes</span><textarea name="notes" maxlength="3000"></textarea></label>
+
+              <div class="form-actions">
+                <button class="hud-button" type="submit">SUBMIT ACTION</button>
+                <button class="hud-button secondary" type="button" data-preview-form="actionForm">PREVIEW RECORD</button>
+                <button class="hud-button danger" type="button" data-clear-form="actionForm">CLEAR DRAFT</button>
+              </div>
+              <div class="form-state" id="actionState" role="status" aria-live="polite"></div>
+            </form>
+          </article>
+        </section>
+
+        <section class="panel" id="suite-canon" data-tab-panel>
+          <article class="hud-panel prose">
+            <div class="section-code">CANON / PLAYER QUICK REFERENCE</div>
+            <h2>Gradari Mireris</h2>
+            <p><strong>Gradari Mireris</strong> is a persistent strategy, roleplaying, and 4X project. Strategic play concerns factions, governments, economies, territories, fleets, armies, colonies, diplomacy, infrastructure, and research. Roleplaying concerns the people living inside those systems. Narrative play connects the two.</p>
+
+            <h3>Core Gameplay Cycle</h3>
+            <p><strong>Observe → Plan → Act → Resolve → Record → Adapt.</strong> Players examine the situation, decide what they want to accomplish, act through roleplay or formal Actions, receive Game Master resolution, record meaningful consequences, and adapt to the resulting world.</p>
+
+            <h3>Player Agency</h3>
+            <p>Players are not limited to a fixed menu of actions. If something is reasonably possible within canon, it may be attempted. Greater ambitions normally require greater preparation, resources, authority, cooperation, or risk.</p>
+
+            <h3>Characters</h3>
+            <p>A player should normally maintain one Main Character and up to two active Side Characters. Each character remains limited by their own location, authority, knowledge, and responsibilities.</p>
+
+            <h3>Writing an Action</h3>
+            <p>A strong Action defines the <strong>Objective</strong>, <strong>Method</strong>, <strong>Resources</strong>, and <strong>Intent</strong>. These give the Game Master enough information to determine what happens and what consequences enter the Record.</p>
+
+            <h3>The Record</h3>
+            <p>Meaningful outcomes persist. Territory can change hands. Resources can be spent. Characters can gain authority or die. Treaties can become binding. Discoveries can permanently alter what factions know.</p>
+
+            <h3>Game Master</h3>
+            <p>The Game Master resolves Actions, represents uncontrolled factions and characters, maintains hidden information and canon, and determines how the universe responds. The player determines the Action. The Game Master determines the response.</p>
+
+            <h3>Major Powers</h3>
+            <p><strong>Gradari Mireris Empire:</strong> the dominant Imperial power and center of the known political order. Its government balances Martial, Civil, and Doctrinal authority through the Praetora, Pilea, and Ethrenari.</p>
+            <p><strong>Luminark Core:</strong> a vast machine civilization governed by the Tri-Singularity and focused on continuity, reconstruction, archives, artificial populations, and controlled preservation.</p>
+            <p><strong>Accordant Spiral:</strong> a major non-Imperial power whose internal factions and relationships with the Empire shape a significant portion of regional politics.</p>
+            <p><strong>Virelac Enclave:</strong> an old and distinct civilization with its own interpretations of reality and the Immutable Laws.</p>
+            <p><strong>Caelestis Concordat:</strong> a solar-theocratic empire whose Solar Mandate binds religion, government, and warfare together.</p>
+          </article>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <dialog id="recordPreview">
+    <div class="dialog-head">RECORD PREVIEW</div>
+    <div class="dialog-body" id="previewBody"></div>
+    <div class="dialog-foot"><button class="hud-button secondary" type="button" id="closePreview">CLOSE</button></div>
+  </dialog>
+
+  <script src="auth.js"></script>
+  <script src="ui.js"></script>
+  <script src="player-suite.js"></script>
+</body>
+</html>
