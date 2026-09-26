@@ -5,7 +5,7 @@
     const userId = session.user.id;
     const uid = encode(userId);
 
-    const [profiles, registrations, wallets, memberships, factions, assets, catalog, characters, actions, transactions] = await Promise.all([
+    const [profiles, registrations, wallets, memberships, factions, assets, catalog, characters, actions, transactions, world, news] = await Promise.all([
       GMAuth.api("player_profiles?user_id=eq." + uid + "&select=*&limit=1"),
       GMAuth.api("players_tab?user_id=eq." + uid + "&select=*&limit=1"),
       GMAuth.api("player_wallets?user_id=eq." + uid + "&select=*&limit=1"),
@@ -15,7 +15,9 @@
       GMAuth.api("asset_catalog?select=id,code,name,kind,unit,description&order=name.asc"),
       GMAuth.api("characters?user_id=eq." + uid + "&select=*&order=is_main.desc,created_at.asc"),
       GMAuth.api("actions_tab?user_id=eq." + uid + "&select=id,action_title,category,status,created_at,resolution,resolved_at&order=created_at.desc"),
-      GMAuth.api("player_transactions?user_id=eq." + uid + "&select=id,amount,currency,kind,description,balance_after,created_at&order=created_at.desc&limit=20")
+      GMAuth.api("player_transactions?user_id=eq." + uid + "&select=id,amount,currency,kind,description,balance_after,created_at&order=created_at.desc&limit=20"),
+      GMAuth.api("world_state?select=key,label,category,value,updated_at&order=category.asc,key.asc"),
+      GMAuth.api("game_news?select=id,title,body,visibility,faction_id,published_at&order=published_at.desc&limit=12")
     ]);
 
     const factionMap = new Map((factions || []).map(row => [row.id, row]));
@@ -43,7 +45,9 @@
       catalog: catalog || [],
       characters: characters || [],
       actions: actions || [],
-      transactions: transactions || []
+      transactions: transactions || [],
+      world: world || [],
+      news: news || []
     };
   }
 
