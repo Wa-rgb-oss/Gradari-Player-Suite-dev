@@ -45,6 +45,9 @@
         <button class="tab" data-tab-target="admin-factions" type="button">FACTIONS</button>
         <button class="tab" data-tab-target="admin-economy" type="button">ECONOMY</button>
         <button class="tab" data-tab-target="admin-assets" type="button">ASSETS</button>
+        <button class="tab" data-tab-target="admin-markets" type="button">MARKETS</button>
+        <button class="tab" data-tab-target="admin-events" type="button">EVENTS</button>
+        <button class="tab" data-tab-target="admin-systems" type="button">SYSTEMS</button>
         <button class="tab" data-tab-target="admin-actions" type="button">ACTIONS</button>
         <button class="tab" data-tab-target="admin-world" type="button">WORLD</button>
       </div>
@@ -168,6 +171,138 @@
         </div>
       </section>
 
+      <section class="panel" id="admin-markets" data-tab-panel>
+        <div class="content-grid">
+          <article class="hud-panel compact">
+            <div class="section-head"><div><div class="section-code">ADMIN / MARKETS</div><h2>Market Network</h2></div><p>NPC // FACTION</p></div>
+            <div id="adminMarketList" class="stack"></div>
+          </article>
+          <aside class="stack">
+            <article class="hud-panel compact">
+              <div class="section-code">MARKET / CREATE</div><h2 style="margin:5px 0 16px;text-transform:uppercase">New Market</h2>
+              <form id="marketCreateForm" class="form-shell">
+                <label><span>Name *</span><input name="name" required></label>
+                <div class="form-grid"><label><span>Type</span><select name="market_type"><option value="npc">NPC</option><option value="faction">Faction</option></select></label><label><span>Faction</span><select name="faction_id" data-faction-select><option value="">None</option></select></label></div>
+                <label><span>Location Ref</span><input name="location_ref" placeholder="Map hex/system reference"></label>
+                <label><span>Description</span><textarea name="description"></textarea></label>
+                <button class="hud-button" type="submit">CREATE MARKET</button>
+                <div class="form-state" id="marketCreateState"></div>
+              </form>
+            </article>
+            <article class="hud-panel compact">
+              <div class="section-code">MARKET / LISTING</div><h2 style="margin:5px 0 16px;text-transform:uppercase">Set Listing</h2>
+              <form id="marketListingForm" class="form-shell">
+                <label><span>Market</span><select name="market_id" id="adminMarketSelect" required></select></label>
+                <label><span>Asset</span><select name="asset_id" data-asset-select required></select></label>
+                <div class="form-grid"><label><span>Price / Unit</span><input name="price_per_unit" type="number" min="0.01" step="0.01" required></label><label><span>Stock</span><input name="stock" type="number" min="0" step="0.0001" placeholder="Blank = unlimited"></label></div>
+                <button class="hud-button" type="submit">SAVE LISTING</button>
+                <div class="form-state" id="marketListingState"></div>
+              </form>
+            </article>
+          </aside>
+        </div>
+      </section>
+
+      <section class="panel" id="admin-events" data-tab-panel>
+        <div class="content-grid">
+          <article class="hud-panel compact">
+            <div class="section-head"><div><div class="section-code">ADMIN / EVENTS</div><h2>Campaigns & Events</h2></div><p>OBJECTIVES // REWARDS</p></div>
+            <div id="adminEventList" class="stack"></div>
+          </article>
+          <aside class="stack">
+            <article class="hud-panel compact">
+              <div class="section-code">EVENT / CREATE</div><h2 style="margin:5px 0 16px;text-transform:uppercase">New Event</h2>
+              <form id="eventCreateForm" class="form-shell">
+                <label><span>Title *</span><input name="title" required></label>
+                <label><span>Description *</span><textarea name="description" required></textarea></label>
+                <div class="form-grid"><label><span>Type</span><input name="event_type" value="campaign"></label><label><span>Status</span><select name="status"><option value="draft">Draft</option><option value="active">Active</option><option value="completed">Completed</option></select></label></div>
+                <div class="form-grid"><label><span>Starts</span><input name="starts_at" type="datetime-local"></label><label><span>Ends</span><input name="ends_at" type="datetime-local"></label></div>
+                <label><span>Location Ref</span><input name="location_ref" placeholder="Optional map location"></label>
+                <div class="form-grid"><label><span>Participation</span><select name="participation_mode"><option value="open">Open</option><option value="faction">Faction</option><option value="invite">Invite</option></select></label><label><span>Visibility</span><select name="visibility"><option value="public">Public</option><option value="faction">Faction</option><option value="admin">Admin Only</option></select></label></div>
+                <label><span>Faction</span><select name="faction_id" data-faction-select><option value="">None</option></select></label>
+                <label class="checkbox-line"><input name="competitive" type="checkbox"><span>Competitive event / leaderboard</span></label>
+                <label><span>Reward Summary</span><input name="reward_summary" placeholder="Aureum, resources, influence, etc."></label>
+                <button class="hud-button" type="submit">CREATE EVENT</button>
+                <div class="form-state" id="eventCreateState"></div>
+              </form>
+            </article>
+            <article class="hud-panel compact">
+              <div class="section-code">EVENT / OBJECTIVE</div><h2 style="margin:5px 0 16px;text-transform:uppercase">Add Objective</h2>
+              <form id="eventObjectiveForm" class="form-shell">
+                <label><span>Event</span><select name="event_id" id="adminEventSelect" required></select></label>
+                <label><span>Objective *</span><input name="title" required></label>
+                <label><span>Description</span><textarea name="description"></textarea></label>
+                <div class="form-grid"><label><span>Points</span><input name="points" type="number" step="0.01" value="0"></label><label><span>Aureum Reward</span><input name="reward_aureum" type="number" min="0" step="0.01" value="0"></label></div>
+                <label><span>Reward Asset</span><select name="reward_asset_id" data-asset-select><option value="">None</option></select></label>
+                <label><span>Reward Quantity</span><input name="reward_asset_quantity" type="number" min="0" step="0.0001" value="0"></label>
+                <button class="hud-button" type="submit">ADD OBJECTIVE</button>
+                <div class="form-state" id="eventObjectiveState"></div>
+              </form>
+            </article>
+          </aside>
+        </div>
+      </section>
+
+      <section class="panel" id="admin-systems" data-tab-panel>
+        <div class="content-grid">
+          <article class="stack">
+            <section class="hud-panel compact">
+              <div class="section-head"><div><div class="section-code">GAME / RULES</div><h2>Economy & Faction Rules</h2></div><p>LIVE CONFIG</p></div>
+              <form id="gameConfigForm" class="form-shell">
+                <div class="form-grid"><label><span>Minimum Founders</span><input name="faction_min_founders" type="number" min="2" required></label><label><span>Faction Creation Cost</span><input name="faction_creation_cost" type="number" min="0" step="0.01" required></label></div>
+                <div class="form-grid"><label><span>Minimum Founder Contribution</span><input name="faction_min_contribution" type="number" min="0" step="0.01" required></label><label><span>Default Faction Tax %</span><input name="faction_default_tax_rate" type="number" min="0" max="100" step="0.1" required></label></div>
+                <label><span>Maximum Faction Tax %</span><input name="faction_max_tax_rate" type="number" min="0" max="100" step="0.1" required></label>
+                <button class="hud-button" type="submit">SAVE GAME RULES</button>
+                <div class="form-state" id="gameConfigState"></div>
+              </form>
+            </section>
+            <section class="hud-panel compact">
+              <div class="section-head"><div><div class="section-code">MAP / TERRITORY</div><h2>Territory Registry</h2></div><p>HEX OWNERSHIP READY</p></div>
+              <div id="territoryList" class="stack"></div>
+            </section>
+          </article>
+          <aside class="stack">
+            <article class="hud-panel compact">
+              <div class="section-code">MAP / TERRITORY</div><h2 style="margin:5px 0 16px;text-transform:uppercase">Set Hex / Location</h2>
+              <form id="territoryForm" class="form-shell">
+                <label><span>Location Ref *</span><input name="location_ref" required placeholder="Will map to your future hex IDs"></label>
+                <label><span>Display Name</span><input name="display_name"></label>
+                <label><span>Owning Faction</span><select name="faction_id" data-faction-select><option value="">Unclaimed</option></select></label>
+                <div class="form-grid"><label><span>Production Modifier</span><input name="production_modifier" type="number" min="0" step="0.01" value="1"></label><label><span>Status</span><input name="status" value="stable"></label></div>
+                <button class="hud-button" type="submit">SAVE TERRITORY</button>
+                <div class="form-state" id="territoryState"></div>
+              </form>
+            </article>
+            <article class="hud-panel compact">
+              <div class="section-code">MAP / MODIFIER</div><h2 style="margin:5px 0 16px;text-transform:uppercase">Temporary Location Modifier</h2>
+              <form id="locationModifierForm" class="form-shell">
+                <label><span>Location Ref *</span><input name="location_ref" required></label>
+                <div class="form-grid"><label><span>Type</span><input name="modifier_type" value="raid"></label><label><span>Label</span><input name="label" value="Raided" required></label></div>
+                <label><span>Production Multiplier</span><input name="production_multiplier" type="number" min="0" step="0.01" value="0.7"></label>
+                <label><span>Expires</span><input name="expires_at" type="datetime-local"></label>
+                <label class="checkbox-line"><input name="player_visible" type="checkbox" checked><span>Visible to players</span></label>
+                <button class="hud-button" type="submit">ADD MODIFIER</button>
+                <div class="form-state" id="locationModifierState"></div>
+              </form>
+            </article>
+            <article class="hud-panel compact">
+              <div class="section-code">HOLDING / CREATE</div><h2 style="margin:5px 0 16px;text-transform:uppercase">Place Facility</h2>
+              <form id="facilityAdminForm" class="form-shell">
+                <label><span>Facility Type</span><select name="facility_type_id" id="facilityTypeSelect" required></select></label>
+                <label><span>Owner Type</span><select name="owner_type"><option value="player">Player</option><option value="faction">Faction</option></select></label>
+                <label><span>Player Owner</span><select name="owner_user_id" data-player-select><option value="">None</option></select></label>
+                <label><span>Faction Owner</span><select name="owner_faction_id" data-faction-select><option value="">None</option></select></label>
+                <label><span>Controlling Faction</span><select name="controlling_faction_id" data-faction-select><option value="">None</option></select></label>
+                <label><span>Location Ref</span><input name="location_ref"></label>
+                <label><span>Facility Name</span><input name="name"></label>
+                <button class="hud-button" type="submit">PLACE FACILITY</button>
+                <div class="form-state" id="facilityAdminState"></div>
+              </form>
+            </article>
+          </aside>
+        </div>
+      </section>
+
       <section class="panel" id="admin-actions" data-tab-panel>
         <div class="hud-panel compact" style="margin-bottom:18px">
           <div class="split-actions"><div class="section-code">ADMIN / ACTION QUEUE</div><select id="statusFilter" style="width:auto;min-width:180px"><option value="">ALL STATUS</option><option>Pending</option><option>Reviewing</option><option>Resolved</option><option>Rejected</option></select></div>
@@ -213,5 +348,6 @@
   <script src="auth.js"></script>
   <script src="ui.js"></script>
   <script src="admin.js"></script>
+  <script src="admin-systems.js"></script>
 </body>
 </html>
