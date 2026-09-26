@@ -107,6 +107,26 @@
             <article class="notice" id="dashboardNotice">PLAYER DATA IS LOADING.</article>
           </aside>
         </section>
+
+        <section class="content-grid">
+          <article class="hud-panel compact">
+            <div class="section-head">
+              <div><div class="section-code">WORLD / INFORMATION</div><h2>Published World State</h2></div>
+              <p>ADMIN AUTHORED</p>
+            </div>
+            <div id="worldStateFeed" class="resource-list"></div>
+            <div class="empty-state" id="worldStateEmpty" hidden>NO PLAYER-VISIBLE WORLD STATE HAS BEEN PUBLISHED.</div>
+          </article>
+
+          <aside class="hud-panel compact">
+            <div class="section-head">
+              <div><div class="section-code">WORLD / NEWS</div><h2>Latest Updates</h2></div>
+              <p>READ ONLY</p>
+            </div>
+            <div id="newsFeed" class="stack"></div>
+            <div class="empty-state" id="newsEmpty" hidden>NO PLAYER-VISIBLE NEWS HAS BEEN PUBLISHED.</div>
+          </aside>
+        </section>
       </main>
     </div>
   </div>
@@ -153,6 +173,29 @@
         document.getElementById("actionCount").textContent = pending.length;
         document.getElementById("pendingTelemetry").textContent = String(pending.length).padStart(2,"0");
         document.getElementById("characterCount").textContent = state.characters.length;
+
+        const worldRoot = document.getElementById("worldStateFeed");
+        if (state.world.length) {
+          document.getElementById("worldStateEmpty").hidden = true;
+          worldRoot.innerHTML = state.world.map(row => {
+            const value = typeof row.value === "object" ? JSON.stringify(row.value) : String(row.value ?? "");
+            return '<div class="resource-row"><div><strong>' + GMUI.esc(row.label) + '</strong><div class="section-code">' + GMUI.esc(String(row.category || "general").toUpperCase()) + '</div></div><span>' + GMUI.esc(value) + '</span></div>';
+          }).join("");
+        } else {
+          worldRoot.innerHTML = "";
+          document.getElementById("worldStateEmpty").hidden = false;
+        }
+
+        const newsRoot = document.getElementById("newsFeed");
+        if (state.news.length) {
+          document.getElementById("newsEmpty").hidden = true;
+          newsRoot.innerHTML = state.news.map(row =>
+            '<article class="notice"><strong style="color:var(--text)">' + GMUI.esc(row.title) + '</strong><div class="section-code">' + GMUI.esc(new Date(row.published_at).toLocaleDateString()) + '</div><div style="margin-top:8px">' + GMUI.esc(row.body) + '</div></article>'
+          ).join("");
+        } else {
+          newsRoot.innerHTML = "";
+          document.getElementById("newsEmpty").hidden = false;
+        }
 
         notice.textContent = state.registration
           ? "PLAYER ACCOUNT LINKED. PERSONAL DATA IS ISOLATED TO THIS AUTHENTICATED USER."
