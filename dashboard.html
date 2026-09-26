@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Player Dashboard | Gradari Mireris</title>
+<style>
+:root{--bg:#0b0d0f;--panel:#121519;--panel2:#171b20;--text:#e8e3d8;--muted:#9b9b96;--line:#30343a;--gold:#a9782b;--gold2:#d1a657}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Georgia,"Times New Roman",serif}
+header{padding:26px 5vw;border-bottom:1px solid var(--line);background:#0e1114;display:flex;justify-content:space-between;align-items:center;gap:20px}
+h1,h2,h3{color:var(--gold2)}h1{margin:0;letter-spacing:.08em}.muted{color:var(--muted)}
+nav{display:flex;gap:8px;flex-wrap:wrap}button,a.btn{background:#20242a;color:var(--text);border:1px solid #454a52;padding:9px 13px;font:inherit;text-decoration:none;cursor:pointer}
+main{max-width:1100px;margin:auto;padding:30px 5vw}.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.card{background:var(--panel);border:1px solid var(--line);padding:22px}
+.stat{font-size:1.8rem;color:var(--gold2)}.profile p{margin:8px 0}.state{color:var(--muted);line-height:1.5}
+@media(max-width:700px){header{align-items:flex-start;flex-direction:column}.grid{grid-template-columns:1fr}}
+</style></head><body>
+<header><div><h1>GRADARI MIRERIS</h1><div class="muted">PLAYER DASHBOARD</div></div>
+<nav><a class="btn" href="index.html">RETURN HOME</a><button id="logout">LOG OUT</button></nav></header>
+<main>
+<div class="card profile"><h2 id="welcome">PLAYER ACCOUNT</h2><div id="profileState" class="state">Loading account...</div>
+<div id="profile" hidden><p><strong>Preferred Name:</strong> <span id="preferred"></span></p><p><strong>Discord:</strong> <span id="discord"></span></p><p><strong>Faction Preference:</strong> <span id="faction"></span></p><p><strong>Role:</strong> <span id="role"></span></p></div></div>
+<div class="grid">
+<div class="card"><h3>ACTIONS</h3><div class="stat" id="actionCount">—</div><p class="muted">Submitted actions tied to your account.</p><a class="btn" href="index.html">SUBMIT ACTION</a></div>
+<div class="card"><h3>SOCIAL</h3><p class="muted">Friends and direct messaging will live here.</p><div class="state">Coming next.</div></div>
+<div class="card"><h3>CHARACTERS</h3><p class="muted">Your active characters will appear here once the character system is connected.</p></div>
+<div class="card"><h3>ACCOUNT</h3><p id="email" class="muted"></p><p id="uid" class="muted"></p></div>
+</div></main>
+<script>
+const U="https://tgszdvvitdijzkkbrlpl.supabase.co",K="sb_publishable_6GE5AFuO7AH1Ym7GU5qjoA_iUAoFAI2";
+const token=localStorage.getItem('gm_access_token'),user=JSON.parse(localStorage.getItem('gm_auth_user')||'null');
+if(!token||!user?.id) location.replace('login.html');
+document.getElementById('email').textContent='Email: '+(user?.email||'');
+document.getElementById('uid').textContent='Account ID: '+(user?.id||'');
+async function get(path){const r=await fetch(U+'/rest/v1/'+path,{headers:{apikey:K,Authorization:'Bearer '+token}});if(r.status===401){localStorage.removeItem('gm_access_token');localStorage.removeItem('gm_refresh_token');localStorage.removeItem('gm_auth_user');location.replace('login.html');throw new Error('Session expired')}if(!r.ok)throw new Error(await r.text());return r.json()}
+async function load(){
+ try{
+  const p=await get('players_tab?user_id=eq.'+encodeURIComponent(user.id)+'&select=player,preferred,faction,role');
+  const s=document.getElementById('profileState');
+  if(!p[0]){s.textContent='Your login works, but this account is not linked to a Player Registration yet.';return}
+  const x=p[0],name=x.preferred||x.player||'Player';
+  document.getElementById('welcome').textContent='WELCOME, '+name.toUpperCase();
+  document.getElementById('preferred').textContent=x.preferred||'Not specified';
+  document.getElementById('discord').textContent=x.player||'Not specified';
+  document.getElementById('faction').textContent=x.faction||'Not specified';
+  document.getElementById('role').textContent=x.role||'Not specified';
+  document.getElementById('profile').hidden=false;s.textContent='';
+  const a=await get('actions_tab?user_id=eq.'+encodeURIComponent(user.id)+'&select=id');
+  document.getElementById('actionCount').textContent=a.length;
+ }catch(e){document.getElementById('profileState').textContent='Dashboard error: '+e.message}
+}
+document.getElementById('logout').onclick=()=>{localStorage.removeItem('gm_access_token');localStorage.removeItem('gm_refresh_token');localStorage.removeItem('gm_auth_user');location.href='login.html'};
+load();
+</script></body></html>
