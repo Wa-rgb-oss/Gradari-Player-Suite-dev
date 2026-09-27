@@ -380,7 +380,10 @@
         code:d.code.trim() || null,
         name:d.name.trim(),
         description:d.description.trim() || null,
-        treasury:Number(d.treasury || 0)
+        treasury:Number(d.treasury || 0),
+        color:d.color || "#4fa8c4",
+        federal_member:form.elements.federal_member.checked,
+        federal_tax_rate:Number(data.config?.[0]?.federal_faction_tax_rate ?? 10)
       })});
       form.reset();
       setState($("factionState"), "FACTION CREATED", "success");
