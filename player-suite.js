@@ -200,7 +200,7 @@
     if (!membership || !faction) {
       $("factionName").textContent = "No Active Faction";
       $("factionCode").textContent = "UNASSIGNED";
-      $("factionDescription").textContent = "The Game Master assigns faction membership and faction authority.";
+      $("factionDescription").textContent = "You are not currently part of a faction.";
       $("factionTitle").textContent = "--";
       $("factionRank").textContent = "--";
       $("factionTreasury").textContent = "--";
@@ -220,7 +220,7 @@
     const permissions = membership.permissions || [];
     $("permissionList").innerHTML = permissions.length
       ? permissions.map(p => '<span class="status-chip">' + esc(p) + '</span>').join("")
-      : '<span class="status-chip muted">VIEW ONLY</span>';
+      : '<span class="status-chip muted">STANDARD MEMBER</span>';
 
     const ownFactionAssets = factionAssets.filter(row => row.faction_id === faction.id);
     if (!ownFactionAssets.length) {
