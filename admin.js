@@ -30,7 +30,8 @@
     senateSeats: [],
     senateBills: [],
     senateVotes: [],
-    federalTaxAssessments: []
+    federalTaxAssessments: [],
+    federalPolicies: []
   };
 
   const $ = id => document.getElementById(id);
@@ -263,7 +264,8 @@
       GMAuth.api("senate_faction_seats?select=*&order=seats.desc"),
       GMAuth.api("senate_bills?select=*&order=created_at.desc"),
       GMAuth.api("senate_votes?select=*&order=updated_at.desc"),
-      GMAuth.api("federal_tax_assessments?select=*&order=assessed_at.desc&limit=100")
+      GMAuth.api("federal_tax_assessments?select=*&order=assessed_at.desc&limit=100"),
+      GMAuth.api("federal_policies?select=*&order=enacted_at.desc")
     ]);
     [
       data.profiles,data.registrations,data.wallets,data.factions,data.memberships,
@@ -273,7 +275,7 @@
       data.territories,data.locationModifiers,data.factionTransactions,
       data.characters,data.characterInfluence,data.influenceTransactions,
       data.republic,data.senateSeats,data.senateBills,data.senateVotes,
-      data.federalTaxAssessments
+      data.federalTaxAssessments,data.federalPolicies
     ] = results;
   }
 
