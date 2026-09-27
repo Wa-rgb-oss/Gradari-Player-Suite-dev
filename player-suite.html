@@ -23,7 +23,7 @@
         <a href="about.html"><span class="nav-index">05</span><span class="nav-label">ABOUT</span><span class="nav-arrow">›</span></a>
       </nav>
       <div class="sidebar-footer">
-        <div class="user-readout"><strong>AUTHENTICATED PLAYER</strong><span data-user-email>Loading identity...</span></div>
+        <div class="user-readout"><strong>SIGNED IN</strong><span data-user-email>Loading identity...</span></div>
         <button class="signout-btn" type="button" data-signout>LOG OUT</button>
       </div>
     </aside>
@@ -38,9 +38,8 @@
         <section class="hud-panel compact" style="margin-bottom:18px">
           <div class="section-head">
             <div><div class="section-code">NAVIGATION / 04</div><h2>Player Suite</h2></div>
-            <p>PLAYER AUTHORITY ONLY</p>
           </div>
-          <p class="hero-copy" style="margin:0">Manage your own player identity, characters, economy, inventory, faction information, and actions. World-scale values are displayed as authoritative information and can only be changed by the Game Master unless your account is explicitly granted a faction permission.</p>
+          <p class="hero-copy" style="margin:0">Manage your identity, character, economy, inventory, faction information, and actions. Faction tools appear according to your current role and permissions.</p>
         </section>
 
         <div class="tabs" data-tabs>
@@ -58,14 +57,14 @@
         <section class="panel active" id="suite-overview" data-tab-panel>
           <div class="content-grid">
             <article class="hud-panel compact">
-              <div class="section-code">PLAYER SUITE / CONTROL SURFACES</div>
+              <div class="section-code">PLAYER SUITE / SYSTEMS</div>
               <h2 style="margin:5px 0 12px;text-transform:uppercase">Your Account Systems</h2>
               <div class="command-list">
                 <div class="command-row"><div class="command-icon">A</div><div><h3>Account</h3><p>Player identity and game registration connected only to your login.</p></div><button class="hud-button secondary" type="button" data-open-tab="suite-account">OPEN</button></div>
                 <div class="command-row"><div class="command-icon">E</div><div><h3>Economy</h3><p>Your personal bank balance and transaction record.</p></div><button class="hud-button secondary" type="button" data-open-tab="suite-economy">OPEN</button></div>
                 <div class="command-row"><div class="command-icon">I</div><div><h3>Inventory</h3><p>Resources and assets currently owned by your player account.</p></div><button class="hud-button secondary" type="button" data-open-tab="suite-inventory">OPEN</button></div>
                 <div class="command-row"><div class="command-icon">F</div><div><h3>Faction</h3><p>Your faction membership, role, permissions, treasury, and faction resources.</p></div><button class="hud-button secondary" type="button" data-open-tab="suite-faction">OPEN</button></div>
-                <div class="command-row"><div class="command-icon">C</div><div><h3>Characters</h3><p>Create and manage characters that belong to your own account.</p></div><button class="hud-button secondary" type="button" data-open-tab="suite-characters">OPEN</button></div>
+                <div class="command-row"><div class="command-icon">C</div><div><h3>Character</h3><p>View your active character, life status, location, and character record.</p></div><button class="hud-button secondary" type="button" data-open-tab="suite-characters">OPEN</button></div>
                 <div class="command-row"><div class="command-icon">X</div><div><h3>Actions</h3><p>Submit formal actions and review the status of your own requests.</p></div><button class="hud-button secondary" type="button" data-open-tab="suite-actions">OPEN</button></div>
               </div>
             </article>
@@ -92,7 +91,6 @@
             <article class="hud-panel">
               <div class="section-head">
                 <div><div class="section-code">ACCOUNT / PLAYER IDENTITY</div><h2>Account Profile</h2></div>
-                <p>PLAYER CONTROLLED</p>
               </div>
               <form id="profileForm" class="form-shell">
                 <div class="form-grid">
@@ -106,7 +104,7 @@
 
             <aside class="hud-panel compact">
               <div class="section-code">AUTH / ACCOUNT</div>
-              <h2 style="margin:5px 0 12px;text-transform:uppercase">Protected Identity</h2>
+              <h2 style="margin:5px 0 12px;text-transform:uppercase">Account Identity</h2>
               <div class="telemetry-stack">
                 <div class="telemetry-row"><span>Email</span><strong data-user-email>--</strong></div>
                 <div class="telemetry-row"><span>User ID</span><strong id="accountUserId" style="max-width:180px;overflow-wrap:anywhere">--</strong></div>
@@ -148,20 +146,20 @@
               <h2 style="margin:0;text-transform:uppercase">Personal Bank Account</h2>
               <div class="metric-value" id="economyBalance" style="font-size:3.5rem;margin-top:26px">--</div>
               <div class="metric-detail" id="economyCurrency">AUREUM</div>
-              <p class="hero-copy">This balance belongs to your player account. Transactions may be created by approved purchases, rewards, transfers, economic actions, or Game Master resolution. Players cannot directly overwrite their own balance.</p>
+              <p class="hero-copy">This balance belongs to your account. Transactions are created through purchases, rewards, transfers, economic activity, and resolved game events.</p>
             </article>
             <aside class="hud-panel compact amber">
-              <div class="hud-kicker amber">ECONOMY AUTHORITY</div>
+              <div class="hud-kicker amber">ACCOUNT ACTIVITY</div>
               <div class="telemetry-stack">
-                <div class="telemetry-row"><span>View Balance</span><strong>PLAYER</strong></div>
-                <div class="telemetry-row"><span>View History</span><strong>PLAYER</strong></div>
-                <div class="telemetry-row"><span>Set Balance</span><strong>ADMIN</strong></div>
-                <div class="telemetry-row"><span>Automated Spending</span><strong>PLANNED</strong></div>
+                <div class="telemetry-row"><span>Currency</span><strong>AUREUM</strong></div>
+                <div class="telemetry-row"><span>Ledger</span><strong>ACTIVE</strong></div>
+                <div class="telemetry-row"><span>Market Purchases</span><strong>ENABLED</strong></div>
+                <div class="telemetry-row"><span>Faction Transfers</span><strong>ENABLED</strong></div>
               </div>
             </aside>
           </div>
           <article class="hud-panel compact">
-            <div class="section-head"><div><div class="section-code">ECONOMY / LEDGER</div><h2>Transaction History</h2></div><p>YOUR ACCOUNT ONLY</p></div>
+            <div class="section-head"><div><div class="section-code">ECONOMY / LEDGER</div><h2>Transaction History</h2></div></div>
             <div class="table-wrap"><table class="data-table"><thead><tr><th>Date</th><th>Type</th><th>Description</th><th>Amount</th><th>Balance</th></tr></thead><tbody id="transactionRows"></tbody></table></div>
             <div class="empty-state" id="transactionEmpty" hidden>NO TRANSACTIONS RECORDED.</div>
           </article>
@@ -190,13 +188,13 @@
 
         <section class="panel" id="suite-inventory" data-tab-panel>
           <article class="hud-panel">
-            <div class="section-head"><div><div class="section-code">PLAYER / INVENTORY</div><h2>Inventory & Resources</h2></div><p>YOUR ACCOUNT ONLY</p></div>
-            <p class="hero-copy" style="margin:0 0 20px">Assets listed here are assigned to your player account. The Game Master and future automated game systems control authoritative quantities.</p>
+            <div class="section-head"><div><div class="section-code">PLAYER / INVENTORY</div><h2>Inventory & Resources</h2></div></div>
+            <p class="hero-copy" style="margin:0 0 20px">Assets listed here are currently held by your account. Quantities change through trade, production, rewards, losses, and other game activity.</p>
             <div class="resource-list" id="playerAssetList"></div>
             <div class="empty-state" id="playerAssetEmpty" hidden>NO PLAYER ASSETS OR RESOURCES ASSIGNED.</div>
           </article>
           <article class="hud-panel compact" style="margin-top:18px">
-            <div class="section-head"><div><div class="section-code">PLAYER / HOLDINGS</div><h2>Facilities & Holdings</h2></div><p>MAP-READY</p></div>
+            <div class="section-head"><div><div class="section-code">PLAYER / HOLDINGS</div><h2>Facilities & Holdings</h2></div></div>
             <p class="hero-copy" style="margin:0 0 18px">Mines, factories, refineries, trading posts, research sites, and other holdings will be constructed through the map. The Player Suite acts as the informational ledger for what you own, where it is, its upkeep, and its current status.</p>
             <div id="facilityList" class="stack"></div>
             <div class="empty-state" id="facilityEmpty" hidden>NO FACILITIES OR HOLDINGS ARE ASSIGNED TO THIS ACCOUNT.</div>
@@ -207,7 +205,7 @@
           <div class="content-grid">
             <article class="hud-panel">
               <div class="section-head"><div><div class="section-code">FACTION / MEMBERSHIP</div><h2 id="factionName">No Active Faction</h2></div><p id="factionCode">UNASSIGNED</p></div>
-              <p class="hero-copy" id="factionDescription" style="margin:0 0 20px">The Game Master assigns faction membership and faction authority.</p>
+              <p class="hero-copy" id="factionDescription" style="margin:0 0 20px">Your current faction membership, position, treasury access, and permissions are shown here.</p>
               <div class="telemetry-stack">
                 <div class="telemetry-row"><span>Position</span><strong id="factionTitle">--</strong></div>
                 <div class="telemetry-row"><span>Rank</span><strong id="factionRank">--</strong></div>
@@ -216,19 +214,19 @@
               <div class="permission-list" id="permissionList"></div>
             </article>
             <aside class="hud-panel compact amber">
-              <div class="hud-kicker amber">FACTION AUTHORITY</div>
-              <p class="hero-copy" style="margin:0">Faction information is visible according to membership. Future controls will unlock only when your faction role explicitly carries that permission.</p>
+              <div class="hud-kicker amber">FACTION ACCESS</div>
+              <p class="hero-copy" style="margin:0">Available faction tools reflect your current position and any permissions granted by the faction leader.</p>
             </aside>
           </div>
           <article class="hud-panel compact" style="margin-top:18px">
-            <div class="section-head"><div><div class="section-code">FACTION / RESOURCES</div><h2>Faction Resources</h2></div><p>MEMBERSHIP REQUIRED</p></div>
+            <div class="section-head"><div><div class="section-code">FACTION / RESOURCES</div><h2>Faction Resources</h2></div></div>
             <div class="resource-list" id="factionAssetList"></div>
             <div class="empty-state" id="factionAssetEmpty" hidden>NO VISIBLE FACTION RESOURCES.</div>
           </article>
 
           <div id="factionNoMembership" class="content-grid" style="margin-top:18px" hidden>
             <article class="hud-panel">
-              <div class="section-head"><div><div class="section-code">FACTION / FOUNDING</div><h2>Create a Faction</h2></div><p>PLAYER-FOUNDED</p></div>
+              <div class="section-head"><div><div class="section-code">FACTION / FOUNDING</div><h2>Create a Faction</h2></div></div>
               <p class="hero-copy" style="margin:0 0 20px">Faction creation requires multiple real players and a shared Aureum commitment. Founder pledges are only charged when the faction successfully forms.</p>
               <div class="metric-grid" style="grid-template-columns:repeat(3,minmax(0,1fr));margin-top:0">
                 <article class="metric-card"><div class="metric-label">Required Founders</div><div class="metric-value" id="founderRequirement">--</div><div class="metric-detail">REAL PLAYER ACCOUNTS</div></article>
@@ -296,36 +294,37 @@
         <section class="panel" id="suite-characters" data-tab-panel>
           <div class="content-grid">
             <article class="hud-panel">
-              <div class="section-head"><div><div class="section-code">PLAYER / CHARACTERS</div><h2>Your Characters</h2></div><p>PLAYER CONTROLLED</p></div>
+              <div class="section-head"><div><div class="section-code">PLAYER / CHARACTER</div><h2>Your Character</h2></div></div>
+              <p class="hero-copy" style="margin:0 0 18px">Each player may have one active living character at a time. Deceased characters remain in the record, and a new character can be created after the previous character dies.</p>
               <div id="characterList" class="stack"></div>
-              <div class="empty-state" id="characterEmpty" hidden>NO CHARACTERS CREATED.</div>
+              <div class="empty-state" id="characterEmpty" hidden>NO CHARACTER HAS BEEN CREATED.</div>
             </article>
-            <aside class="hud-panel compact">
+            <aside class="hud-panel compact" id="characterCreatePanel">
               <div class="section-code">CHARACTER / CREATE</div>
-              <h2 style="margin:5px 0 16px;text-transform:uppercase">New Character</h2>
+              <h2 style="margin:5px 0 16px;text-transform:uppercase">Create Character</h2>
               <form id="characterForm" class="form-shell">
                 <label><span>Name *</span><input name="name" required maxlength="140"></label>
                 <label><span>Title</span><input name="title" maxlength="160"></label>
                 <label><span>Faction</span><select name="faction_id" id="characterFaction"><option value="">No faction</option></select></label>
-                <label class="checkbox-line"><input type="checkbox" name="is_main"><span>Main Character</span></label>
                 <label><span>Bio / Notes</span><textarea name="bio" maxlength="2500"></textarea></label>
                 <button class="hud-button" type="submit">CREATE CHARACTER</button>
                 <div class="form-state" id="characterState"></div>
               </form>
+              <div class="empty-state" id="characterLimitNotice" hidden>YOU ALREADY HAVE AN ACTIVE LIVING CHARACTER.</div>
             </aside>
           </div>
           <article class="hud-panel compact" style="margin-top:18px">
-            <div class="section-head"><div><div class="section-code">CHARACTERS / LOCATION</div><h2>Physical Presence</h2></div><p>MAP-READY</p></div>
-            <p class="hero-copy" style="margin:0 0 18px">Characters have a physical game location. Other players are not automatically identified. When another visible character is at the same location, your character can receive a presence count such as “2 other characters present.”</p>
+            <div class="section-head"><div><div class="section-code">CHARACTER / LOCATION</div><h2>Physical Presence</h2></div></div>
+            <p class="hero-copy" style="margin:0 0 18px">Your living character has a physical game location. Other characters are not automatically identified; when another visible character is present at the same location, you can see a presence count without automatically learning their identity.</p>
             <div id="characterLocationList" class="stack"></div>
-            <div class="empty-state" id="characterLocationEmpty" hidden>NO CHARACTER LOCATION DATA AVAILABLE.</div>
+            <div class="empty-state" id="characterLocationEmpty" hidden>NO ACTIVE CHARACTER LOCATION DATA AVAILABLE.</div>
           </article>
         </section>
 
         <section class="panel" id="suite-actions" data-tab-panel>
           <div class="content-grid">
             <article class="hud-panel">
-              <div class="section-head"><div><div class="section-code">FORMAL ACTION / SUBMISSION</div><h2>Submit Action</h2></div><p>GAME MASTER RESOLUTION</p></div>
+              <div class="section-head"><div><div class="section-code">FORMAL ACTION / SUBMISSION</div><h2>Submit Action</h2></div></div>
               <form id="actionForm" class="form-shell">
                 <div class="form-grid">
                   <label><span>Player / Faction</span><input name="player" readonly></label>
