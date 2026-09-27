@@ -3,6 +3,7 @@
   let player = null;
   let territories = [];
   let modifiers = [];
+  let mapRegistry = [];
   let selectedHex = null;
   let hoverHex = null;
 
@@ -40,15 +41,30 @@
   }
 
   function buildCircle() {
-    mapHexes = [];
-    mapHexSet = new Set();
-    for (let q=-radius;q<=radius;q++) {
-      for (let r=-radius;r<=radius;r++) {
-        const s = -q-r;
-        if (Math.max(Math.abs(q),Math.abs(r),Math.abs(s)) <= radius) {
-          const hex = {q,r,ref:refFor(q,r)};
-          mapHexes.push(hex);
-          mapHexSet.add(hex.ref);
+    const registry = (mapRegistry || []).filter(row => row.player_visible !== false);
+    if (registry.length) {
+      mapHexes = registry.map(row => ({
+        q:Number(row.q),
+        r:Number(row.r),
+        ref:row.location_ref,
+        display_name:row.display_name || null,
+        region_name:row.region_name || null,
+        terrain_type:row.terrain_type || null,
+        habitable_systems:Number(row.habitable_systems || 0),
+        status:row.status || "open"
+      }));
+      mapHexSet = new Set(mapHexes.map(row => row.ref));
+    } else {
+      mapHexes = [];
+      mapHexSet = new Set();
+      for (let q=-radius;q<=radius;q++) {
+        for (let r=-radius;r<=radius;r++) {
+          const s = -q-r;
+          if (Math.max(Math.abs(q),Math.abs(r),Math.abs(s)) <= radius) {
+            const hex = {q,r,ref:refFor(q,r)};
+            mapHexes.push(hex);
+            mapHexSet.add(hex.ref);
+          }
         }
       }
     }
@@ -85,10 +101,12 @@
   }
 
   async function loadMapData() {
-    const [territoryRows,modifierRows] = await Promise.all([
+    const [hexRows,territoryRows,modifierRows] = await Promise.all([
+      GMAuth.api("map_hexes?player_visible=eq.true&select=*&order=q.asc,r.asc"),
       GMAuth.api("territories?select=*&order=location_ref.asc"),
       GMAuth.api("location_modifiers?player_visible=eq.true&select=*&order=created_at.desc")
     ]);
+    mapRegistry = hexRows || [];
     territories = territoryRows || [];
     modifiers = modifierRows || [];
   }
@@ -523,16 +541,23 @@
     }
 
     const territory=territoryByRef(selectedHex.ref);
+    const mapHex=mapHexes.find(row=>row.ref===selectedHex.ref) || selectedHex;
     const faction=factionById(territory?.faction_id);
-    const name=territory?.display_name || "Hex "+selectedHex.q+", "+selectedHex.r;
+    const name=territory?.display_name || mapHex.display_name || "Hex "+selectedHex.q+", "+selectedHex.r;
     const production=Number(territory?.production_modifier ?? 1);
+    const locationStatus=territory?.status || mapHex.status || "open";
+    const context=[
+      mapHex.region_name ? String(mapHex.region_name).toUpperCase() : null,
+      mapHex.terrain_type ? String(mapHex.terrain_type).toUpperCase() : null,
+      Number(mapHex.habitable_systems || 0)>0 ? Number(mapHex.habitable_systems)+" HABITABLE SYSTEM"+(Number(mapHex.habitable_systems)===1?"":"S") : null
+    ].filter(Boolean).join(" // ");
 
     $("mapSelectedReadout").textContent=name.toUpperCase();
-    $("mapCoordinateReadout").textContent="Q "+selectedHex.q+" // R "+selectedHex.r;
+    $("mapCoordinateReadout").textContent=context || ("Q "+selectedHex.q+" // R "+selectedHex.r);
     $("selectedHexName").textContent=name;
     $("selectedHexRef").textContent=selectedHex.ref;
     $("selectedHexFaction").textContent=faction?.name || "UNCLAIMED";
-    $("selectedHexStatus").textContent=(territory?.status || "OPEN").toUpperCase();
+    $("selectedHexStatus").textContent=String(locationStatus).toUpperCase();
     $("selectedHexProduction").textContent=Math.round(production*100)+"%";
 
     const selectedFacilities=player.facilities.filter(row=>row.location_ref===selectedHex.ref);
