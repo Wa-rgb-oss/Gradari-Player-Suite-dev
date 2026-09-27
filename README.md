@@ -18,14 +18,15 @@ Authenticated players can access only their own player-owned data and faction in
 Current framework includes:
 
 - persistent login/account session
+- live canon world clock
 - player profile and game registration
 - personal Aureum wallet and transaction history
-- player inventory/resources
-- faction membership, position, permissions, treasury display, and faction resources
-- player-owned characters
-- formal action submission and personal action history
-- player-visible world state and news
-- map placeholder
+- inventory, resources, holdings, markets, and automated economy cycles
+- faction founding, membership, permissions, treasury, markets, leadership, and resources
+- one active living character with travel, death, and succession continuity
+- interactive hex map with territory, character location, holdings, armies, raids, and conquest
+- Senate seats, Influence, legislation, political activity, offices, candidacy, elections, and Imperial taxation
+- events, objectives, rewards, formal actions, world state, and news
 - project/canon reference
 
 ### Game Master backend
@@ -34,16 +35,14 @@ The restricted admin interface controls authoritative game state.
 
 Current framework includes:
 
-- player directory
-- faction creation and editing
-- faction membership, rank, title, and permission assignment
-- personal balance control with transaction ledger entries
-- asset/resource catalog
-- player asset assignment
-- faction asset assignment
-- action review, status, GM notes, and resolution
-- world-state publishing
-- news publishing
+- player and character administration, including character death records
+- faction creation, leadership succession, membership, permissions, treasury, markets, and resources
+- personal and faction economy controls with transaction ledgers and automated cycle history
+- asset/resource catalog, holdings, facility production, and market administration
+- authoritative map registry, territory, location modifiers, armies, travel, raids, and conquest
+- Senate seats, Influence, political actions, offices, elections, legislation, policy, and Imperial taxation
+- live world-clock controls and automated world processing
+- event/campaign administration, action review/resolution, world-state publishing, and news publishing
 
 ## Security model
 
@@ -58,7 +57,7 @@ The frontend does not rely on hidden buttons for security.
 - `index.html` — session router
 - `login.html` — player login and account creation
 - `dashboard.html` — authenticated player dashboard
-- `map.html` — temporary galactic map display
+- `map.html` / `map.js` — interactive galactic hex map and world interaction layer
 - `player-suite.html` — player economy, inventory, faction, characters, actions, and canon
 - `player-suite.js` — player interactions
 - `player-data.js` — shared player-state loader
@@ -92,6 +91,16 @@ Gradari includes a Senate politics framework.
 
 The Politics player page is `politics.html`. Politics administration is part of the restricted `admin.html` backend.
 
+### Offices and elections
+
+- Political offices are configurable by the Game Master rather than hardcoded beyond the seeded First Consul office.
+- An office can be filled by appointment, a Senate-seat-weighted election, or a one-player-one-vote election.
+- Elections run against the canon world clock, with scheduled opening and closing handled by the world heartbeat.
+- Living characters may declare candidacy when they meet an office's Influence requirement.
+- Resolved elections assign the winning character to the office; dead characters are automatically withdrawn and vacate held offices.
+- Election results can remain hidden until resolution, while the voter's own vote remains visible to them.
+
+
 The uploaded legacy Senate, economy, and map HTML files are design references only and are not part of this implementation.
 
 
@@ -102,5 +111,6 @@ The uploaded legacy Senate, economy, and map HTML files are design references on
 - Deceased characters remain in the historical Record and cannot be deleted by normal players.
 - When a character dies, physical presence and character-based political actions stop immediately.
 - A player may create a new living character after the prior character is deceased.
-- Character Influence remains attached to the deceased character as historical political capital and does not automatically transfer to the successor.
-- Player-account Aureum, inventory, facilities, and faction membership currently remain account-level and are not automatically destroyed on character death.
+- Character Influence remains attached to the deceased character as historical political capital. A configurable succession percentage controls how much political standing, if any, transfers to the successor; the default is 0%.
+- Player-account Aureum, inventory, facilities, and faction membership remain account-level and continue across character succession.
+- Character succession is recorded as predecessor → successor history for the player.
