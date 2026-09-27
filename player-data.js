@@ -10,13 +10,13 @@
       characters, actions, transactions, world, news, config, directory,
       proposals, proposalMembers, factionInvitations, factionTransactions,
       facilityTypes, facilities, markets, marketListings, events,
-      eventObjectives, eventParticipation
+      eventObjectives, eventParticipation, characterSuccessions
     ] = await Promise.all([
       GMAuth.api("player_profiles?user_id=eq." + uid + "&select=*&limit=1"),
       GMAuth.api("players_tab?user_id=eq." + uid + "&select=*&limit=1"),
       GMAuth.api("player_wallets?user_id=eq." + uid + "&select=*&limit=1"),
       GMAuth.api("faction_memberships?user_id=eq." + uid + "&select=*&order=created_at.asc"),
-      GMAuth.api("factions?select=id,code,name,description,treasury,status,leader_user_id,tax_rate,federal_tax_rate,federal_member,color&order=name.asc"),
+      GMAuth.api("factions?select=id,code,name,description,treasury,status,leader_user_id,leader_character_id,leadership_status,tax_rate,federal_tax_rate,federal_member,color&order=name.asc"),
       GMAuth.api("player_assets?user_id=eq." + uid + "&select=*&order=updated_at.desc"),
       GMAuth.api("faction_assets?select=*&order=updated_at.desc"),
       GMAuth.api("asset_catalog?select=id,code,name,kind,unit,description&order=name.asc"),
@@ -37,7 +37,8 @@
       GMAuth.api("market_listings?select=*&order=created_at.asc"),
       GMAuth.api("game_events?select=*&order=starts_at.asc,created_at.desc"),
       GMAuth.api("event_objectives?select=*&order=sort_order.asc"),
-      GMAuth.api("event_participants?user_id=eq." + uid + "&select=*&order=joined_at.desc")
+      GMAuth.api("event_participants?user_id=eq." + uid + "&select=*&order=joined_at.desc"),
+      GMAuth.api("character_successions?user_id=eq." + uid + "&select=*&order=created_at.desc")
     ]);
 
     const factionMap = new Map((factions || []).map(row => [row.id,row]));
@@ -102,7 +103,8 @@
       marketListings: enrichedListings,
       events: events || [],
       eventObjectives: enrichedObjectives,
-      eventParticipation: eventParticipation || []
+      eventParticipation: eventParticipation || [],
+      characterSuccessions: characterSuccessions || []
     };
   }
 
