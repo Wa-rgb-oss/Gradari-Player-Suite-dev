@@ -58,6 +58,23 @@
               <div id="influenceList" class="stack senate-side-stack"></div>
               <div class="empty-state" id="influenceEmpty" hidden>NO CHARACTERS AVAILABLE.</div>
             </article>
+
+            <article class="hud-panel compact senate-console-panel amber">
+              <div class="hud-kicker amber">POLITICAL ACTIVITY</div>
+              <p class="hero-copy senate-side-copy">Your living character can build Influence through political activity. Each activity uses the canon world clock and has a shared cooldown.</p>
+              <form id="politicalActivityForm" class="form-shell">
+                <label><span>Character</span><select name="character_id" id="politicalActivityCharacter" required></select></label>
+                <label><span>Activity</span><select name="action_code" id="politicalActivityType" required></select></label>
+                <div class="telemetry-stack">
+                  <div class="telemetry-row"><span>Influence Reward</span><strong id="politicalActivityReward">--</strong></div>
+                  <div class="telemetry-row"><span>Aureum Cost</span><strong id="politicalActivityCost">--</strong></div>
+                  <div class="telemetry-row"><span>Availability</span><strong id="politicalActivityAvailability">--</strong></div>
+                </div>
+                <button class="hud-button amber" id="politicalActivityBtn" type="submit">PERFORM ACTIVITY</button>
+                <div class="form-state" id="politicalActivityState"></div>
+              </form>
+              <div class="empty-state" id="politicalActivityLocked" hidden>AN ACTIVE LIVING CHARACTER IS REQUIRED.</div>
+            </article>
           </aside>
 
           <div class="senate-center-column">
