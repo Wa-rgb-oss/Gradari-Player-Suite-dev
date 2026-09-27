@@ -387,7 +387,7 @@
   async function renderCharacterPresence() {
     const root = $("characterLocationList");
     if (!root) return;
-    const chars = state.characters || [];
+    const chars = (state.characters || []).filter(char => char.status === "active" && char.life_status === "alive");
     if (!chars.length) {
       root.innerHTML = "";
       $("characterLocationEmpty").hidden = false;
