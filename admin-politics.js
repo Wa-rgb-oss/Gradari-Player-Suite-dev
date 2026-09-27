@@ -44,14 +44,16 @@
   }
 
   function fillCharacterSelects() {
-    const options='<option value="">No linked character</option>' + (data?.characters||[]).map(char =>
+    const living=(data?.characters||[]).filter(char => char.status==="active" && char.life_status==="alive");
+    const options='<option value="">No linked character</option>' + living.map(char =>
       '<option value="'+esc(char.id)+'">'+esc(char.name)+' // '+esc(factionById(char.faction_id)?.name || "No faction")+'</option>'
     ).join("");
     $("firstConsulCharacter").innerHTML=options;
 
     $("influenceCharacter").innerHTML='<option value="">Select character</option>' + (data?.characters||[]).map(char => {
       const wallet=influenceByCharacter(char.id);
-      return '<option value="'+esc(char.id)+'">'+esc(char.name)+' // '+esc(fmt(wallet.balance))+' Influence</option>';
+      const status=char.status==="active" && char.life_status==="alive" ? "ALIVE" : "DECEASED";
+      return '<option value="'+esc(char.id)+'">'+esc(char.name)+' // '+status+' // '+esc(fmt(wallet.balance))+' Influence</option>';
     }).join("");
   }
 
