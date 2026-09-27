@@ -1020,11 +1020,7 @@ dialog::backdrop{background:rgba(0,0,0,.72);backdrop-filter:blur(2px)}
   min-width:0;
   overflow-y:auto;
   padding-right:3px;
-  scrollbar-width:thin;
-  scrollbar-color:var(--cyan3) transparent;
 }
-.senate-console-side::-webkit-scrollbar{width:6px}
-.senate-console-side::-webkit-scrollbar-thumb{background:var(--cyan3)}
 .senate-console-panel{
   margin:0 0 12px;
   padding:14px;
@@ -1472,4 +1468,64 @@ dialog::backdrop{background:rgba(0,0,0,.72);backdrop-filter:blur(2px)}
   .senate-below-grid{
     grid-template-columns:1fr;
   }
+}
+
+
+/* Site-wide Gradari HUD scrollbar theme
+   Adapted from the uploaded reference HTML scrollbar treatment. */
+*{
+  scrollbar-width:thin;
+  scrollbar-color:#17475d #03070b;
+}
+
+::-webkit-scrollbar{
+  width:12px;
+  height:12px;
+}
+
+::-webkit-scrollbar-track{
+  background:linear-gradient(180deg,#071018,#03070b);
+  border-left:1px solid #1a3842;
+  border-top:1px solid rgba(26,56,66,.45);
+}
+
+::-webkit-scrollbar-thumb{
+  min-height:34px;
+  background:linear-gradient(180deg,#17475d,#0a1924);
+  border:1px solid #45d7e8;
+  border-radius:2px;
+  box-shadow:
+    inset 0 0 8px rgba(0,0,0,.32),
+    0 0 8px rgba(0,234,255,.20);
+}
+
+::-webkit-scrollbar-thumb:hover{
+  background:linear-gradient(180deg,#1d5f7c,#103246);
+  border-color:#86d7e8;
+  box-shadow:
+    inset 0 0 8px rgba(0,0,0,.26),
+    0 0 12px rgba(0,234,255,.40);
+}
+
+::-webkit-scrollbar-thumb:active{
+  background:linear-gradient(180deg,#26718f,#123a50);
+  border-color:#b4edf5;
+}
+
+::-webkit-scrollbar-corner{
+  background:#071018;
+}
+
+::-webkit-scrollbar-button{
+  display:none;
+  width:0;
+  height:0;
+}
+
+/* Keep intentionally hidden navigation scrollbars hidden. */
+.primary-nav{
+  scrollbar-width:none;
+}
+.primary-nav::-webkit-scrollbar{
+  display:none;
 }
