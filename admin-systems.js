@@ -164,7 +164,7 @@
     const cfg = data.config?.[0];
     if (!cfg) return;
     const form=$("gameConfigForm");
-    ["faction_min_founders","faction_creation_cost","faction_min_contribution","faction_default_tax_rate","faction_max_tax_rate"].forEach(key => {
+    ["faction_min_founders","faction_creation_cost","faction_min_contribution","faction_default_tax_rate","faction_max_tax_rate","character_travel_hours_per_hex","army_travel_hours_per_hex","military_operation_hours","raid_effect_world_hours"].forEach(key => {
       if (form.elements[key]) form.elements[key].value=cfg[key];
     });
     const mapForm=$("mapGridForm");
@@ -213,6 +213,61 @@
     }).join("");
   }
 
+  function renderMilitary() {
+    const armyRoot=$("adminArmyList");
+    const opRoot=$("militaryOperationList");
+    const opEmpty=$("militaryOperationEmpty");
+
+    if(armyRoot){
+      armyRoot.innerHTML=(data.armies||[]).length
+        ? data.armies.map(row =>
+          '<div class="resource-row"><div><strong>'+esc(row.name)+'</strong><div class="section-code">'+
+          esc(factionName(row.faction_id))+' // '+esc(row.location_ref || "UNPLACED")+' // '+esc(String(row.movement_status || "stationary").toUpperCase())+
+          '</div></div><span>'+esc(fmt(row.strength))+' STR</span></div>'
+        ).join("")
+        : '<div class="empty-state">NO ARMIES CREATED.</div>';
+    }
+
+    const waiting=(data.militaryOperations||[]).filter(row=>row.status==="awaiting_resolution");
+    if(opRoot){
+      opEmpty.hidden=waiting.length>0;
+      opRoot.innerHTML=waiting.map(row => {
+        const army=(data.armies||[]).find(a=>a.id===row.army_id);
+        return '<article class="notice military-op-row" data-id="'+esc(row.id)+'">'+
+          '<div class="split-actions"><div><strong style="color:var(--text)">'+esc(String(row.operation_type).toUpperCase())+' // '+esc(row.target_ref)+'</strong>'+
+          '<div class="section-code">'+esc(factionName(row.attacker_faction_id))+' VS '+esc(factionName(row.defender_faction_id))+' // '+esc(army?.name || "ARMY")+'</div></div>'+
+          '<span class="status-chip amber">AWAITING RESOLUTION</span></div>'+
+          '<label style="margin-top:10px"><span>Resolution Notes</span><textarea class="military-op-notes"></textarea></label>'+
+          '<label><span>Raid Production Multiplier</span><input class="military-op-multiplier" type="number" min="0" step="0.01" value="0.7"></label>'+
+          '<div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:10px">'+
+          '<button class="hud-button military-op-resolve" data-outcome="success" type="button">SUCCESS</button>'+
+          '<button class="hud-button secondary military-op-resolve" data-outcome="failure" type="button">FAILURE</button>'+
+          '<button class="hud-button secondary military-op-resolve" data-outcome="draw" type="button">DRAW</button>'+
+          '</div></article>';
+      }).join("");
+
+      opRoot.querySelectorAll(".military-op-resolve").forEach(button=>{
+        button.addEventListener("click",async ()=>{
+          const row=button.closest(".military-op-row");
+          try{
+            const result=await GMAuth.api("rpc/resolve_military_operation",{
+              method:"POST",
+              body:JSON.stringify({
+                p_operation_id:row.dataset.id,
+                p_outcome:button.dataset.outcome,
+                p_notes:row.querySelector(".military-op-notes").value.trim() || null,
+                p_raid_multiplier:Number(row.querySelector(".military-op-multiplier").value || .7)
+              })
+            });
+            await refresh("MILITARY OPERATION RESOLVED // "+String(result.outcome).toUpperCase(),$("militaryOperationState"));
+          }catch(error){
+            setState($("militaryOperationState"),"RESOLUTION FAILED // "+error.message,"error");
+          }
+        });
+      });
+    }
+  }
+
   function renderAll(nextData) {
     data=nextData;
     renderMarkets();
@@ -220,6 +275,7 @@
     renderConfig();
     renderFacilityTypes();
     renderTerritories();
+    renderMilitary();
   }
 
   $("marketCreateForm")?.addEventListener("submit",async event => {
@@ -408,7 +464,11 @@
           faction_creation_cost:Number(d.faction_creation_cost),
           faction_min_contribution:Number(d.faction_min_contribution),
           faction_default_tax_rate:Number(d.faction_default_tax_rate),
-          faction_max_tax_rate:Number(d.faction_max_tax_rate)
+          faction_max_tax_rate:Number(d.faction_max_tax_rate),
+          character_travel_hours_per_hex:Number(d.character_travel_hours_per_hex),
+          army_travel_hours_per_hex:Number(d.army_travel_hours_per_hex),
+          military_operation_hours:Number(d.military_operation_hours),
+          raid_effect_world_hours:Number(d.raid_effect_world_hours)
         })
       });
       await refresh("GAME RULES UPDATED",$("gameConfigState"));
@@ -554,6 +614,34 @@
       await refresh("LOCATION MODIFIER ADDED",$("locationModifierState"));
     } catch (error) {
       setState($("locationModifierState"),"MODIFIER CREATE FAILED // "+error.message,"error");
+    }
+  });
+
+  $("armyAdminForm")?.addEventListener("submit",async event => {
+    event.preventDefault();
+    const form=event.currentTarget;
+    const d=Object.fromEntries(new FormData(form));
+    if(Number(d.strength)>Number(d.max_strength)){
+      return setState($("armyAdminState"),"STRENGTH CANNOT EXCEED MAXIMUM STRENGTH","error");
+    }
+    try{
+      await GMAuth.api("armies",{
+        method:"POST",
+        headers:{Prefer:"return=minimal"},
+        body:JSON.stringify({
+          faction_id:d.faction_id,
+          name:d.name.trim(),
+          strength:Number(d.strength || 0),
+          max_strength:Number(d.max_strength || 1),
+          location_ref:d.location_ref.trim() || null,
+          status:"active",
+          movement_status:"stationary"
+        })
+      });
+      form.reset();
+      await refresh("ARMY CREATED",$("armyAdminState"));
+    }catch(error){
+      setState($("armyAdminState"),"ARMY CREATE FAILED // "+error.message,"error");
     }
   });
 
