@@ -1251,3 +1251,225 @@ dialog::backdrop{background:rgba(0,0,0,.72);backdrop-filter:blur(2px)}
   .senate-console-panel{margin:0}
   .senate-console-right .senate-tally{grid-template-columns:1fr}
 }
+
+
+/* Senate layout correction: side intelligence, chamber center, action panels below */
+.senate-reference-layout{
+  max-width:none;
+  padding:12px;
+}
+.senate-console{
+  grid-template-columns:minmax(190px,235px) minmax(500px,1fr) minmax(220px,275px);
+  gap:12px;
+  height:auto;
+  min-height:0;
+  max-height:none;
+  align-items:start;
+}
+.senate-center-column{
+  min-width:0;
+  display:grid;
+  gap:12px;
+}
+.senate-stage{
+  height:720px;
+  min-height:720px;
+}
+.senate-console-side{
+  overflow:visible;
+  padding-right:0;
+}
+.senate-seat-strip{
+  position:absolute;
+  z-index:5;
+  top:12px;
+  left:12px;
+  right:12px;
+  min-height:82px;
+  padding:10px 12px 9px;
+  border:1px solid rgba(79,168,196,.36);
+  border-top:2px solid var(--cyan);
+  background:
+    linear-gradient(90deg,rgba(10,29,39,.96),rgba(4,13,18,.92));
+  box-shadow:
+    inset 0 0 22px rgba(0,0,0,.34),
+    0 0 16px rgba(79,168,196,.05);
+  clip-path:polygon(0 0,calc(100% - 12px) 0,100% 12px,100% 100%,12px 100%,0 calc(100% - 12px));
+}
+.senate-seat-strip-heading{
+  display:grid;
+  grid-template-columns:minmax(150px,.7fr) minmax(300px,1.3fr);
+  gap:12px;
+  align-items:center;
+}
+.senate-seat-strip-heading>div:first-child{
+  min-width:0;
+}
+.senate-seat-strip-heading strong{
+  display:block;
+  margin-top:2px;
+  color:var(--cyan);
+  font:600 .92rem var(--ui);
+  letter-spacing:.08em;
+}
+.senate-seat-strip-totals{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:7px;
+}
+.senate-seat-strip-totals span{
+  min-width:0;
+  padding:5px 7px;
+  border-left:1px solid rgba(79,168,196,.22);
+  color:var(--muted);
+  font:400 .57rem var(--mono);
+  letter-spacing:.08em;
+  white-space:nowrap;
+}
+.senate-seat-strip-totals b{
+  display:block;
+  margin-top:2px;
+  color:var(--cyan);
+  font-size:.8rem;
+  font-weight:400;
+}
+.senate-seat-strip-legend{
+  display:flex;
+  gap:6px 12px;
+  align-items:center;
+  flex-wrap:wrap;
+  margin-top:7px;
+  padding-top:7px;
+  border-top:1px solid var(--line-soft);
+}
+.senate-seat-strip-legend .senate-legend-item{
+  display:grid;
+  grid-template-columns:7px auto auto;
+  grid-template-rows:1fr;
+  min-width:0;
+  column-gap:6px;
+  align-items:center;
+}
+.senate-seat-strip-legend .senate-legend-item i{
+  grid-row:auto;
+  width:6px;
+  height:15px;
+}
+.senate-seat-strip-legend .senate-legend-item strong{
+  font-size:.61rem;
+  white-space:nowrap;
+}
+.senate-seat-strip-legend .senate-legend-item small{
+  font-size:.52rem;
+  white-space:nowrap;
+}
+.senate-stage-label{
+  top:107px;
+}
+.senate-below-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:12px;
+  align-items:start;
+}
+.senate-below-grid .senate-console-panel{
+  margin:0;
+  height:100%;
+}
+.senate-below-stack{
+  max-height:330px;
+  overflow-y:auto;
+  padding-right:2px;
+}
+.senate-below-grid .senate-vote-controls{
+  grid-template-columns:1fr;
+}
+.senate-below-grid .senate-tally{
+  grid-template-columns:repeat(3,minmax(0,1fr));
+}
+.senate-below-grid textarea{
+  min-height:92px;
+}
+
+@media(max-width:1320px){
+  .senate-console{
+    grid-template-columns:165px minmax(430px,1fr) 215px;
+    gap:9px;
+  }
+  .senate-stage{
+    height:680px;
+    min-height:680px;
+  }
+  .senate-seat-strip-heading{
+    grid-template-columns:140px 1fr;
+  }
+}
+@media(max-width:1100px){
+  .senate-console{
+    grid-template-columns:150px minmax(390px,1fr) 195px;
+    gap:8px;
+  }
+  .senate-stage{
+    height:650px;
+    min-height:650px;
+  }
+  .senate-seat-strip{
+    left:9px;
+    right:9px;
+    top:9px;
+    padding-inline:9px;
+  }
+  .senate-seat-strip-heading{
+    grid-template-columns:120px 1fr;
+    gap:7px;
+  }
+  .senate-seat-strip-heading strong{font-size:.78rem}
+  .senate-seat-strip-totals span{font-size:.49rem;padding-inline:4px}
+  .senate-seat-strip-totals b{font-size:.68rem}
+  .senate-below-grid{
+    grid-template-columns:1fr;
+  }
+}
+@media(max-width:820px){
+  .senate-console{
+    grid-template-columns:140px minmax(360px,1fr) 185px;
+    gap:7px;
+  }
+  .senate-stage{
+    height:630px;
+    min-height:630px;
+  }
+}
+@media(max-width:720px){
+  .senate-console{
+    grid-template-columns:1fr;
+  }
+  .senate-center-column{
+    grid-row:1;
+  }
+  .senate-stage{
+    height:470px;
+    min-height:470px;
+  }
+  .senate-console-left,
+  .senate-console-right{
+    display:grid;
+    grid-template-columns:1fr;
+  }
+  .senate-seat-strip{
+    position:relative;
+    top:auto;
+    left:auto;
+    right:auto;
+    margin:9px;
+  }
+  .senate-seat-strip-heading{
+    grid-template-columns:1fr;
+  }
+  .senate-stage-label{
+    top:128px;
+  }
+  .senate-below-grid{
+    grid-template-columns:1fr;
+  }
+}
