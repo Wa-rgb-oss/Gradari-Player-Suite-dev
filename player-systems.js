@@ -224,7 +224,7 @@
       return;
     }
 
-    const allowed = ["treasury","military","diplomacy","construction","market","research","events","intelligence","economy"];
+    const allowed = ["treasury","military","diplomacy","construction","market","research","events","intelligence","economy","politics"];
     root.innerHTML = rows.map(member => {
       const isLeader = member.user_id === faction.leader_user_id;
       const checks = allowed.map(permission =>
