@@ -43,7 +43,9 @@
     politicalElections: [],
     electionCandidates: [],
     electionVotes: [],
-    characterSuccessions: []
+    characterSuccessions: [],
+    mapHexes: [],
+    mapLabels: []
   };
 
   const $ = id => document.getElementById(id);
@@ -359,7 +361,9 @@
       GMAuth.api("political_elections?select=*&order=created_at.desc"),
       GMAuth.api("election_candidates?select=*&order=created_at.asc"),
       GMAuth.api("election_votes?select=*&order=created_at.asc"),
-      GMAuth.api("character_successions?select=*&order=created_at.desc")
+      GMAuth.api("character_successions?select=*&order=created_at.desc"),
+      GMAuth.api("map_hexes?select=*&order=q.asc,r.asc"),
+      GMAuth.api("map_labels?select=*&order=created_at.asc")
     ]);
     [
       data.profiles,data.registrations,data.wallets,data.factions,data.memberships,
@@ -373,7 +377,8 @@
       data.armies,data.armyMovements,data.militaryOperations,data.characterTravel,
       data.economyCycleRuns,data.politicalActionTypes,data.senateSeatHistory,
       data.imperialOffices,data.politicalElections,data.electionCandidates,
-      data.electionVotes,data.characterSuccessions
+      data.electionVotes,data.characterSuccessions,
+      data.mapHexes,data.mapLabels
     ] = results;
   }
 
