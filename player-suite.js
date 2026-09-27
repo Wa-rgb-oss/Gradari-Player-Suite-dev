@@ -143,9 +143,10 @@
     $("suiteWallet").textContent = fmt(state.wallet?.balance) + " " + String(state.wallet?.currency || "Aureum").toUpperCase();
     $("suiteFaction").textContent = state.primaryMembership?.faction?.code || state.primaryMembership?.faction?.name || "UNASSIGNED";
     $("suiteAssetCount").textContent = String(state.assets.length).padStart(2,"0");
-    $("suiteCharacterCount").textContent = String(state.characters.length).padStart(2,"0");
+    const livingCharacters = state.characters.filter(row => row.status === "active" && row.life_status === "alive");
+    $("suiteCharacterCount").textContent = String(livingCharacters.length).padStart(2,"0");
     $("suiteActionCount").textContent = String(state.actions.length).padStart(2,"0");
-    $("suiteNotice").textContent = "DATABASE PERMISSIONS LIMIT THIS SESSION TO YOUR OWN PLAYER-OWNED DATA AND AUTHORIZED FACTION INFORMATION.";
+    $("suiteNotice").textContent = "YOUR ACCOUNT IS SYNCHRONIZED WITH THE CURRENT GAME STATE.";
   }
 
   function renderAccount() {
@@ -245,31 +246,49 @@
 
   function renderCharacters() {
     const root = $("characterList");
+    const living = state.characters.find(row => row.status === "active" && row.life_status === "alive");
+    const createForm = $("characterForm");
+    const limitNotice = $("characterLimitNotice");
+
+    createForm.hidden = Boolean(living);
+    limitNotice.hidden = !living;
+
     if (!state.characters.length) {
       root.innerHTML = "";
       $("characterEmpty").hidden = false;
       return;
     }
+
     $("characterEmpty").hidden = true;
     const factionMap = new Map(state.factions.map(row => [row.id,row]));
-    root.innerHTML = state.characters.map(row => `
-      <article class="notice">
-        <div class="split-actions">
-          <div>
-            <strong style="color:var(--text)">${esc(row.name)}</strong>
-            <div class="section-code">${esc(row.title || "NO TITLE")} // ${esc(factionMap.get(row.faction_id)?.name || "NO FACTION")}</div>
-          </div>
-          <div style="display:flex;gap:7px;align-items:center">
-            ${row.is_main ? '<span class="status-chip">MAIN</span>' : '<span class="status-chip muted">SIDE</span>'}
-            <button class="hud-button danger character-delete" type="button" data-id="${esc(row.id)}">DELETE</button>
-          </div>
-        </div>
-        ${row.bio ? '<div style="margin-top:10px">' + esc(row.bio) + '</div>' : ""}
-      </article>`).join("");
-
-    root.querySelectorAll(".character-delete").forEach(button => {
-      button.addEventListener("click", () => deleteCharacter(button.dataset.id));
+    const ordered = [...state.characters].sort((a,b) => {
+      const aAlive = a.status === "active" && a.life_status === "alive";
+      const bAlive = b.status === "active" && b.life_status === "alive";
+      if (aAlive !== bAlive) return aAlive ? -1 : 1;
+      return new Date(b.created_at) - new Date(a.created_at);
     });
+
+    root.innerHTML = ordered.map(row => {
+      const alive = row.status === "active" && row.life_status === "alive";
+      const lifeLabel = alive ? "ALIVE" : "DECEASED";
+      const deathRecord = !alive && row.died_at
+        ? '<div class="section-code" style="margin-top:9px">DIED // ' + esc(new Date(row.died_at).toLocaleDateString()) +
+          (row.death_cause ? ' // ' + esc(row.death_cause) : '') + '</div>'
+        : "";
+      return `
+        <article class="notice">
+          <div class="split-actions">
+            <div>
+              <strong style="color:var(--text)">${esc(row.name)}</strong>
+              <div class="section-code">${esc(row.title || "NO TITLE")} // ${esc(factionMap.get(row.faction_id)?.name || "NO FACTION")}</div>
+            </div>
+            <span class="status-chip ${alive ? "" : "muted"}">${lifeLabel}</span>
+          </div>
+          ${row.bio ? '<div style="margin-top:10px">' + esc(row.bio) + '</div>' : ""}
+          ${deathRecord}
+          ${row.death_notes ? '<div style="margin-top:8px">' + esc(row.death_notes) + '</div>' : ""}
+        </article>`;
+    }).join("");
   }
 
   function renderActions() {
@@ -362,6 +381,12 @@
 
   characterForm.addEventListener("submit", async event => {
     event.preventDefault();
+    const living = state.characters.find(row => row.status === "active" && row.life_status === "alive");
+    if (living) {
+      setState(characterState, "ONLY ONE ACTIVE LIVING CHARACTER IS ALLOWED", "error");
+      return;
+    }
+
     const data = formObject(characterForm);
     setState(characterState, "CREATING CHARACTER...");
     try {
@@ -373,7 +398,9 @@
           name:data.name.trim(),
           title:data.title?.trim() || null,
           faction_id:data.faction_id || null,
-          is_main:Boolean(data.is_main),
+          is_main:true,
+          status:"active",
+          life_status:"alive",
           bio:data.bio?.trim() || null
         })
       });
@@ -384,16 +411,6 @@
       setState(characterState, "CHARACTER CREATION FAILED // " + error.message, "error");
     }
   });
-
-  async function deleteCharacter(id) {
-    if (!confirm("Delete this character from your account?")) return;
-    try {
-      await GMAuth.api("characters?id=eq." + encodeURIComponent(id), {method:"DELETE",headers:{Prefer:"return=minimal"}});
-      await refreshState();
-    } catch (error) {
-      setState(characterState, "CHARACTER DELETE FAILED // " + error.message, "error");
-    }
-  }
 
   actionForm.addEventListener("submit", async event => {
     event.preventDefault();
