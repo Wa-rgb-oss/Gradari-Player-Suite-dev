@@ -537,11 +537,38 @@ dialog::backdrop{background:rgba(0,0,0,.72);backdrop-filter:blur(2px)}
   .primary-nav{display:flex;overflow-x:auto;padding:10px 0 0;gap:5px;scrollbar-width:none}
   .primary-nav::-webkit-scrollbar{display:none}
   .primary-nav a{min-width:max-content;grid-template-columns:24px auto 10px;min-height:42px;padding:7px 9px}
-  .sidebar-footer{display:flex;align-items:center;gap:10px;margin-top:10px;padding:10px 4px 0}
-  .user-readout{min-width:0;flex:1}
-  .signout-btn{width:auto;margin:0;white-space:nowrap}
+  .sidebar-footer{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto auto;
+    align-items:center;
+    gap:8px;
+    margin-top:10px;
+    padding:10px 4px 0;
+  }
+  .user-readout{min-width:0}
+  .admin-access-btn,
+  .signout-btn{
+    width:auto;
+    margin:0;
+    white-space:nowrap;
+  }
   .topbar{position:relative}
   .top-telemetry{display:none}
+}
+@media(max-width:540px){
+  .sidebar-footer{
+    grid-template-columns:minmax(0,1fr) auto;
+    align-items:center;
+  }
+  .sidebar-footer .user-readout{
+    grid-column:1/-1;
+  }
+  .admin-access-btn{
+    justify-self:start;
+  }
+  .signout-btn{
+    justify-self:end;
+  }
 }
 @media(max-width:620px){
   .page-content{padding:18px 14px 34px}
