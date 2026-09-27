@@ -38,7 +38,12 @@
     characterTravel: [],
     economyCycleRuns: [],
     politicalActionTypes: [],
-    senateSeatHistory: []
+    senateSeatHistory: [],
+    imperialOffices: [],
+    politicalElections: [],
+    electionCandidates: [],
+    electionVotes: [],
+    characterSuccessions: []
   };
 
   const $ = id => document.getElementById(id);
@@ -349,7 +354,12 @@
       GMAuth.api("character_travel?select=*&order=created_at.desc&limit=100"),
       GMAuth.api("economy_cycle_runs?select=*&order=cycle_index.desc&limit=12"),
       GMAuth.api("political_action_types?select=*&order=name.asc"),
-      GMAuth.api("senate_seat_history?select=*&order=changed_at.desc&limit=100")
+      GMAuth.api("senate_seat_history?select=*&order=changed_at.desc&limit=100"),
+      GMAuth.api("imperial_offices?select=*&order=name.asc"),
+      GMAuth.api("political_elections?select=*&order=created_at.desc"),
+      GMAuth.api("election_candidates?select=*&order=created_at.asc"),
+      GMAuth.api("election_votes?select=*&order=created_at.asc"),
+      GMAuth.api("character_successions?select=*&order=created_at.desc")
     ]);
     [
       data.profiles,data.registrations,data.wallets,data.factions,data.memberships,
@@ -361,7 +371,9 @@
       data.republic,data.senateSeats,data.senateBills,data.senateVotes,
       data.federalTaxAssessments,data.federalPolicies,
       data.armies,data.armyMovements,data.militaryOperations,data.characterTravel,
-      data.economyCycleRuns,data.politicalActionTypes,data.senateSeatHistory
+      data.economyCycleRuns,data.politicalActionTypes,data.senateSeatHistory,
+      data.imperialOffices,data.politicalElections,data.electionCandidates,
+      data.electionVotes,data.characterSuccessions
     ] = results;
   }
 
