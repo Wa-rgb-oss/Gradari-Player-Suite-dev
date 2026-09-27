@@ -377,6 +377,7 @@
               <form id="gameConfigForm" class="form-shell">
                 <div class="form-grid"><label><span>Minimum Founders</span><input name="faction_min_founders" type="number" min="2" required></label><label><span>Faction Creation Cost</span><input name="faction_creation_cost" type="number" min="0" step="0.01" required></label></div>
                 <div class="form-grid"><label><span>Minimum Founder Contribution</span><input name="faction_min_contribution" type="number" min="0" step="0.01" required></label><label><span>Default Faction Tax %</span><input name="faction_default_tax_rate" type="number" min="0" max="100" step="0.1" required></label></div>
+                <label><span>Faction Market Creation Cost</span><input name="faction_market_creation_cost" type="number" min="0" step="0.01" required></label>
                 <label><span>Maximum Faction Tax %</span><input name="faction_max_tax_rate" type="number" min="0" max="100" step="0.1" required></label>
                 <div class="form-grid"><label><span>Character Travel Hours / Hex</span><input name="character_travel_hours_per_hex" type="number" min="0.1" step="0.1" required></label><label><span>Army Travel Hours / Hex</span><input name="army_travel_hours_per_hex" type="number" min="0.1" step="0.1" required></label></div>
                 <div class="form-grid"><label><span>Military Operation Hours</span><input name="military_operation_hours" type="number" min="0.1" step="0.1" required></label><label><span>Raid Effect World Hours</span><input name="raid_effect_world_hours" type="number" min="0.1" step="0.1" required></label></div>
@@ -386,7 +387,8 @@
             </section>
             <section class="hud-panel compact">
               <div class="section-head"><div><div class="section-code">ECONOMY / CYCLE</div><h2>Production Cycle</h2></div><p>UPKEEP // OUTPUT // TAX</p></div>
-              <p class="hero-copy" style="margin:0 0 18px">Run one authoritative economic cycle. Active facilities pay Aureum upkeep, produce configured resources, apply territory and raid modifiers, and automatically route the controlling faction's resource tax.</p>
+              <p class="hero-copy" style="margin:0 0 18px">Economic cycles now run automatically when the canon clock crosses into a new Cycle. This manual control remains available for recovery or testing.</p>
+              <div id="economyAutomationList" class="resource-list" style="margin-bottom:16px"></div>
               <form id="productionCycleForm" class="form-shell">
                 <label><span>Cycle Key *</span><input name="cycle_key" required placeholder="Example: A8746-C13-W1-D1"></label>
                 <button class="hud-button amber" type="submit">RUN PRODUCTION CYCLE</button>
