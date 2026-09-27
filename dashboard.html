@@ -23,23 +23,23 @@
         <a href="about.html"><span class="nav-index">05</span><span class="nav-label">ABOUT</span><span class="nav-arrow">›</span></a>
       </nav>
       <div class="sidebar-footer">
-        <div class="user-readout"><strong>AUTHENTICATED PLAYER</strong><span data-user-email>Loading identity...</span></div>
+        <div class="user-readout"><strong>SIGNED IN</strong><span data-user-email>Loading identity...</span></div>
         <button class="signout-btn" type="button" data-signout>LOG OUT</button>
       </div>
     </aside>
 
     <div class="main-frame">
       <header class="topbar">
-        <div class="page-id"><span class="page-bracket"></span><div><strong>HOME / COMMAND OVERVIEW</strong><span>PLAYER FRONTEND</span></div></div>
+        <div class="page-id"><span class="page-bracket"></span><div><strong>HOME / COMMAND OVERVIEW</strong><span>PERSONAL COMMAND INTERFACE</span></div></div>
         <div class="top-telemetry"><span><i class="status-dot"></i>NETWORK ACTIVE</span><span data-system-time>--:--:--</span></div>
       </header>
 
       <main class="page-content">
         <section class="hero-grid">
           <article class="hud-panel">
-            <div class="hud-kicker">PLAYER COMMAND INTERFACE // HOME</div>
+            <div class="hud-kicker">COMMAND INTERFACE // HOME</div>
             <h1 class="hero-title"><small id="welcomeLine">AUTHENTICATED PLAYER</small>COMMAND<br>OVERVIEW</h1>
-            <p class="hero-copy">Your personal account, faction position, economy, inventory, characters, and submitted actions are presented here. World-scale information is authoritative and controlled by the Game Master.</p>
+            <p class="hero-copy">Your account, faction position, economy, inventory, character, submitted actions, and current world information are presented here.</p>
             <div class="hero-actions">
               <a class="hud-button" href="player-suite.html">OPEN PLAYER SUITE</a>
               <a class="hud-button secondary" href="map.html">OPEN MAP</a>
@@ -53,7 +53,6 @@
               <div class="telemetry-row"><span>Player Record</span><strong id="profileStatus">SCANNING</strong></div>
               <div class="telemetry-row"><span>Faction</span><strong id="factionStatus">UNASSIGNED</strong></div>
               <div class="telemetry-row"><span>Pending Actions</span><strong id="pendingTelemetry">--</strong></div>
-              <div class="telemetry-row"><span>Interface</span><strong>PLAYER</strong></div>
             </div>
           </aside>
         </section>
@@ -84,8 +83,7 @@
         <section class="content-grid">
           <article class="hud-panel compact">
             <div class="section-head">
-              <div><div class="section-code">PLAYER / CONTROL SURFACES</div><h2>Your Systems</h2></div>
-              <p>PLAYER AUTHORITY</p>
+              <div><div class="section-code">PLAYER / SYSTEMS</div><h2>Your Systems</h2></div>
             </div>
             <div class="command-list">
               <div class="command-row"><div class="command-icon">E</div><div><h3>Economy</h3><p>View your personal balance and transaction history.</p></div><a href="player-suite.html#economy">OPEN ›</a></div>
@@ -102,7 +100,7 @@
               <div class="telemetry-stack">
                 <div class="telemetry-row"><span>Handle</span><strong id="playerHandle">--</strong></div>
                 <div class="telemetry-row"><span>Faction Position</span><strong id="playerRole">--</strong></div>
-                <div class="telemetry-row"><span>Characters</span><strong id="characterCount">--</strong></div>
+                <div class="telemetry-row"><span>Active Character</span><strong id="characterCount">--</strong></div>
               </div>
             </article>
             <article class="notice" id="dashboardNotice">PLAYER DATA IS LOADING.</article>
@@ -114,7 +112,7 @@
             <div><div class="section-code">HOME / ACTIVE EVENTS</div><h2>Events & Campaigns</h2></div>
             <p>OBJECTIVES // REWARDS // COMPETITION</p>
           </div>
-          <p class="hero-copy" style="margin:0 0 18px">Events are Game Master-created campaigns, competitions, crises, expeditions, and objectives that give players a reason to move, cooperate, compete, and earn meaningful rewards.</p>
+          <p class="hero-copy" style="margin:0 0 18px">Events are campaigns, competitions, crises, expeditions, and objectives that give players a reason to move, cooperate, compete, and earn meaningful rewards.</p>
           <div id="eventFeed" class="stack"></div>
           <div class="empty-state" id="eventEmpty" hidden>NO ACTIVE EVENTS ARE CURRENTLY AVAILABLE.</div>
           <div class="form-state" id="eventState"></div>
@@ -123,8 +121,8 @@
         <section class="content-grid">
           <article class="hud-panel compact">
             <div class="section-head">
-              <div><div class="section-code">WORLD / INFORMATION</div><h2>Published World State</h2></div>
-              <p>ADMIN AUTHORED</p>
+              <div><div class="section-code">WORLD / INFORMATION</div><h2>Current World State</h2></div>
+              <p>CURRENT RECORD</p>
             </div>
             <div id="worldStateFeed" class="resource-list"></div>
             <div class="empty-state" id="worldStateEmpty" hidden>NO PLAYER-VISIBLE WORLD STATE HAS BEEN PUBLISHED.</div>
@@ -133,7 +131,7 @@
           <aside class="hud-panel compact">
             <div class="section-head">
               <div><div class="section-code">WORLD / NEWS</div><h2>Latest Updates</h2></div>
-              <p>READ ONLY</p>
+              <p>LATEST BULLETINS</p>
             </div>
             <div id="newsFeed" class="stack"></div>
             <div class="empty-state" id="newsEmpty" hidden>NO PLAYER-VISIBLE NEWS HAS BEEN PUBLISHED.</div>
@@ -184,7 +182,7 @@
         document.getElementById("assetCount").textContent = state.assets.length;
         document.getElementById("actionCount").textContent = pending.length;
         document.getElementById("pendingTelemetry").textContent = String(pending.length).padStart(2,"0");
-        document.getElementById("characterCount").textContent = state.characters.length;
+        document.getElementById("characterCount").textContent = state.characters.some(row => row.status === "active" && row.life_status === "alive") ? "ACTIVE" : "NONE";
 
         const eventRoot = document.getElementById("eventFeed");
         const activeEvents = (state.events || []).filter(event => event.status === "active");
@@ -195,7 +193,7 @@
             const objectives = (state.eventObjectives || []).filter(obj => obj.event_id === event.id);
             const objectiveHtml = objectives.length
               ? objectives.map(obj => '<div class="resource-row"><div><strong>' + GMUI.esc(obj.title) + '</strong><div class="section-code">' + GMUI.esc(obj.description || "OBJECTIVE") + '</div></div><span>' + GMUI.esc(String(obj.points || 0)) + ' PTS</span></div>').join("")
-              : '<div class="empty-state">OBJECTIVES WILL BE PUBLISHED BY THE GAME MASTER.</div>';
+              : '<div class="empty-state">OBJECTIVES HAVE NOT YET BEEN PUBLISHED.</div>';
             const joined = joinedEvents.has(event.id);
             const timing = [event.starts_at ? new Date(event.starts_at).toLocaleDateString() : null,event.ends_at ? new Date(event.ends_at).toLocaleDateString() : null].filter(Boolean).join(" → ");
             return '<article class="notice">' +
