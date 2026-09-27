@@ -506,7 +506,10 @@
     }
     $("officeEmpty").hidden=true;
     root.innerHTML=rows.map(office => {
-      const holderName=office.current_holder_name || characterById(office.current_holder_character_id)?.name || null;
+      const holderName=office.current_holder_name ||
+        (office.code==="FIRST_CONSUL" && republic?.first_consul_name && republic.first_consul_name!=="Vacant"
+          ? republic.first_consul_name
+          : characterById(office.current_holder_character_id)?.name || null);
       const term=office.holder_until_world_hour ? worldTimeLabel(office.holder_until_world_hour) : "NO FIXED TERM";
       return '<article class="notice">'+
         '<div class="split-actions"><div><strong style="color:var(--text)">'+esc(office.name)+'</strong><div class="section-code">'+esc(String(office.selection_method).toUpperCase().replaceAll("_"," "))+'</div></div>'+
