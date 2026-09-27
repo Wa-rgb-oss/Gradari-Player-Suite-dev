@@ -4,6 +4,11 @@
   let territories = [];
   let modifiers = [];
   let mapRegistry = [];
+  let armies = [];
+  let armyMovements = [];
+  let militaryOperations = [];
+  let characterTravel = [];
+  let worldClock = null;
   let selectedHex = null;
   let hoverHex = null;
 
@@ -91,24 +96,59 @@
     return player?.facilityTypes?.find(row => row.id === id) || null;
   }
 
+  function hexDistance(aRef,bRef) {
+    const a=parseRef(aRef), b=parseRef(bRef);
+    if(!a || !b) return 0;
+    const as=-a.q-a.r, bs=-b.q-b.r;
+    return Math.max(Math.abs(a.q-b.q),Math.abs(a.r-b.r),Math.abs(as-bs));
+  }
+
+  function currentWorldHour() {
+    return Number(worldClock?.total_world_hours || 0);
+  }
+
+  function worldArrivalLabel(totalHours) {
+    if(!Number.isFinite(Number(totalHours))) return "--";
+    const whole=Math.floor(Number(totalHours));
+    const aevum=Math.floor(whole/9360);
+    const cycle=Math.floor((whole%9360)/720)+1;
+    const week=Math.floor((whole%720)/180)+1;
+    const day=Math.floor((whole%180)/36)+1;
+    const hour=(whole%36)+1;
+    return "A"+aevum+" C"+cycle+" W"+week+" D"+day+" H"+String(hour).padStart(2,"0");
+  }
+
   function activeModifiersFor(ref) {
     const now = Date.now();
+    const worldNow=currentWorldHour();
     return modifiers.filter(row =>
       row.location_ref === ref &&
+      (row.starts_world_hour==null || Number(row.starts_world_hour)<=worldNow) &&
+      (row.expires_world_hour==null || Number(row.expires_world_hour)>worldNow) &&
       (!row.starts_at || new Date(row.starts_at).getTime() <= now) &&
       (!row.expires_at || new Date(row.expires_at).getTime() > now)
     );
   }
 
   async function loadMapData() {
-    const [hexRows,territoryRows,modifierRows] = await Promise.all([
+    const [hexRows,territoryRows,modifierRows,armyRows,armyMoveRows,operationRows,travelRows,clock] = await Promise.all([
       GMAuth.api("map_hexes?player_visible=eq.true&select=*&order=q.asc,r.asc"),
       GMAuth.api("territories?select=*&order=location_ref.asc"),
-      GMAuth.api("location_modifiers?player_visible=eq.true&select=*&order=created_at.desc")
+      GMAuth.api("location_modifiers?player_visible=eq.true&select=*&order=created_at.desc"),
+      GMAuth.api("armies?select=*&order=name.asc"),
+      GMAuth.api("army_movements?select=*&order=created_at.desc&limit=100"),
+      GMAuth.api("military_operations?select=*&order=created_at.desc&limit=100"),
+      GMAuth.api("character_travel?select=*&order=created_at.desc&limit=20"),
+      GMAuth.api("rpc/get_world_clock",{method:"POST",body:"{}"})
     ]);
     mapRegistry = hexRows || [];
     territories = territoryRows || [];
     modifiers = modifierRows || [];
+    armies = armyRows || [];
+    armyMovements = armyMoveRows || [];
+    militaryOperations = operationRows || [];
+    characterTravel = travelRows || [];
+    worldClock = clock || null;
   }
 
   async function refreshAll(message="",target=null) {
@@ -315,6 +355,30 @@
     ctx.restore();
   }
 
+  function drawArmies() {
+    ctx.save();
+    ctx.textAlign="center";
+    ctx.textBaseline="middle";
+    armies.filter(row=>row.status==="active" && row.location_ref).forEach(row => {
+      const h=parseRef(row.location_ref);
+      if(!h || !mapHexSet.has(row.location_ref)) return;
+      const p=worldToScreen(hexToWorld(h.q,h.r));
+      const faction=factionById(row.faction_id);
+      const radius=Math.max(8,12*camera.zoom);
+      ctx.beginPath();
+      ctx.rect(p.x-radius,p.y-radius,radius*2,radius*2);
+      ctx.fillStyle="rgba(3,10,15,.95)";
+      ctx.fill();
+      ctx.strokeStyle=faction?.color || "#86d7e8";
+      ctx.lineWidth=Math.max(1.5,2*camera.zoom);
+      ctx.stroke();
+      ctx.fillStyle=faction?.color || "#86d7e8";
+      ctx.font=`600 ${Math.max(8,11*camera.zoom)}px "Share Tech Mono", Consolas, monospace`;
+      ctx.fillText("A",p.x,p.y+.5);
+    });
+    ctx.restore();
+  }
+
   function drawModifiers() {
     if (!layers.modifiers) return;
     const refs=new Set(modifiers.filter(row => activeModifiersFor(row.location_ref).length).map(row=>row.location_ref));
@@ -386,6 +450,7 @@
     drawTerritories();
     drawModifiers();
     drawFacilities();
+    drawArmies();
     drawCharacter();
     drawSelection();
 
@@ -465,6 +530,7 @@
       $("mapCharacterName").textContent="No Active Character";
       $("mapCharacterStatus").textContent="--";
       $("mapCharacterLocation").textContent="--";
+      $("mapCharacterMovement").textContent="--";
       $("mapCharacterFaction").textContent="--";
       $("setInitialLocationBtn").hidden=true;
       return;
@@ -472,7 +538,9 @@
 
     $("mapCharacterName").textContent=char.name;
     $("mapCharacterStatus").textContent="ALIVE";
+    const travel=characterTravel.find(row=>row.character_id===char.id && row.status==="traveling");
     $("mapCharacterLocation").textContent=char.location_name || char.location_ref || "UNPLACED";
+    $("mapCharacterMovement").textContent=travel ? "TRAVELING // "+worldArrivalLabel(travel.arrive_world_hour) : "STATIONARY";
     $("mapCharacterFaction").textContent=factionById(char.faction_id)?.name || activeMembership()?.faction?.name || "NO FACTION";
 
     $("setInitialLocationBtn").hidden=Boolean(char.location_ref) || !selectedHex;
@@ -512,6 +580,67 @@
       return {ok:false,message:"NO PLAYER-BUILDABLE FACILITIES ARE AVAILABLE."};
     }
     return {ok:true,message:""};
+  }
+
+  function renderTravelPanel() {
+    const char=livingCharacter();
+    const travel=char ? characterTravel.find(row=>row.character_id===char.id && row.status==="traveling") : null;
+    let distance=0;
+    let hours=0;
+    let arrival=null;
+
+    if(char?.location_ref && selectedHex){
+      distance=hexDistance(char.location_ref,selectedHex.ref);
+      hours=distance*Number(player?.config?.character_travel_hours_per_hex || 6);
+      arrival=currentWorldHour()+hours;
+    }
+
+    $("mapTravelDistance").textContent=selectedHex && char?.location_ref ? distance+" HEX"+(distance===1?"":"ES") : "--";
+    $("mapTravelHours").textContent=distance ? fmt(hours)+" WORLD HRS" : "--";
+    $("mapTravelArrival").textContent=distance ? worldArrivalLabel(arrival) : "--";
+
+    const button=$("mapTravelBtn");
+    button.disabled=Boolean(travel) || !char?.location_ref || !selectedHex || distance<1;
+    button.textContent=travel ? "CHARACTER IN TRANSIT" : "TRAVEL TO SELECTED HEX";
+  }
+
+  function canMilitary() {
+    const membership=activeMembership();
+    const faction=membership?.faction;
+    if(!membership || !faction) return false;
+    return faction.leader_user_id===session.user.id || (membership.permissions||[]).includes("military");
+  }
+
+  function controlledArmies() {
+    const factionId=activeMembership()?.faction_id;
+    return canMilitary() && factionId ? armies.filter(row=>row.faction_id===factionId && row.status==="active") : [];
+  }
+
+  function renderMilitaryPanel() {
+    const select=$("mapArmySelect");
+    const list=controlledArmies();
+    const current=select.value;
+
+    select.innerHTML=list.length
+      ? list.map(row=>'<option value="'+esc(row.id)+'">'+esc(row.name)+'</option>').join("")
+      : '<option value="">No controlled armies</option>';
+
+    if(list.some(row=>row.id===current)) select.value=current;
+    const army=list.find(row=>row.id===select.value) || list[0] || null;
+
+    $("mapArmyStrength").textContent=army ? fmt(army.strength)+" / "+fmt(army.max_strength) : "--";
+    $("mapArmyLocation").textContent=army?.location_ref || "--";
+    $("mapArmyStatus").textContent=army ? (army.movement_status==="moving"?"MOVING":"STATIONARY") : "--";
+
+    const hasSelection=Boolean(selectedHex);
+    const atTarget=army && selectedHex && army.location_ref===selectedHex.ref && army.movement_status==="stationary";
+    const targetTerritory=selectedHex ? territoryByRef(selectedHex.ref) : null;
+    const enemy=atTarget && targetTerritory?.faction_id && targetTerritory.faction_id!==army.faction_id;
+    const activeOp=army ? militaryOperations.find(row=>row.army_id===army.id && ["active","awaiting_resolution"].includes(row.status)) : null;
+
+    $("mapArmyMoveBtn").disabled=!army || !hasSelection || army.movement_status!=="stationary" || army.location_ref===selectedHex?.ref || Boolean(activeOp);
+    $("mapRaidBtn").disabled=!army || !enemy || Boolean(activeOp);
+    $("mapConquestBtn").disabled=!army || !enemy || Boolean(activeOp);
   }
 
   function renderBuildPanel() {
@@ -574,12 +703,16 @@
     ).join("");
 
     renderCharacterPanel();
+    renderTravelPanel();
+    renderMilitaryPanel();
     renderBuildPanel();
   }
 
   function renderUi() {
     renderFacilityTypeSelect();
     renderCharacterPanel();
+    renderTravelPanel();
+    renderMilitaryPanel();
     renderSelection();
   }
 
@@ -696,6 +829,62 @@
       setState($("mapCharacterState"),"LOCATION UPDATE FAILED // "+error.message,"error");
     }
   });
+
+  $("mapTravelBtn").addEventListener("click",async () => {
+    const char=livingCharacter();
+    if(!char || !selectedHex) return;
+    if(!confirm("Begin travel to "+selectedHex.ref+"? Travel time follows the live world clock.")) return;
+    try{
+      setState($("mapTravelState"),"TRAVEL ORDER TRANSMITTED...");
+      const result=await GMAuth.api("rpc/begin_character_travel",{
+        method:"POST",
+        body:JSON.stringify({p_character_id:char.id,p_to_ref:selectedHex.ref})
+      });
+      await refreshAll("TRAVELING // "+fmt(result.travel_hours)+" WORLD HOURS",$("mapTravelState"));
+    }catch(error){
+      setState($("mapTravelState"),"TRAVEL FAILED // "+error.message,"error");
+    }
+  });
+
+  $("mapArmySelect").addEventListener("change",renderMilitaryPanel);
+
+  $("mapArmyMoveBtn").addEventListener("click",async () => {
+    const armyId=$("mapArmySelect").value;
+    if(!armyId || !selectedHex) return;
+    try{
+      setState($("mapMilitaryState"),"ARMY MOVEMENT ORDER TRANSMITTED...");
+      const result=await GMAuth.api("rpc/order_army_movement",{
+        method:"POST",
+        body:JSON.stringify({p_army_id:armyId,p_to_ref:selectedHex.ref})
+      });
+      await refreshAll("ARMY MOVING // "+fmt(result.travel_hours)+" WORLD HOURS",$("mapMilitaryState"));
+    }catch(error){
+      setState($("mapMilitaryState"),"ARMY MOVEMENT FAILED // "+error.message,"error");
+    }
+  });
+
+  async function launchOperation(type){
+    const armyId=$("mapArmySelect").value;
+    if(!armyId || !selectedHex) return;
+    if(!confirm("Launch "+type.toUpperCase()+" operation at "+selectedHex.ref+"?")) return;
+    try{
+      setState($("mapMilitaryState"),type.toUpperCase()+" OPERATION STARTING...");
+      const result=await GMAuth.api("rpc/launch_military_operation",{
+        method:"POST",
+        body:JSON.stringify({
+          p_army_id:armyId,
+          p_target_ref:selectedHex.ref,
+          p_operation_type:type
+        })
+      });
+      await refreshAll(type.toUpperCase()+" ACTIVE // RESOLUTION AT "+worldArrivalLabel(result.resolve_world_hour),$("mapMilitaryState"));
+    }catch(error){
+      setState($("mapMilitaryState"),type.toUpperCase()+" FAILED // "+error.message,"error");
+    }
+  }
+
+  $("mapRaidBtn").addEventListener("click",()=>launchOperation("raid"));
+  $("mapConquestBtn").addEventListener("click",()=>launchOperation("conquest"));
 
   $("mapFacilityType").addEventListener("change",updateBuildPreview);
 
