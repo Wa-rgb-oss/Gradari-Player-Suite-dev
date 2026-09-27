@@ -210,6 +210,24 @@
         <div class="content-grid" style="margin-top:18px">
           <article class="hud-panel compact">
             <div class="section-head"><div><div class="section-code">IMPERIAL / OFFICES</div><h2>Political Offices</h2></div><p>HOLDERS // TERMS</p></div>
+            <form id="officeCreateForm" class="form-shell" style="margin-bottom:18px">
+              <div class="form-grid">
+                <label><span>Code</span><input name="code" required maxlength="80" placeholder="OFFICE_CODE"></label>
+                <label><span>Name</span><input name="name" required maxlength="160"></label>
+              </div>
+              <label><span>Description</span><textarea name="description" maxlength="1600"></textarea></label>
+              <div class="form-grid">
+                <label><span>Selection Method</span><select name="selection_method">
+                  <option value="appointment">Appointment</option>
+                  <option value="senate_seats">Senate Seat Vote</option>
+                  <option value="character_vote">One Player Vote</option>
+                </select></label>
+                <label><span>Candidate Influence Minimum</span><input name="candidate_influence_min" type="number" min="0" step="0.01" value="0"></label>
+              </div>
+              <label><span>Term World Hours</span><input name="term_world_hours" type="number" min="0.01" step="0.01" placeholder="Blank = no automatic expiry"></label>
+              <button class="hud-button" type="submit">CREATE OFFICE</button>
+              <div class="form-state" id="officeCreateState"></div>
+            </form>
             <div id="adminOfficeList" class="stack"></div>
             <div class="form-state" id="adminOfficeState"></div>
           </article>
