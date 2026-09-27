@@ -79,66 +79,232 @@
     return factionById(factionId)?.color || "#4fa8c4";
   }
 
+  const senateCanvas = $("senateCanvas");
+  const senateCtx = senateCanvas.getContext("2d");
+  let chamberResizeObserver = null;
+
   function buildSeatOwners(total) {
     const owners = [];
     seats
       .filter(row => Number(row.seats || 0) > 0)
       .sort((a,b) => Number(b.seats)-Number(a.seats))
       .forEach(row => {
-        for (let i=0;i<Number(row.seats || 0) && owners.length<total;i++) owners.push(row.faction_id);
+        for (let i=0;i<Number(row.seats || 0) && owners.length<total;i++) {
+          owners.push(row.faction_id);
+        }
       });
     while (owners.length < total) owners.push(null);
     return owners.slice(0,total);
   }
 
-  function rowCounts(total) {
-    if (total === 120) return [12,16,20,22,24,26];
+  function referenceRowCounts(total) {
+    if (total === 120) return [14,18,20,22,22,24];
+
     const rows = Math.min(7,Math.max(4,Math.round(Math.sqrt(total)/2)));
-    const weights = Array.from({length:rows},(_,i)=>1+i*.18);
-    const sum = weights.reduce((a,b)=>a+b,0);
-    const counts = weights.map(w => Math.max(1,Math.floor(total*w/sum)));
+    const weights = Array.from({length:rows},(_,i)=>1+i*.16);
+    const weightTotal = weights.reduce((a,b)=>a+b,0);
+    const counts = weights.map(weight => Math.max(1,Math.floor(total*weight/weightTotal)));
     let used = counts.reduce((a,b)=>a+b,0);
-    let i = counts.length-1;
-    while (used < total) { counts[i]++; used++; i=(i-1+counts.length)%counts.length; }
+    let cursor = counts.length-1;
+
+    while (used < total) {
+      counts[cursor]++;
+      used++;
+      cursor = (cursor-1+counts.length)%counts.length;
+    }
     while (used > total) {
-      const j = counts.findIndex(x=>x>1);
-      if (j<0) break;
-      counts[j]--; used--;
+      const index = counts.findIndex(value=>value>1);
+      if (index < 0) break;
+      counts[index]--;
+      used--;
     }
     return counts;
+  }
+
+  function buildSeatPositions(total) {
+    const positions = [];
+    const counts = referenceRowCounts(total);
+    const baseRadius = 160;
+    const rowGap = 34;
+
+    counts.forEach((count,row) => {
+      const radius = baseRadius + row*rowGap;
+      const start = Math.PI*1.05;
+      const finish = Math.PI*1.95;
+
+      for (let i=0;i<count;i++) {
+        const t = count===1 ? .5 : i/(count-1);
+        const angle = start + (finish-start)*t;
+        positions.push({
+          x:Math.cos(angle)*radius,
+          y:Math.sin(angle)*radius,
+          angle,
+          row
+        });
+      }
+    });
+
+    return positions;
+  }
+
+  function hexPath(ctx,x,y,size) {
+    ctx.beginPath();
+    for (let i=0;i<6;i++) {
+      const angle = Math.PI/180*(60*i-30);
+      const px = x + size*Math.cos(angle);
+      const py = y + size*Math.sin(angle);
+      if (i===0) ctx.moveTo(px,py);
+      else ctx.lineTo(px,py);
+    }
+    ctx.closePath();
+  }
+
+  function drawChamberCanvas(total,owners) {
+    const rect = senateCanvas.getBoundingClientRect();
+    const width = Math.max(320,rect.width || senateCanvas.parentElement?.clientWidth || 900);
+    const height = Math.max(360,rect.height || 640);
+    const dpr = Math.min(2,window.devicePixelRatio || 1);
+
+    senateCanvas.width = Math.round(width*dpr);
+    senateCanvas.height = Math.round(height*dpr);
+    senateCtx.setTransform(dpr,0,0,dpr,0,0);
+    senateCtx.clearRect(0,0,width,height);
+
+    const scale = Math.min(width/860,height/760);
+    const center = {x:width/2,y:height*.73};
+    const positions = buildSeatPositions(total);
+
+    const ordered = positions
+      .map((position,index)=>({position,index}))
+      .sort((a,b)=>a.position.angle-b.position.angle || a.position.row-b.position.row);
+
+    const ownerByPosition = Array(total).fill(null);
+    ordered.forEach((entry,orderIndex) => {
+      ownerByPosition[entry.index] = owners[orderIndex] || null;
+    });
+
+    senateCtx.save();
+
+    senateCtx.strokeStyle = "rgba(79,168,196,.34)";
+    senateCtx.lineWidth = Math.max(1,1.8*scale);
+    [150,184,218,252,286,320,354].forEach(radius => {
+      senateCtx.beginPath();
+      senateCtx.arc(
+        center.x,center.y,
+        radius*scale,
+        Math.PI*1.05,
+        Math.PI*1.95
+      );
+      senateCtx.stroke();
+    });
+
+    senateCtx.strokeStyle = "rgba(134,215,232,.11)";
+    senateCtx.lineWidth = 1;
+    senateCtx.beginPath();
+    senateCtx.arc(center.x,center.y,382*scale,Math.PI*1.05,Math.PI*1.95);
+    senateCtx.stroke();
+
+    positions.forEach((position,index) => {
+      const factionId = ownerByPosition[index];
+      const x = center.x + position.x*scale;
+      const y = center.y + position.y*scale;
+      const size = Math.max(6,12.5*scale);
+
+      hexPath(senateCtx,x,y,size);
+
+      if (factionId) {
+        senateCtx.save();
+        senateCtx.shadowColor = seatColor(factionId);
+        senateCtx.shadowBlur = Math.max(2,6*scale);
+        senateCtx.fillStyle = seatColor(factionId);
+        senateCtx.fill();
+        senateCtx.restore();
+        senateCtx.strokeStyle = "rgba(2,8,12,.9)";
+      } else {
+        senateCtx.fillStyle = "#e8edef";
+        senateCtx.fill();
+        senateCtx.strokeStyle = "#10181c";
+      }
+
+      senateCtx.lineWidth = Math.max(1,1.8*scale);
+      senateCtx.stroke();
+    });
+
+    const daisRadius = 120*scale;
+    const daisGradient = senateCtx.createRadialGradient(
+      center.x,center.y-daisRadius*.2,daisRadius*.1,
+      center.x,center.y,daisRadius
+    );
+    daisGradient.addColorStop(0,"rgba(11,28,37,.98)");
+    daisGradient.addColorStop(1,"rgba(3,10,14,.98)");
+
+    senateCtx.fillStyle = daisGradient;
+    senateCtx.beginPath();
+    senateCtx.arc(center.x,center.y,daisRadius,0,Math.PI*2);
+    senateCtx.fill();
+
+    senateCtx.strokeStyle = "#4fcde3";
+    senateCtx.lineWidth = Math.max(1.4,2.2*scale);
+    senateCtx.shadowColor = "rgba(79,205,227,.24)";
+    senateCtx.shadowBlur = 12*scale;
+    senateCtx.stroke();
+    senateCtx.shadowBlur = 0;
+
+    senateCtx.strokeStyle = "rgba(79,205,227,.22)";
+    senateCtx.lineWidth = 1;
+    senateCtx.beginPath();
+    senateCtx.arc(center.x,center.y,daisRadius-9*scale,0,Math.PI*2);
+    senateCtx.stroke();
+
+    const titleY = center.y - 430*scale;
+    senateCtx.textAlign = "center";
+    senateCtx.textBaseline = "middle";
+    senateCtx.fillStyle = "#d8a35d";
+    senateCtx.font = `500 ${Math.max(17,23*scale)}px "Share Tech Mono", Consolas, monospace`;
+    senateCtx.fillText("REPUBLIC OF WORLDS",center.x,titleY);
+
+    senateCtx.fillStyle = "rgba(134,215,232,.62)";
+    senateCtx.font = `400 ${Math.max(8,10.5*scale)}px "Share Tech Mono", Consolas, monospace`;
+    senateCtx.fillText(
+      `FEDERAL SENATE // ${owners.filter(Boolean).length} ASSIGNED // ${total} TOTAL`,
+      center.x,
+      titleY+27*scale
+    );
+
+    senateCtx.fillStyle = "#91a9b1";
+    senateCtx.font = `400 ${Math.max(9,12*scale)}px "Share Tech Mono", Consolas, monospace`;
+    senateCtx.fillText("FIRST CONSUL",center.x,center.y-11*scale);
+
+    senateCtx.fillStyle = "#d8a35d";
+    senateCtx.font = `500 ${Math.max(13,18*scale)}px "Share Tech Mono", Consolas, monospace`;
+    senateCtx.fillText(republic?.first_consul_name || "Vacant",center.x,center.y+18*scale);
+
+    const bracketY = Math.max(16,titleY-34*scale);
+    senateCtx.strokeStyle = "rgba(79,205,227,.45)";
+    senateCtx.lineWidth = 1;
+    senateCtx.beginPath();
+    senateCtx.moveTo(24,bracketY+18);
+    senateCtx.lineTo(24,bracketY);
+    senateCtx.lineTo(Math.min(width*.18,150),bracketY);
+    senateCtx.moveTo(width-24,bracketY+18);
+    senateCtx.lineTo(width-24,bracketY);
+    senateCtx.lineTo(Math.max(width*.82,width-150),bracketY);
+    senateCtx.stroke();
+
+    senateCtx.restore();
   }
 
   function renderChamber() {
     const total = Number(republic?.total_seats || player?.config?.senate_total_seats || 120);
     const owners = buildSeatOwners(total);
-    const rows = rowCounts(total);
-    const chamber = $("senateChamber");
-    chamber.innerHTML = "";
-    let index = 0;
 
-    rows.forEach((count,rowIndex) => {
-      const radius = 28 + rowIndex * (58 / Math.max(1,rows.length-1));
-      for (let i=0;i<count && index<owners.length;i++,index++) {
-        const t = count===1 ? .5 : i/(count-1);
-        const angle = Math.PI * (1.08 + .84*t);
-        const x = 50 + Math.cos(angle) * radius;
-        const y = 84 + Math.sin(angle) * radius * .52;
-        const factionId = owners[index];
-        const seat = document.createElement("span");
-        seat.className = "senate-seat" + (factionId ? " assigned" : "");
-        seat.style.left = x + "%";
-        seat.style.top = y + "%";
-        if (factionId) {
-          seat.style.setProperty("--seat-color",seatColor(factionId));
-          seat.title = factionById(factionId)?.name || "Assigned seat";
-        } else {
-          seat.title = "Unassigned seat";
-        }
-        chamber.appendChild(seat);
-      }
-    });
+    drawChamberCanvas(total,owners);
 
-    $("daisConsul").textContent = republic?.first_consul_name || "Vacant";
+    if (!chamberResizeObserver && "ResizeObserver" in window) {
+      chamberResizeObserver = new ResizeObserver(() => drawChamberCanvas(total,buildSeatOwners(total)));
+      chamberResizeObserver.observe(senateCanvas.parentElement);
+    }
+
     $("senateLegend").innerHTML = seats
       .filter(row => Number(row.seats || 0)>0)
       .sort((a,b)=>Number(b.seats)-Number(a.seats))
@@ -162,6 +328,8 @@
     $("politicsAuthority").textContent = authority ? "POLITICS AUTHORIZED" : "VIEW ONLY";
     $("totalSeats").textContent = total;
     $("assignedSeats").textContent = assigned;
+    $("unassignedSeats").textContent = Math.max(0,total-assigned);
+    $("senateStageStatus").textContent = total+"-SEAT CHAMBER";
     $("federalTreasury").textContent = fmt(republic?.federal_treasury || 0);
     $("yourFactionSeats").textContent = faction ? ownSeats : "--";
     $("yourFactionSeatShare").textContent = faction && total ? ((ownSeats/total)*100).toFixed(1)+"% OF CHAMBER" : "NO REPRESENTATION";
