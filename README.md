@@ -114,3 +114,16 @@ The uploaded legacy Senate, economy, and map HTML files are design references on
 - Character Influence remains attached to the deceased character as historical political capital. A configurable succession percentage controls how much political standing, if any, transfers to the successor; the default is 0%.
 - Player-account Aureum, inventory, facilities, and faction membership remain account-level and continue across character succession.
 - Character succession is recorded as predecessor → successor history for the player.
+
+
+### Admin map editor
+
+The restricted admin console includes a visual MAP tab modeled on the original Gradari map editor while writing to the live game database.
+
+- Select an existing faction and claim or erase hex ownership directly on the authoritative map.
+- Create or edit faction names/colors without maintaining a separate map-only faction list.
+- Place, select, move, style, rename, and delete player-visible map labels.
+- Export and import map claim/label saves. Imports preserve live characters, armies, facilities, and economy records.
+- Place and edit faction-owned facilities using the live facility catalog and production/upkeep rules.
+- Initial setup facilities can be placed without charging faction treasury; live construction can optionally charge the configured build cost.
+- The player map reads the same faction claims, map labels, and facilities, so admin map edits become the actual game map rather than a separate localStorage copy.
