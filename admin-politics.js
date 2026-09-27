@@ -71,6 +71,7 @@
     const rules=$("politicalRulesForm");
     rules.elements.bill_proposal_influence_cost.value=config.bill_proposal_influence_cost ?? 25;
     rules.elements.federal_faction_tax_rate.value=config.federal_faction_tax_rate ?? 10;
+    rules.elements.succession_influence_percent.value=config.succession_influence_percent ?? 0;
   }
 
   function renderFactionSeats() {
@@ -266,6 +267,157 @@
     });
   }
 
+  function renderOffices() {
+    const root=$("adminOfficeList");
+    const offices=data?.imperialOffices || [];
+    const living=(data?.characters||[]).filter(char=>char.status==="active" && char.life_status==="alive");
+
+    if (!offices.length) {
+      root.innerHTML='<div class="empty-state">NO POLITICAL OFFICES CONFIGURED.</div>';
+      return;
+    }
+
+    root.innerHTML=offices.map(office => {
+      const holder=characterById(office.current_holder_character_id);
+      const candidateOptions='<option value="">Vacant</option>' + living.map(char =>
+        '<option value="'+esc(char.id)+'" '+(char.id===office.current_holder_character_id?"selected":"")+'>'+esc(char.name)+'</option>'
+      ).join("");
+      return `
+        <form class="office-admin-form notice form-shell" data-id="${esc(office.id)}">
+          <div class="split-actions">
+            <div><strong style="color:var(--text)">${esc(office.name)}</strong><div class="section-code">${esc(office.code)} // ${holder ? "HELD BY "+esc(holder.name) : "VACANT"}</div></div>
+            <button class="hud-button secondary" type="submit">SAVE OFFICE</button>
+          </div>
+          <label><span>Description</span><textarea name="description">${esc(office.description || "")}</textarea></label>
+          <div class="form-grid">
+            <label><span>Selection Method</span><select name="selection_method">
+              <option value="senate_seats" ${office.selection_method==="senate_seats"?"selected":""}>Senate Seat Vote</option>
+              <option value="character_vote" ${office.selection_method==="character_vote"?"selected":""}>One Player Vote</option>
+              <option value="appointment" ${office.selection_method==="appointment"?"selected":""}>Appointment</option>
+            </select></label>
+            <label><span>Candidate Influence Minimum</span><input name="candidate_influence_min" type="number" min="0" step="0.01" value="${esc(String(office.candidate_influence_min || 0))}"></label>
+          </div>
+          <div class="form-grid">
+            <label><span>Term World Hours</span><input name="term_world_hours" type="number" min="0.01" step="0.01" value="${office.term_world_hours==null?"":esc(String(office.term_world_hours))}" placeholder="Blank = no automatic expiry"></label>
+            <label><span>Office Holder</span><select name="holder_character_id">${candidateOptions}</select></label>
+          </div>
+        </form>`;
+    }).join("");
+
+    root.querySelectorAll(".office-admin-form").forEach(form => {
+      form.addEventListener("submit",async event => {
+        event.preventDefault();
+        const d=Object.fromEntries(new FormData(form));
+        try {
+          await GMAuth.api("imperial_offices?id=eq."+encodeURIComponent(form.dataset.id),{
+            method:"PATCH",
+            headers:{Prefer:"return=minimal"},
+            body:JSON.stringify({
+              description:d.description.trim() || null,
+              selection_method:d.selection_method,
+              candidate_influence_min:Number(d.candidate_influence_min || 0),
+              term_world_hours:d.term_world_hours ? Number(d.term_world_hours) : null
+            })
+          });
+
+          const office=(data.imperialOffices||[]).find(row=>row.id===form.dataset.id);
+          const nextHolder=d.holder_character_id || null;
+          if (nextHolder && nextHolder!==office?.current_holder_character_id) {
+            await GMAuth.api("rpc/appoint_political_office",{
+              method:"POST",
+              body:JSON.stringify({p_office_id:form.dataset.id,p_character_id:nextHolder})
+            });
+          } else if (!nextHolder && office?.current_holder_character_id) {
+            await GMAuth.api("imperial_offices?id=eq."+encodeURIComponent(form.dataset.id),{
+              method:"PATCH",
+              headers:{Prefer:"return=minimal"},
+              body:JSON.stringify({
+                current_holder_character_id:null,
+                holder_since_world_hour:null,
+                holder_until_world_hour:null
+              })
+            });
+            if (office.code==="FIRST_CONSUL") {
+              await GMAuth.api("republic_state?singleton=eq.true",{
+                method:"PATCH",
+                headers:{Prefer:"return=minimal"},
+                body:JSON.stringify({
+                  first_consul_character_id:null,
+                  first_consul_name:"Vacant"
+                })
+              });
+            }
+          }
+          await refresh("OFFICE UPDATED",$("adminOfficeState"));
+        } catch (error) {
+          setState($("adminOfficeState"),"OFFICE UPDATE FAILED // "+error.message,"error");
+        }
+      });
+    });
+  }
+
+  function renderElections() {
+    const root=$("adminElectionList");
+    const rows=data?.politicalElections || [];
+
+    $("electionOffice").innerHTML=(data?.imperialOffices||[]).map(office =>
+      '<option value="'+esc(office.id)+'">'+esc(office.name)+'</option>'
+    ).join("");
+
+    if (!rows.length) {
+      root.innerHTML='<div class="empty-state">NO ELECTIONS CREATED.</div>';
+      return;
+    }
+
+    root.innerHTML=rows.map(row => {
+      const office=(data.imperialOffices||[]).find(x=>x.id===row.office_id);
+      const candidates=(data.electionCandidates||[]).filter(x=>x.election_id===row.id);
+      const votes=(data.electionVotes||[]).filter(x=>x.election_id===row.id);
+      const tally=candidates.map(candidate => ({
+        ...candidate,
+        weight:votes.filter(v=>v.candidate_character_id===candidate.character_id)
+          .reduce((sum,v)=>sum+Number(v.weight||0),0)
+      })).sort((a,b)=>b.weight-a.weight);
+
+      const candidateHtml=tally.length
+        ? tally.map(candidate =>
+          '<div class="resource-row"><div><strong>'+esc(candidate.candidate_name)+'</strong><div class="section-code">'+esc(candidate.faction_name || "NO FACTION")+' // '+esc(candidate.status.toUpperCase())+'</div></div><span>'+esc(fmt(candidate.weight))+' VOTE WEIGHT</span></div>'
+        ).join("")
+        : '<div class="empty-state">NO CANDIDATES DECLARED.</div>';
+
+      return `
+        <article class="notice">
+          <div class="split-actions">
+            <div><strong style="color:var(--text)">${esc(row.title)}</strong><div class="section-code">${esc(office?.name || "OFFICE")} // ${esc(row.selection_method.toUpperCase().replaceAll("_"," "))}</div></div>
+            <span class="status-chip ${row.status==="open"?"amber":""}">${esc(row.status==="resolved" ? row.result : row.status)}</span>
+          </div>
+          <div class="telemetry-stack" style="margin-top:10px">
+            <div class="telemetry-row"><span>Opens</span><strong>${esc(fmt(row.opens_world_hour))}</strong></div>
+            <div class="telemetry-row"><span>Closes</span><strong>${esc(fmt(row.closes_world_hour))}</strong></div>
+            <div class="telemetry-row"><span>Winner</span><strong>${esc(row.winner_name || "—")}</strong></div>
+          </div>
+          <div class="resource-list" style="margin-top:10px">${candidateHtml}</div>
+          ${!["resolved","cancelled"].includes(row.status) && row.selection_method!=="appointment"
+            ? '<button class="hud-button amber resolve-election" type="button" data-id="'+esc(row.id)+'" style="margin-top:12px">RESOLVE ELECTION</button>'
+            : ""}
+        </article>`;
+    }).join("");
+
+    root.querySelectorAll(".resolve-election").forEach(button => {
+      button.addEventListener("click",async () => {
+        try {
+          const result=await GMAuth.api("rpc/resolve_political_election",{
+            method:"POST",
+            body:JSON.stringify({p_election_id:button.dataset.id})
+          });
+          await refresh("ELECTION RESOLVED // "+String(result.result).toUpperCase(),$("adminElectionState"));
+        } catch (error) {
+          setState($("adminElectionState"),"ELECTION RESOLUTION FAILED // "+error.message,"error");
+        }
+      });
+    });
+  }
+
   function renderTaxAssessments() {
     const root=$("adminTaxAssessmentList");
     if (!(data?.federalTaxAssessments||[]).length) {
@@ -288,6 +440,8 @@
     renderFactionSeats();
     renderInfluence();
     renderBills();
+    renderOffices();
+    renderElections();
     renderTaxAssessments();
     renderPolicies();
   }
@@ -324,12 +478,36 @@
         headers:{Prefer:"return=minimal"},
         body:JSON.stringify({
           bill_proposal_influence_cost:Number(d.bill_proposal_influence_cost || 0),
-          federal_faction_tax_rate:Number(d.federal_faction_tax_rate || 0)
+          federal_faction_tax_rate:Number(d.federal_faction_tax_rate || 0),
+          succession_influence_percent:Number(d.succession_influence_percent || 0)
         })
       });
       await refresh("POLITICAL RULES UPDATED",$("politicalRulesState"));
     } catch (error) {
       setState($("politicalRulesState"),"POLITICAL RULE UPDATE FAILED // "+error.message,"error");
+    }
+  });
+
+  $("electionCreateForm")?.addEventListener("submit",async event => {
+    event.preventDefault();
+    const form=event.currentTarget;
+    const d=Object.fromEntries(new FormData(form));
+    try {
+      const result=await GMAuth.api("rpc/create_political_election",{
+        method:"POST",
+        body:JSON.stringify({
+          p_office_id:d.office_id,
+          p_title:d.title.trim(),
+          p_selection_method:d.selection_method,
+          p_opens_world_hour:Number(d.opens_world_hour),
+          p_closes_world_hour:Number(d.closes_world_hour),
+          p_results_public:form.elements.results_public.checked
+        })
+      });
+      form.reset();
+      await refresh("ELECTION CREATED // "+String(result.status).toUpperCase(),$("electionCreateState"));
+    } catch (error) {
+      setState($("electionCreateState"),"ELECTION CREATE FAILED // "+error.message,"error");
     }
   });
 
