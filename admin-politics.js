@@ -494,14 +494,17 @@
     const form=event.currentTarget;
     const d=Object.fromEntries(new FormData(form));
     try {
+      const clock=await GMAuth.api("rpc/get_world_clock",{method:"POST",body:"{}"});
+      const opensAt=Number(clock.total_world_hours || 0)+Number(d.opens_in_world_hours || 0);
+      const closesAt=opensAt+Number(d.duration_world_hours || 0);
       const result=await GMAuth.api("rpc/create_political_election",{
         method:"POST",
         body:JSON.stringify({
           p_office_id:d.office_id,
           p_title:d.title.trim(),
           p_selection_method:d.selection_method,
-          p_opens_world_hour:Number(d.opens_world_hour),
-          p_closes_world_hour:Number(d.closes_world_hour),
+          p_opens_world_hour:opensAt,
+          p_closes_world_hour:closesAt,
           p_results_public:form.elements.results_public.checked
         })
       });
