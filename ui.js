@@ -22,6 +22,51 @@
     setInterval(tick, 1000);
   }
 
+  function startWorldClock() {
+    const hosts = document.querySelectorAll(".top-telemetry");
+    if (!hosts.length || !window.GMAuth) return;
+
+    let snapshot = null;
+    let fetchedAt = 0;
+
+    const ensureReadout = () => {
+      hosts.forEach(host => {
+        if (host.querySelector("[data-world-clock]")) return;
+        const el = document.createElement("span");
+        el.dataset.worldClock = "";
+        el.className = "world-clock-readout";
+        el.textContent = "WORLD TIME // --";
+        host.insertBefore(el, host.firstChild);
+      });
+    };
+
+    const format = data => {
+      const state = data.running ? "" : " // PAUSED";
+      return "A" + data.aevum +
+        " // C" + String(data.cycle).padStart(2,"0") +
+        " // W" + data.week +
+        " // D" + data.day +
+        " // H" + String(data.hour).padStart(2,"0") +
+        state;
+    };
+
+    const refresh = async () => {
+      try {
+        snapshot = await GMAuth.api("rpc/get_world_clock",{method:"POST",body:"{}"});
+        fetchedAt = Date.now();
+        document.querySelectorAll("[data-world-clock]").forEach(el => el.textContent = format(snapshot));
+      } catch {
+        document.querySelectorAll("[data-world-clock]").forEach(el => el.textContent = "WORLD TIME // OFFLINE");
+      }
+    };
+
+    ensureReadout();
+    refresh();
+    setInterval(() => {
+      if (!snapshot || Date.now()-fetchedAt > 60000) refresh();
+    },12000);
+  }
+
   function initTabs() {
     document.querySelectorAll("[data-tabs]").forEach(group => {
       const buttons = group.querySelectorAll("[data-tab-target]");
@@ -72,9 +117,10 @@
     });
 
     startClock();
+    startWorldClock();
     initTabs();
     return session;
   }
 
-  window.GMUI = { esc, setState, startClock, initTabs, initProtected };
+  window.GMUI = { esc, setState, startClock, startWorldClock, initTabs, initProtected };
 })();
