@@ -1819,3 +1819,9 @@ dialog::backdrop{background:rgba(0,0,0,.72);backdrop-filter:blur(2px)}
     font-size:.51rem;
   }
 }
+
+.world-clock-readout{
+  color:var(--amber) !important;
+  border-color:rgba(216,163,93,.28) !important;
+  white-space:nowrap;
+}
