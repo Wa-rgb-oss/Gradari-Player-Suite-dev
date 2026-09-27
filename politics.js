@@ -350,7 +350,7 @@
     if ((ownMembership()?.permissions || []).includes("politics")) permissions.push("POLITICS");
     $("politicsPermissionList").innerHTML = permissions.length
       ? permissions.map(p=>'<span class="status-chip">'+esc(p)+'</span>').join("")
-      : '<span class="status-chip muted">VIEW ONLY</span>';
+      : '<span class="status-chip muted">OBSERVER</span>';
 
     $("billInfluenceCost").textContent = fmt(player?.config?.bill_proposal_influence_cost || 0);
   }
