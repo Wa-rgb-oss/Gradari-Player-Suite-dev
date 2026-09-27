@@ -75,21 +75,20 @@ The frontend does not rely on hidden buttons for security.
 Mid-2000s military science-fiction command console: angular HUD panels, technical typography, cyan/steel instrumentation, restrained amber indicators, tactical grids, and dense system readouts.
 
 
-## Politics and federal government
+## Senate politics
 
-Gradari now includes a Republic of Worlds federal politics framework.
+Gradari includes a Senate politics framework.
 
 - Influence is a character-level political currency with its own ledger.
-- Imperial federal member factions can hold Senate seats.
+- Factions can hold Senate seats.
 - Senate voting is faction-based and weighted by the number of seats controlled.
 - Faction leaders automatically retain political authority and can delegate the `politics` permission to members.
 - Authorized characters can spend Influence to sponsor legislation.
-- Passed Senate bills automatically enter the federal policy register.
-- Federal policies can carry structured effects for later integration with economy, military, map, and character systems.
-- Imperial federal member factions have a configurable federal tax rate.
-- Federal tax assessments apply to configured faction-generated Aureum revenue, not member deposits or founding capital.
-- External / non-federal factions can be excluded from Senate representation and Imperial taxation.
-- The First Consul and Republic of Worlds chamber are controlled from the Game Master backend.
+- Passed Senate bills automatically enter the policy register.
+- Policies can carry structured effects for later integration with economy, military, map, and character systems.
+- Imperial factions have a configurable Imperial tax rate.
+- Imperial tax assessments apply to configured faction-generated Aureum revenue, not member deposits or founding capital.
+- The First Consul and Senate chamber are controlled from the Game Master backend.
 
 The Politics player page is `politics.html`. Politics administration is part of the restricted `admin.html` backend.
 
