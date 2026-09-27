@@ -173,14 +173,43 @@
               <div id="marketList" class="stack"></div>
               <div class="empty-state" id="marketEmpty" hidden>NO ACTIVE MARKET LISTINGS ARE CURRENTLY AVAILABLE.</div>
             </article>
-            <aside class="hud-panel compact amber">
-              <div class="hud-kicker amber">MARKET MODEL</div>
-              <div class="telemetry-stack">
-                <div class="telemetry-row"><span>NPC Baseline</span><strong>GUILDED CONCORD</strong></div>
-                <div class="telemetry-row"><span>Faction Markets</span><strong>FRAMEWORK READY</strong></div>
-                <div class="telemetry-row"><span>Player Listings</span><strong>LATER PHASE</strong></div>
-                <div class="telemetry-row"><span>Map Integration</span><strong>PLANNED</strong></div>
-              </div>
+            <aside class="stack">
+              <article class="hud-panel compact amber">
+                <div class="hud-kicker amber">MARKET NETWORK</div>
+                <div class="telemetry-stack">
+                  <div class="telemetry-row"><span>NPC Baseline</span><strong>GUILDED CONCORD</strong></div>
+                  <div class="telemetry-row"><span>Faction Markets</span><strong>ACTIVE</strong></div>
+                  <div class="telemetry-row"><span>Market Sales</span><strong>FACTION TREASURY</strong></div>
+                  <div class="telemetry-row"><span>Location</span><strong>MAP-BASED</strong></div>
+                </div>
+              </article>
+
+              <article class="hud-panel compact" id="factionMarketControls" hidden>
+                <div class="section-code">FACTION / MARKET</div>
+                <h2 style="margin:5px 0 16px;text-transform:uppercase">Establish Market</h2>
+                <form id="factionMarketForm" class="form-shell">
+                  <label><span>Name *</span><input name="name" required maxlength="160"></label>
+                  <label><span>Hex ID *</span><input name="location_ref" required placeholder="HEX_0_0"></label>
+                  <label><span>Description</span><textarea name="description" maxlength="1200"></textarea></label>
+                  <button class="hud-button amber" type="submit">ESTABLISH MARKET</button>
+                  <div class="form-state" id="factionMarketState"></div>
+                </form>
+
+                <div class="section-code" style="margin-top:20px">MARKET LISTING</div>
+                <form id="factionListingForm" class="form-shell" style="margin-top:10px">
+                  <label><span>Market</span><select name="market_id" id="factionMarketSelect" required></select></label>
+                  <label><span>Resource</span><select name="asset_id" id="factionListingAsset" required></select></label>
+                  <div class="form-grid"><label><span>Price / Unit</span><input name="price_per_unit" type="number" min="0.01" step="0.01" required></label><label><span>Stock</span><input name="stock" type="number" min="0" step="0.0001"></label></div>
+                  <button class="hud-button" type="submit">SAVE LISTING</button>
+                  <div class="form-state" id="factionListingState"></div>
+                </form>
+              </article>
+
+              <article class="hud-panel compact" id="factionMarketUnavailable">
+                <div class="section-code">FACTION / MARKET</div>
+                <h2 style="margin:5px 0 10px;text-transform:uppercase">Market Access</h2>
+                <p class="hero-copy" style="margin:0">Faction market controls appear for the faction leader or members granted Market authority.</p>
+              </article>
             </aside>
           </div>
           <div class="form-state" id="marketState"></div>
