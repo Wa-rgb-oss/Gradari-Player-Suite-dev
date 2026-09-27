@@ -95,6 +95,7 @@
             <label><span>Senate Seats</span><input name="seats" type="number" min="0" value="${esc(String(seats))}"></label>
             <label><span>Political Color</span><input name="color" type="color" value="${esc(faction.color || "#4fa8c4")}"></label>
           </div>
+          <label class="checkbox-line"><input name="federal_member" type="checkbox" ${faction.federal_member ? "checked" : ""}><span>Imperial federal member</span></label>
           <label><span>Federal Tax Rate %</span><input name="federal_tax_rate" type="number" min="0" max="100" step="0.1" value="${esc(String(faction.federal_tax_rate ?? 10))}"></label>
         </form>`;
     }).join("");
@@ -104,21 +105,43 @@
         event.preventDefault();
         const d=Object.fromEntries(new FormData(form));
         try {
-          await GMAuth.api("rpc/set_senate_faction_seats",{
-            method:"POST",
-            body:JSON.stringify({
-              p_faction_id:form.dataset.id,
-              p_seats:Number(d.seats || 0)
-            })
-          });
-          await GMAuth.api("factions?id=eq."+encodeURIComponent(form.dataset.id),{
-            method:"PATCH",
-            headers:{Prefer:"return=minimal"},
-            body:JSON.stringify({
-              color:d.color || "#4fa8c4",
-              federal_tax_rate:Number(d.federal_tax_rate || 0)
-            })
-          });
+          const federalMember=form.elements.federal_member.checked;
+          const requestedSeats=federalMember ? Number(d.seats || 0) : 0;
+          if (federalMember) {
+            await GMAuth.api("factions?id=eq."+encodeURIComponent(form.dataset.id),{
+              method:"PATCH",
+              headers:{Prefer:"return=minimal"},
+              body:JSON.stringify({
+                federal_member:true,
+                color:d.color || "#4fa8c4",
+                federal_tax_rate:Number(d.federal_tax_rate || 0)
+              })
+            });
+            await GMAuth.api("rpc/set_senate_faction_seats",{
+              method:"POST",
+              body:JSON.stringify({
+                p_faction_id:form.dataset.id,
+                p_seats:requestedSeats
+              })
+            });
+          } else {
+            await GMAuth.api("rpc/set_senate_faction_seats",{
+              method:"POST",
+              body:JSON.stringify({
+                p_faction_id:form.dataset.id,
+                p_seats:0
+              })
+            });
+            await GMAuth.api("factions?id=eq."+encodeURIComponent(form.dataset.id),{
+              method:"PATCH",
+              headers:{Prefer:"return=minimal"},
+              body:JSON.stringify({
+                federal_member:false,
+                color:d.color || "#4fa8c4",
+                federal_tax_rate:Number(d.federal_tax_rate || 0)
+              })
+            });
+          }
           await refresh("FACTION POLITICAL STATE UPDATED",$("senateFactionState"));
         } catch (error) {
           setState($("senateFactionState"),"FACTION POLITICAL UPDATE FAILED // "+error.message,"error");
