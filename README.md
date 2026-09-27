@@ -93,3 +93,14 @@ Gradari includes a Senate politics framework.
 The Politics player page is `politics.html`. Politics administration is part of the restricted `admin.html` backend.
 
 The uploaded legacy Senate, economy, and map HTML files are design references only and are not part of this implementation.
+
+
+## Character continuity
+
+- Each player may have one active living character at a time.
+- Characters have explicit life status: `alive` or `dead`.
+- Deceased characters remain in the historical Record and cannot be deleted by normal players.
+- When a character dies, physical presence and character-based political actions stop immediately.
+- A player may create a new living character after the prior character is deceased.
+- Character Influence remains attached to the deceased character as historical political capital and does not automatically transfer to the successor.
+- Player-account Aureum, inventory, facilities, and faction membership currently remain account-level and are not automatically destroyed on character death.
