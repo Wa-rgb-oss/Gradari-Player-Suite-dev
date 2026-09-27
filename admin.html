@@ -43,6 +43,7 @@
         <button class="tab active" data-tab-target="admin-overview" type="button">OVERVIEW</button>
         <button class="tab" data-tab-target="admin-players" type="button">PLAYERS</button>
         <button class="tab" data-tab-target="admin-factions" type="button">FACTIONS</button>
+        <button class="tab" data-tab-target="admin-politics" type="button">POLITICS</button>
         <button class="tab" data-tab-target="admin-economy" type="button">ECONOMY</button>
         <button class="tab" data-tab-target="admin-assets" type="button">ASSETS</button>
         <button class="tab" data-tab-target="admin-markets" type="button">MARKETS</button>
@@ -107,6 +108,89 @@
               <button class="hud-button" type="submit">CREATE FACTION</button>
               <div class="form-state" id="factionState"></div>
             </form>
+          </aside>
+        </div>
+      </section>
+
+      <section class="panel" id="admin-politics" data-tab-panel>
+        <section class="metric-grid">
+          <article class="metric-card"><div class="metric-label">Federal Treasury</div><div class="metric-value" id="adminFederalTreasury">--</div><div class="metric-detail">AUREUM</div></article>
+          <article class="metric-card"><div class="metric-label">Senate Seats</div><div class="metric-value" id="adminSenateTotal">--</div><div class="metric-detail">TOTAL CHAMBER</div></article>
+          <article class="metric-card"><div class="metric-label">Assigned Seats</div><div class="metric-value" id="adminSenateAssigned">--</div><div class="metric-detail">FACTION CONTROL</div></article>
+          <article class="metric-card"><div class="metric-label">Open Bills</div><div class="metric-value" id="adminOpenBills">--</div><div class="metric-detail">AWAITING RESOLUTION</div></article>
+        </section>
+
+        <div class="content-grid">
+          <article class="hud-panel compact">
+            <div class="section-head"><div><div class="section-code">REPUBLIC / FEDERAL STATE</div><h2>Republic of Worlds</h2></div><p>AUTHORITATIVE</p></div>
+            <form id="republicStateForm" class="form-shell">
+              <div class="form-grid">
+                <label><span>Federal Government</span><input name="government_name" required></label>
+                <label><span>Legislature</span><input name="chamber_name" required></label>
+              </div>
+              <div class="form-grid">
+                <label><span>Total Senate Seats</span><input name="total_seats" type="number" min="1" required></label>
+                <label><span>Current Session</span><input name="current_session" placeholder="Optional session label"></label>
+              </div>
+              <label><span>First Consul Display Name</span><input name="first_consul_name" placeholder="Vacant"></label>
+              <label><span>Linked First Consul Character</span><select name="first_consul_character_id" id="firstConsulCharacter"><option value="">No linked character</option></select></label>
+              <button class="hud-button" type="submit">SAVE FEDERAL STATE</button>
+              <div class="form-state" id="republicStateState"></div>
+            </form>
+          </article>
+
+          <aside class="hud-panel compact amber">
+            <div class="hud-kicker amber">POLITICAL RULES</div>
+            <form id="politicalRulesForm" class="form-shell">
+              <label><span>Bill Sponsorship Cost</span><input name="bill_proposal_influence_cost" type="number" min="0" step="0.01"></label>
+              <label><span>Default Federal Faction Tax %</span><input name="federal_faction_tax_rate" type="number" min="0" max="100" step="0.1"></label>
+              <button class="hud-button amber" type="submit">SAVE POLITICAL RULES</button>
+              <div class="form-state" id="politicalRulesState"></div>
+            </form>
+          </aside>
+        </div>
+
+        <div class="content-grid" style="margin-top:18px">
+          <article class="hud-panel compact">
+            <div class="section-head"><div><div class="section-code">SENATE / REPRESENTATION</div><h2>Faction Seats & Federal Tax</h2></div><p>STATE // FEDERAL</p></div>
+            <div id="adminSenateFactionList" class="stack"></div>
+            <div class="form-state" id="senateFactionState"></div>
+          </article>
+
+          <aside class="hud-panel compact">
+            <div class="section-code">CHARACTERS / INFLUENCE</div>
+            <h2 style="margin:5px 0 16px;text-transform:uppercase">Adjust Influence</h2>
+            <form id="influenceAdjustmentForm" class="form-shell">
+              <label><span>Character</span><select name="character_id" id="influenceCharacter" required></select></label>
+              <label><span>Amount</span><input name="amount" type="number" step="0.01" required placeholder="Positive to award, negative to spend/remove"></label>
+              <label><span>Type</span><input name="kind" value="political_action"></label>
+              <label><span>Description</span><textarea name="description" placeholder="Election victory, negotiation, scandal, office service, political action..."></textarea></label>
+              <button class="hud-button" type="submit">APPLY INFLUENCE</button>
+              <div class="form-state" id="influenceAdjustmentState"></div>
+            </form>
+            <div class="section-code" style="margin-top:20px">CHARACTER BALANCES</div>
+            <div id="adminInfluenceList" class="resource-list"></div>
+          </aside>
+        </div>
+
+        <div class="content-grid" style="margin-top:18px">
+          <article class="hud-panel compact">
+            <div class="section-head"><div><div class="section-code">SENATE / LEGISLATION</div><h2>Bill Queue</h2></div><p>VOTES // RESOLUTION</p></div>
+            <div id="adminSenateBillList" class="stack"></div>
+            <div class="form-state" id="senateBillState"></div>
+          </article>
+
+          <aside class="hud-panel compact">
+            <div class="section-code">FEDERAL / TAXATION</div>
+            <h2 style="margin:5px 0 16px;text-transform:uppercase">Assess Faction Taxes</h2>
+            <p class="hero-copy" style="margin:0 0 16px">Federal assessment taxes faction-generated Aureum revenue. Member deposits and founding capital are not treated as taxable revenue.</p>
+            <form id="federalTaxForm" class="form-shell">
+              <label><span>Cycle Key</span><input name="cycle_key" required placeholder="Example: A8746-C13"></label>
+              <button class="hud-button amber" type="submit">ASSESS FEDERAL TAXES</button>
+              <div class="form-state" id="federalTaxState"></div>
+            </form>
+            <div class="section-code" style="margin-top:20px">RECENT ASSESSMENTS</div>
+            <div id="adminTaxAssessmentList" class="stack"></div>
           </aside>
         </div>
       </section>
@@ -382,5 +466,6 @@
   <script src="ui.js"></script>
   <script src="admin.js"></script>
   <script src="admin-systems.js"></script>
+  <script src="admin-politics.js"></script>
 </body>
 </html>
