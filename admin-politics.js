@@ -211,6 +211,59 @@
     });
   }
 
+  function renderPolicies() {
+    const root=$("adminFederalPolicyList");
+    const rows=data?.federalPolicies || [];
+    if (!rows.length) {
+      root.innerHTML='<div class="empty-state">NO FEDERAL POLICIES HAVE BEEN ENACTED.</div>';
+      return;
+    }
+
+    root.innerHTML=rows.map(row => `
+      <form class="federal-policy-form notice form-shell" data-id="${esc(row.id)}">
+        <div class="split-actions">
+          <div><strong style="color:var(--text)">${esc(row.title)}</strong><div class="section-code">${esc(String(row.policy_type || "LEGISLATION").toUpperCase())} // ENACTED ${esc(new Date(row.enacted_at).toLocaleDateString())}</div></div>
+          <button class="hud-button secondary" type="submit">SAVE POLICY</button>
+        </div>
+        ${row.description?'<div style="margin-top:10px">'+esc(row.description)+'</div>':""}
+        <label><span>Status</span><select name="status">
+          <option value="active" ${row.status==="active"?"selected":""}>Active</option>
+          <option value="suspended" ${row.status==="suspended"?"selected":""}>Suspended</option>
+          <option value="repealed" ${row.status==="repealed"?"selected":""}>Repealed</option>
+          <option value="expired" ${row.status==="expired"?"selected":""}>Expired</option>
+        </select></label>
+        <label><span>Structured Effects JSON</span><textarea name="effects">${esc(JSON.stringify(row.effects || {},null,2))}</textarea></label>
+      </form>`).join("");
+
+    root.querySelectorAll(".federal-policy-form").forEach(form => {
+      form.addEventListener("submit",async event => {
+        event.preventDefault();
+        let effects;
+        try {
+          effects=JSON.parse(form.elements.effects.value || "{}");
+        } catch {
+          setState($("federalPolicyState"),"POLICY EFFECTS MUST BE VALID JSON","error");
+          return;
+        }
+        try {
+          const status=form.elements.status.value;
+          await GMAuth.api("federal_policies?id=eq."+encodeURIComponent(form.dataset.id),{
+            method:"PATCH",
+            headers:{Prefer:"return=minimal"},
+            body:JSON.stringify({
+              status,
+              effects,
+              repealed_at:status==="repealed" ? new Date().toISOString() : null
+            })
+          });
+          await refresh("FEDERAL POLICY UPDATED",$("federalPolicyState"));
+        } catch (error) {
+          setState($("federalPolicyState"),"POLICY UPDATE FAILED // "+error.message,"error");
+        }
+      });
+    });
+  }
+
   function renderTaxAssessments() {
     const root=$("adminTaxAssessmentList");
     if (!(data?.federalTaxAssessments||[]).length) {
@@ -234,6 +287,7 @@
     renderInfluence();
     renderBills();
     renderTaxAssessments();
+    renderPolicies();
   }
 
   $("republicStateForm")?.addEventListener("submit",async event => {
