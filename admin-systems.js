@@ -164,7 +164,7 @@
     const cfg = data.config?.[0];
     if (!cfg) return;
     const form=$("gameConfigForm");
-    ["faction_min_founders","faction_creation_cost","faction_min_contribution","faction_default_tax_rate","faction_max_tax_rate","character_travel_hours_per_hex","army_travel_hours_per_hex","military_operation_hours","raid_effect_world_hours"].forEach(key => {
+    ["faction_min_founders","faction_creation_cost","faction_min_contribution","faction_default_tax_rate","faction_max_tax_rate","faction_market_creation_cost","character_travel_hours_per_hex","army_travel_hours_per_hex","military_operation_hours","raid_effect_world_hours"].forEach(key => {
       if (form.elements[key]) form.elements[key].value=cfg[key];
     });
     const mapForm=$("mapGridForm");
@@ -210,6 +210,23 @@
           </div>
           ${mods.map(m=>'<div class="section-code" style="margin-top:8px">'+esc(m.label)+' // '+esc(fmt(Number(m.production_multiplier||1)*100))+'%'+(m.expires_at?' // UNTIL '+esc(new Date(m.expires_at).toLocaleString()):'')+'</div>').join("")}
         </article>`;
+    }).join("");
+  }
+
+  function renderEconomyAutomation() {
+    const root=$("economyAutomationList");
+    if(!root) return;
+    const rows=data.economyCycleRuns||[];
+    if(!rows.length){
+      root.innerHTML='<div class="empty-state">NO AUTOMATED ECONOMY CYCLES HAVE RUN YET.</div>';
+      return;
+    }
+    root.innerHTML=rows.slice(0,6).map(row => {
+      const facility=row.facility_result || {};
+      const tax=row.tax_result || {};
+      return '<div class="resource-row"><div><strong>'+esc(row.cycle_key)+'</strong><div class="section-code">'+
+        esc(new Date(row.run_at).toLocaleString())+' // AUTOMATED</div></div><span>'+
+        esc(String(facility.processed || 0))+' FAC // '+esc(String(tax.processed_factions || 0))+' TAX</span></div>';
     }).join("");
   }
 
@@ -275,6 +292,7 @@
     renderConfig();
     renderFacilityTypes();
     renderTerritories();
+    renderEconomyAutomation();
     renderMilitary();
   }
 
@@ -465,6 +483,7 @@
           faction_min_contribution:Number(d.faction_min_contribution),
           faction_default_tax_rate:Number(d.faction_default_tax_rate),
           faction_max_tax_rate:Number(d.faction_max_tax_rate),
+          faction_market_creation_cost:Number(d.faction_market_creation_cost),
           character_travel_hours_per_hex:Number(d.character_travel_hours_per_hex),
           army_travel_hours_per_hex:Number(d.army_travel_hours_per_hex),
           military_operation_hours:Number(d.military_operation_hours),
