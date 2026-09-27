@@ -347,6 +347,51 @@
     }
   });
 
+  async function loadWorldClockControls() {
+    const form=$("worldClockForm");
+    if(!form) return;
+    try {
+      const clock=await GMAuth.api("rpc/get_world_clock",{method:"POST",body:"{}"});
+      form.elements.aevum.value=clock.aevum;
+      form.elements.cycle.value=clock.cycle;
+      form.elements.week.value=clock.week;
+      form.elements.day.value=clock.day;
+      form.elements.hour.value=clock.hour;
+      form.elements.speed.value=clock.speed;
+      form.elements.running.checked=Boolean(clock.running);
+      setState($("worldClockState"),
+        "CURRENT // A"+clock.aevum+" C"+clock.cycle+" W"+clock.week+" D"+clock.day+" H"+clock.hour+
+        (clock.running?" // RUNNING":" // PAUSED"),"success");
+    } catch(error) {
+      setState($("worldClockState"),"CLOCK LOAD FAILED // "+error.message,"error");
+    }
+  }
+
+  $("worldClockForm")?.addEventListener("submit",async event => {
+    event.preventDefault();
+    const form=event.currentTarget;
+    const d=Object.fromEntries(new FormData(form));
+    try {
+      const result=await GMAuth.api("rpc/set_world_clock",{
+        method:"POST",
+        body:JSON.stringify({
+          p_aevum:Number(d.aevum),
+          p_cycle:Number(d.cycle),
+          p_week:Number(d.week),
+          p_day:Number(d.day),
+          p_hour:Number(d.hour),
+          p_speed:Number(d.speed),
+          p_running:form.elements.running.checked
+        })
+      });
+      setState($("worldClockState"),
+        "CLOCK SET // A"+result.aevum+" C"+result.cycle+" W"+result.week+" D"+result.day+" H"+result.hour+
+        (result.running?" // RUNNING":" // PAUSED"),"success");
+    } catch(error) {
+      setState($("worldClockState"),"CLOCK UPDATE FAILED // "+error.message,"error");
+    }
+  });
+
   $("gameConfigForm")?.addEventListener("submit",async event => {
     event.preventDefault();
     const d=Object.fromEntries(new FormData(event.currentTarget));
@@ -492,7 +537,11 @@
 
   document.addEventListener("gm:admin-state",event => {
     renderAll(event.detail);
+    loadWorldClockControls();
   });
 
-  if(window.GMAdminData) renderAll(window.GMAdminData);
+  if(window.GMAdminData) {
+    renderAll(window.GMAdminData);
+    loadWorldClockControls();
+  }
 })();
