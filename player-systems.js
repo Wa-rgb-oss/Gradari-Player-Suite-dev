@@ -306,6 +306,40 @@
     }
   }
 
+  function canManageFactionMarket() {
+    const membership=state?.primaryMembership;
+    const faction=membership?.faction;
+    if(!membership || !faction) return false;
+    return faction.leader_user_id===session.user.id || (membership.permissions||[]).includes("market");
+  }
+
+  function renderFactionMarketControls() {
+    const controls=$("factionMarketControls");
+    const unavailable=$("factionMarketUnavailable");
+    if(!controls || !unavailable) return;
+
+    const allowed=canManageFactionMarket();
+    controls.hidden=!allowed;
+    unavailable.hidden=allowed;
+    if(!allowed) return;
+
+    const factionId=state.primaryMembership.faction_id;
+    const markets=(state.markets||[]).filter(row=>row.faction_id===factionId && row.status==="active");
+    const marketSelect=$("factionMarketSelect");
+    marketSelect.innerHTML=markets.length
+      ? markets.map(row=>'<option value="'+esc(row.id)+'">'+esc(row.name)+' // '+esc(row.location_ref || "UNPLACED")+'</option>').join("")
+      : '<option value="">No faction markets</option>';
+
+    const availableAssets=(state.factionAssets||[])
+      .filter(row=>row.faction_id===factionId && Number(row.quantity)>0)
+      .map(row=>({...row,asset:state.catalog.find(asset=>asset.id===row.asset_id)}))
+      .filter(row=>row.asset);
+
+    $("factionListingAsset").innerHTML=availableAssets.length
+      ? availableAssets.map(row=>'<option value="'+esc(row.asset_id)+'">'+esc(row.asset.name)+' // '+esc(fmt(row.quantity))+' '+esc(row.asset.unit || "units")+'</option>').join("")
+      : '<option value="">No faction inventory</option>';
+  }
+
   function renderMarkets() {
     const root = $("marketList");
     if (!root) return;
@@ -432,10 +466,45 @@
     if (!session) session = state.session;
     renderConfig();
     renderMarkets();
+    renderFactionMarketControls();
     renderFacilities();
     await renderFactionSystems();
     await renderCharacterPresence();
   }
+
+  $("factionMarketForm")?.addEventListener("submit",async event => {
+    event.preventDefault();
+    const form=event.currentTarget;
+    const d=Object.fromEntries(new FormData(form));
+    try{
+      const result=await rpc("create_faction_market",{
+        p_name:d.name.trim(),
+        p_location_ref:d.location_ref.trim(),
+        p_description:d.description.trim() || null
+      });
+      form.reset();
+      await refresh("MARKET ESTABLISHED // "+fmt(result.cost)+" AUREUM",$("factionMarketState"));
+    }catch(error){
+      setState($("factionMarketState"),"MARKET CREATION FAILED // "+error.message,"error");
+    }
+  });
+
+  $("factionListingForm")?.addEventListener("submit",async event => {
+    event.preventDefault();
+    const form=event.currentTarget;
+    const d=Object.fromEntries(new FormData(form));
+    try{
+      await rpc("set_faction_market_listing",{
+        p_market_id:d.market_id,
+        p_asset_id:d.asset_id,
+        p_price_per_unit:Number(d.price_per_unit),
+        p_stock:d.stock===""?null:Number(d.stock)
+      });
+      await refresh("FACTION MARKET LISTING SAVED",$("factionListingState"));
+    }catch(error){
+      setState($("factionListingState"),"LISTING SAVE FAILED // "+error.message,"error");
+    }
+  });
 
   $("factionProposalForm")?.addEventListener("submit",async event => {
     event.preventDefault();
