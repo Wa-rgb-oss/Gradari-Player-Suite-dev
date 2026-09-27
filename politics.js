@@ -9,6 +9,9 @@
   let influenceTransactions = [];
   let taxAssessments = [];
   let policies = [];
+  let politicalActionTypes = [];
+  let politicalActivity = [];
+  let worldClock = null;
 
   const $ = id => document.getElementById(id);
   const esc = value => GMUI.esc(value);
@@ -48,14 +51,33 @@
     return faction.leader_user_id === session.user.id || (membership.permissions || []).includes("politics");
   }
 
+  function activeCharacters() {
+    return (player?.characters || []).filter(char => char.status === "active" && char.life_status === "alive");
+  }
+
   function eligibleCharacters() {
     const faction = ownFaction();
     if (!faction) return [];
-    return (player.characters || []).filter(char => char.status === "active" && char.life_status === "alive" && char.faction_id === faction.id);
+    return activeCharacters().filter(char => char.faction_id === faction.id);
+  }
+
+  function worldTimeLabel(totalHours) {
+    if (!Number.isFinite(Number(totalHours))) return "--";
+    const whole = Math.floor(Number(totalHours));
+    const aevum = Math.floor(whole/9360);
+    const cycle = Math.floor((whole%9360)/720)+1;
+    const week = Math.floor((whole%720)/180)+1;
+    const day = Math.floor((whole%180)/36)+1;
+    const hour = (whole%36)+1;
+    return "A"+aevum+" C"+cycle+" W"+week+" D"+day+" H"+String(hour).padStart(2,"0");
   }
 
   async function loadPolitics() {
-    const [republicRows,seatRows,billRows,voteRows,influenceRows,txRows,taxRows,policyRows] = await Promise.all([
+    const uid = encodeURIComponent(session.user.id);
+    const [
+      republicRows,seatRows,billRows,voteRows,influenceRows,txRows,taxRows,policyRows,
+      politicalTypes,activityRows,clock
+    ] = await Promise.all([
       GMAuth.api("republic_state?select=*&limit=1"),
       GMAuth.api("senate_faction_seats?select=*&order=seats.desc"),
       GMAuth.api("senate_bills?select=*&order=created_at.desc"),
@@ -63,7 +85,10 @@
       GMAuth.api("character_influence?select=*&order=updated_at.desc"),
       GMAuth.api("influence_transactions?select=*&order=created_at.desc&limit=50"),
       GMAuth.api("federal_tax_assessments?select=*&order=assessed_at.desc&limit=20"),
-      GMAuth.api("federal_policies?select=*&order=enacted_at.desc")
+      GMAuth.api("federal_policies?select=*&order=enacted_at.desc"),
+      GMAuth.api("political_action_types?active=eq.true&select=*&order=name.asc"),
+      GMAuth.api("political_activity_log?user_id=eq."+uid+"&select=*&order=world_hour.desc&limit=20"),
+      GMAuth.api("rpc/get_world_clock",{method:"POST",body:"{}"})
     ]);
     republic = republicRows?.[0] || null;
     seats = seatRows || [];
@@ -73,6 +98,9 @@
     influenceTransactions = txRows || [];
     taxAssessments = taxRows || [];
     policies = policyRows || [];
+    politicalActionTypes = politicalTypes || [];
+    politicalActivity = activityRows || [];
+    worldClock = clock || null;
   }
 
   function seatColor(factionId) {
@@ -381,6 +409,54 @@
     }).join("");
   }
 
+  function renderPoliticalActivity() {
+    const form = $("politicalActivityForm");
+    const locked = $("politicalActivityLocked");
+    if (!form || !locked) return;
+
+    const chars = activeCharacters();
+    form.hidden = !chars.length;
+    locked.hidden = Boolean(chars.length);
+
+    if (!chars.length) return;
+
+    const charSelect = $("politicalActivityCharacter");
+    const previousChar = charSelect.value;
+    charSelect.innerHTML = chars.map(char =>
+      '<option value="'+esc(char.id)+'">'+esc(char.name)+'</option>'
+    ).join("");
+    if (chars.some(char=>char.id===previousChar)) charSelect.value=previousChar;
+
+    const typeSelect = $("politicalActivityType");
+    const previousType = typeSelect.value;
+    typeSelect.innerHTML = politicalActionTypes.length
+      ? politicalActionTypes.map(row =>
+          '<option value="'+esc(row.code)+'">'+esc(row.name)+'</option>'
+        ).join("")
+      : '<option value="">No activities available</option>';
+    if (politicalActionTypes.some(row=>row.code===previousType)) typeSelect.value=previousType;
+
+    const charId = charSelect.value;
+    const action = politicalActionTypes.find(row=>row.code===typeSelect.value);
+    const last = politicalActivity
+      .filter(row=>row.character_id===charId)
+      .sort((a,b)=>Number(b.world_hour)-Number(a.world_hour))[0] || null;
+    const cooldown = Number(player?.config?.political_action_cooldown_world_hours || 36);
+    const now = Number(worldClock?.total_world_hours || 0);
+    const availableAt = last ? Number(last.world_hour)+cooldown : now;
+    const remaining = Math.max(0,availableAt-now);
+
+    $("politicalActivityReward").textContent = action ? "+"+fmt(action.influence_reward)+" INF" : "--";
+    $("politicalActivityCost").textContent = action ? fmt(action.aureum_cost)+" A" : "--";
+    $("politicalActivityAvailability").textContent = remaining>0
+      ? worldTimeLabel(availableAt)+" // "+fmt(remaining)+" HRS"
+      : "AVAILABLE";
+
+    const button = $("politicalActivityBtn");
+    button.disabled = !action || remaining>0;
+    button.textContent = remaining>0 ? "ACTIVITY ON COOLDOWN" : "PERFORM ACTIVITY";
+  }
+
   function billTally(billId) {
     const rows = votes.filter(v=>v.bill_id===billId);
     return {
@@ -504,11 +580,37 @@
     renderSummary();
     renderChamber();
     renderInfluence();
+    renderPoliticalActivity();
     renderPolicies();
     renderBills();
     renderBillForm();
     renderTaxAssessments();
   }
+
+  $("politicalActivityCharacter")?.addEventListener("change",renderPoliticalActivity);
+  $("politicalActivityType")?.addEventListener("change",renderPoliticalActivity);
+
+  $("politicalActivityForm")?.addEventListener("submit",async event => {
+    event.preventDefault();
+    const form=event.currentTarget;
+    const d=Object.fromEntries(new FormData(form));
+    try {
+      setState($("politicalActivityState"),"POLITICAL ACTIVITY IN PROGRESS...");
+      const result=await GMAuth.api("rpc/perform_political_action",{
+        method:"POST",
+        body:JSON.stringify({
+          p_character_id:d.character_id,
+          p_action_code:d.action_code
+        })
+      });
+      await refreshPolitics(
+        "ACTIVITY COMPLETE // +"+fmt(result.influence_gained)+" INFLUENCE",
+        $("politicalActivityState")
+      );
+    } catch (error) {
+      setState($("politicalActivityState"),"ACTIVITY FAILED // "+error.message,"error");
+    }
+  });
 
   $("billForm").addEventListener("submit",async event => {
     event.preventDefault();
