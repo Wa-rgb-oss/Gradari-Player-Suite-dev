@@ -362,9 +362,14 @@
     const root=$("adminElectionList");
     const rows=data?.politicalElections || [];
 
-    $("electionOffice").innerHTML=(data?.imperialOffices||[]).map(office =>
-      '<option value="'+esc(office.id)+'">'+esc(office.name)+'</option>'
-    ).join("");
+    const electionOffices=(data?.imperialOffices||[]).filter(office=>office.active && office.selection_method!=="appointment");
+    $("electionOffice").innerHTML=electionOffices.length
+      ? electionOffices.map(office => '<option value="'+esc(office.id)+'">'+esc(office.name)+'</option>').join("")
+      : '<option value="">No elected offices configured</option>';
+    const selectedElectionOffice=electionOffices.find(office=>office.id===$("electionOffice").value) || electionOffices[0] || null;
+    $("electionMethodPreview").textContent=selectedElectionOffice
+      ? String(selectedElectionOffice.selection_method).toUpperCase().replaceAll("_"," ")
+      : "NO ELECTED OFFICE";
 
     if (!rows.length) {
       root.innerHTML='<div class="empty-state">NO ELECTIONS CREATED.</div>';
@@ -515,6 +520,13 @@
     }
   });
 
+  $("electionOffice")?.addEventListener("change",event => {
+    const office=(data?.imperialOffices||[]).find(row=>row.id===event.currentTarget.value);
+    $("electionMethodPreview").textContent=office
+      ? String(office.selection_method).toUpperCase().replaceAll("_"," ")
+      : "NO ELECTED OFFICE";
+  });
+
   $("electionCreateForm")?.addEventListener("submit",async event => {
     event.preventDefault();
     const form=event.currentTarget;
@@ -528,7 +540,7 @@
         body:JSON.stringify({
           p_office_id:d.office_id,
           p_title:d.title.trim(),
-          p_selection_method:d.selection_method,
+          p_selection_method:(data.imperialOffices||[]).find(office=>office.id===d.office_id)?.selection_method || "",
           p_opens_world_hour:opensAt,
           p_closes_world_hour:closesAt,
           p_results_public:form.elements.results_public.checked
