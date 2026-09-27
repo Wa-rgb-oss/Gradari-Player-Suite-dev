@@ -83,6 +83,7 @@
             <div class="telemetry-stack">
               <div class="telemetry-row"><span>Senate Seats</span><strong id="factionSeatCount">--</strong></div>
               <div class="telemetry-row"><span>Chamber Share</span><strong id="factionSeatPercent">--</strong></div>
+              <div class="telemetry-row"><span>Federal Status</span><strong id="factionFederalStatus">--</strong></div>
               <div class="telemetry-row"><span>Federal Tax Rate</span><strong id="factionFederalTax">--</strong></div>
               <div class="telemetry-row"><span>Current Arrears</span><strong id="factionTaxArrears">--</strong></div>
             </div>
@@ -98,6 +99,16 @@
             <div id="influenceList" class="stack"></div>
             <div class="empty-state" id="influenceEmpty" hidden>NO CHARACTERS AVAILABLE.</div>
           </aside>
+        </section>
+
+        <section class="hud-panel compact" style="margin-top:18px">
+          <div class="section-head">
+            <div><div class="section-code">FEDERAL / POLICY REGISTER</div><h2>Enacted Policy</h2></div>
+            <p>LAW // REPUBLIC OF WORLDS</p>
+          </div>
+          <p class="hero-copy" style="margin:0 0 18px">Bills that pass the Senate enter the federal policy register. Their practical game effects can be attached by the Game Master as the political system expands.</p>
+          <div id="policyList" class="stack"></div>
+          <div class="empty-state" id="policyEmpty" hidden>NO FEDERAL POLICIES HAVE BEEN ENACTED.</div>
         </section>
 
         <section class="content-grid" style="margin-top:18px">
