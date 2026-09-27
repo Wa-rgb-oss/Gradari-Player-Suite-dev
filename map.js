@@ -4,6 +4,7 @@
   let territories = [];
   let modifiers = [];
   let mapRegistry = [];
+  let mapLabels = [];
   let armies = [];
   let armyMovements = [];
   let militaryOperations = [];
@@ -131,9 +132,10 @@
   }
 
   async function loadMapData() {
-    const [hexRows,territoryRows,modifierRows,armyRows,armyMoveRows,operationRows,travelRows,clock] = await Promise.all([
+    const [hexRows,territoryRows,labelRows,modifierRows,armyRows,armyMoveRows,operationRows,travelRows,clock] = await Promise.all([
       GMAuth.api("map_hexes?player_visible=eq.true&select=*&order=q.asc,r.asc"),
       GMAuth.api("territories?select=*&order=location_ref.asc"),
+      GMAuth.api("map_labels?player_visible=eq.true&select=*&order=created_at.asc"),
       GMAuth.api("location_modifiers?player_visible=eq.true&select=*&order=created_at.desc"),
       GMAuth.api("armies?select=*&order=name.asc"),
       GMAuth.api("army_movements?select=*&order=created_at.desc&limit=100"),
@@ -143,6 +145,7 @@
     ]);
     mapRegistry = hexRows || [];
     territories = territoryRows || [];
+    mapLabels = labelRows || [];
     modifiers = modifierRows || [];
     armies = armyRows || [];
     armyMovements = armyMoveRows || [];
@@ -327,6 +330,39 @@
     return "■";
   }
 
+  function drawMapLabels() {
+    ctx.save();
+    mapLabels.forEach(label => {
+      const p=worldToScreen({x:Number(label.x),y:Number(label.y)});
+      const fontSize=Math.max(8,Number(label.font_size||16)*camera.zoom);
+      const opacity=Number(label.opacity??1);
+      const border=label.border_style||"none";
+      const borderOpacity=Number(label.border_opacity??.8);
+      const bgOpacity=Number(label.background_opacity??0);
+      ctx.font=fontSize+'px Georgia';
+      ctx.textAlign='left';
+      ctx.textBaseline='alphabetic';
+      const w=ctx.measureText(label.text).width,h=fontSize;
+      if(bgOpacity>0){
+        ctx.fillStyle=colorWithAlpha(label.background_color||"#000000",bgOpacity);
+        ctx.fillRect(p.x-6,p.y-h-6,w+12,h+12);
+      }
+      if(border==="box"){
+        ctx.strokeStyle=colorWithAlpha(label.border_color||"#000000",borderOpacity);
+        ctx.lineWidth=Math.max(1,2*camera.zoom);
+        ctx.strokeRect(p.x-6,p.y-h-6,w+12,h+12);
+      }
+      if(border==="outline"){
+        ctx.strokeStyle=colorWithAlpha(label.border_color||"#000000",borderOpacity);
+        ctx.lineWidth=Math.max(1,3*camera.zoom);
+        ctx.strokeText(label.text,p.x,p.y);
+      }
+      ctx.fillStyle=colorWithAlpha(label.color||"#ffffff",opacity);
+      ctx.fillText(label.text,p.x,p.y);
+    });
+    ctx.restore();
+  }
+
   function drawFacilities() {
     if (!layers.facilities) return;
     ctx.save();
@@ -448,6 +484,7 @@
     drawStars(rect.width,rect.height);
     drawBaseHexes();
     drawTerritories();
+    drawMapLabels();
     drawModifiers();
     drawFacilities();
     drawArmies();
