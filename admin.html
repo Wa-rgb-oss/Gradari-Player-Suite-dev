@@ -237,10 +237,9 @@
             <form id="electionCreateForm" class="form-shell">
               <label><span>Office</span><select name="office_id" id="electionOffice" required></select></label>
               <label><span>Title</span><input name="title" required maxlength="180" placeholder="Election title"></label>
-              <label><span>Selection Method</span><select name="selection_method">
-                <option value="senate_seats">Senate Seat Vote</option>
-                <option value="character_vote">One Player Vote</option>
-              </select></label>
+              <div class="telemetry-stack">
+                <div class="telemetry-row"><span>Selection Method</span><strong id="electionMethodPreview">SELECT AN OFFICE</strong></div>
+              </div>
               <div class="form-grid">
                 <label><span>Opens In (World Hours)</span><input name="opens_in_world_hours" type="number" min="0" step="0.01" value="0" required></label>
                 <label><span>Voting Duration (World Hours)</span><input name="duration_world_hours" type="number" min="1" step="0.01" value="180" required></label>
