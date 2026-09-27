@@ -12,6 +12,10 @@
   let politicalActionTypes = [];
   let politicalActivity = [];
   let worldClock = null;
+  let offices = [];
+  let elections = [];
+  let electionCandidates = [];
+  let electionVotes = [];
 
   const $ = id => document.getElementById(id);
   const esc = value => GMUI.esc(value);
@@ -76,7 +80,7 @@
     const uid = encodeURIComponent(session.user.id);
     const [
       republicRows,seatRows,billRows,voteRows,influenceRows,txRows,taxRows,policyRows,
-      politicalTypes,activityRows,clock
+      politicalTypes,activityRows,clock,officeRows,electionRows,candidateRows,electionVoteRows
     ] = await Promise.all([
       GMAuth.api("republic_state?select=*&limit=1"),
       GMAuth.api("senate_faction_seats?select=*&order=seats.desc"),
@@ -88,7 +92,11 @@
       GMAuth.api("federal_policies?select=*&order=enacted_at.desc"),
       GMAuth.api("political_action_types?active=eq.true&select=*&order=name.asc"),
       GMAuth.api("political_activity_log?user_id=eq."+uid+"&select=*&order=world_hour.desc&limit=20"),
-      GMAuth.api("rpc/get_world_clock",{method:"POST",body:"{}"})
+      GMAuth.api("rpc/get_world_clock",{method:"POST",body:"{}"}),
+      GMAuth.api("imperial_offices?select=*&order=name.asc"),
+      GMAuth.api("political_elections?select=*&order=created_at.desc"),
+      GMAuth.api("election_candidates?select=*&order=created_at.asc"),
+      GMAuth.api("election_votes?select=*&order=created_at.asc")
     ]);
     republic = republicRows?.[0] || null;
     seats = seatRows || [];
@@ -101,6 +109,10 @@
     politicalActionTypes = politicalTypes || [];
     politicalActivity = activityRows || [];
     worldClock = clock || null;
+    offices = officeRows || [];
+    elections = electionRows || [];
+    electionCandidates = candidateRows || [];
+    electionVotes = electionVoteRows || [];
   }
 
   function seatColor(factionId) {
@@ -484,6 +496,128 @@
     ).join("");
   }
 
+  function renderOffices() {
+    const root=$("officeList");
+    const rows=offices || [];
+    if (!rows.length) {
+      root.innerHTML="";
+      $("officeEmpty").hidden=false;
+      return;
+    }
+    $("officeEmpty").hidden=true;
+    root.innerHTML=rows.map(office => {
+      const holder=characterById(office.current_holder_character_id);
+      const term=office.holder_until_world_hour ? worldTimeLabel(office.holder_until_world_hour) : "NO FIXED TERM";
+      return '<article class="notice">'+
+        '<div class="split-actions"><div><strong style="color:var(--text)">'+esc(office.name)+'</strong><div class="section-code">'+esc(String(office.selection_method).toUpperCase().replaceAll("_"," "))+'</div></div>'+
+        '<span class="status-chip '+(holder?"":"muted")+'">'+esc(holder?.name || "VACANT")+'</span></div>'+
+        (office.description?'<div style="margin-top:9px">'+esc(office.description)+'</div>':"")+
+        '<div class="section-code" style="margin-top:9px">TERM // '+esc(term)+' // CANDIDATE MINIMUM '+esc(fmt(office.candidate_influence_min))+' INF</div>'+
+        '</article>';
+    }).join("");
+  }
+
+  function renderElections() {
+    const root=$("electionList");
+    const rows=elections || [];
+    if (!rows.length) {
+      root.innerHTML="";
+      $("electionEmpty").hidden=false;
+      return;
+    }
+    $("electionEmpty").hidden=true;
+
+    const activeChar=activeCharacters()[0] || null;
+    const faction=ownFaction();
+    const politics=canPolitics();
+    const seatsHeld=ownSeatCount();
+
+    root.innerHTML=rows.map(election => {
+      const office=offices.find(row=>row.id===election.office_id);
+      const candidates=electionCandidates.filter(row=>row.election_id===election.id);
+      const ownCandidate=activeChar ? candidates.find(row=>row.character_id===activeChar.id && row.status==="declared") : null;
+      const ownVote=electionVotes.find(row=>row.election_id===election.id && row.voter_user_id===session.user.id);
+      const open=election.status==="open";
+      const canDeclare=open && activeChar && election.selection_method!=="appointment" && !ownCandidate;
+      const canVote=open && activeChar && candidates.some(row=>row.status==="declared") &&
+        (election.selection_method==="character_vote" ||
+          (election.selection_method==="senate_seats" && politics && seatsHeld>0 && faction));
+
+      const candidateRows=candidates.length
+        ? candidates.map(candidate => {
+            const publicWeight=election.status==="resolved"
+              ? electionVotes.filter(v=>v.election_id===election.id && v.candidate_character_id===candidate.character_id)
+                  .reduce((sum,v)=>sum+Number(v.weight||0),0)
+              : null;
+            return '<div class="resource-row"><div><strong>'+esc(candidate.candidate_name)+'</strong><div class="section-code">'+esc(candidate.faction_name || "NO FACTION")+' // '+esc(candidate.status.toUpperCase())+'</div></div><span>'+
+              (publicWeight===null ? (ownVote?.candidate_character_id===candidate.character_id ? "YOUR VOTE" : "CANDIDATE") : esc(fmt(publicWeight))+" VOTE WEIGHT")+
+              '</span></div>';
+          }).join("")
+        : '<div class="empty-state">NO CANDIDATES DECLARED.</div>';
+
+      const characterOptions=activeChar ? '<option value="'+esc(activeChar.id)+'">'+esc(activeChar.name)+'</option>' : "";
+      const candidateOptions=candidates.filter(row=>row.status==="declared").map(row =>
+        '<option value="'+esc(row.character_id)+'">'+esc(row.candidate_name)+'</option>'
+      ).join("");
+
+      return '<article class="notice election-card" data-election="'+esc(election.id)+'">'+
+        '<div class="split-actions"><div><strong style="color:var(--text)">'+esc(election.title)+'</strong><div class="section-code">'+esc(office?.name || "OFFICE")+' // '+esc(String(election.selection_method).toUpperCase().replaceAll("_"," "))+'</div></div>'+
+        '<span class="status-chip '+(open?"amber":"")+'">'+esc(election.status==="resolved" ? election.result : election.status)+'</span></div>'+
+        '<div class="section-code" style="margin-top:9px">OPENS '+esc(worldTimeLabel(election.opens_world_hour))+' // CLOSES '+esc(worldTimeLabel(election.closes_world_hour))+'</div>'+
+        (election.winner_name?'<div class="section-code" style="margin-top:6px">WINNER // '+esc(election.winner_name)+'</div>':"")+
+        '<div class="resource-list" style="margin-top:10px">'+candidateRows+'</div>'+
+        (canDeclare?'<button class="hud-button secondary declare-candidate" type="button" style="margin-top:10px">DECLARE CANDIDACY</button>':"")+
+        (canVote?'<div class="senate-vote-controls election-vote-controls" style="margin-top:10px">'+
+          '<select class="election-vote-character">'+characterOptions+'</select>'+
+          '<select class="election-vote-candidate">'+candidateOptions+'</select>'+
+          '<button class="hud-button secondary cast-election-vote" type="button">'+(ownVote?"UPDATE VOTE":"CAST VOTE")+'</button></div>':"")+
+        '</article>';
+    }).join("");
+
+    root.querySelectorAll(".declare-candidate").forEach(button => {
+      button.addEventListener("click",async () => {
+        const card=button.closest(".election-card");
+        const char=activeCharacters()[0];
+        const statement=prompt("Candidate statement (optional):","");
+        if (statement===null || !char) return;
+        try {
+          await GMAuth.api("rpc/declare_election_candidacy",{
+            method:"POST",
+            body:JSON.stringify({
+              p_election_id:card.dataset.election,
+              p_character_id:char.id,
+              p_statement:statement.trim() || null
+            })
+          });
+          await refreshPolitics("CANDIDACY DECLARED",$("electionState"));
+        } catch (error) {
+          setState($("electionState"),"CANDIDACY FAILED // "+error.message,"error");
+        }
+      });
+    });
+
+    root.querySelectorAll(".cast-election-vote").forEach(button => {
+      button.addEventListener("click",async () => {
+        const card=button.closest(".election-card");
+        const characterId=card.querySelector(".election-vote-character").value;
+        const candidateId=card.querySelector(".election-vote-candidate").value;
+        try {
+          await GMAuth.api("rpc/cast_election_vote",{
+            method:"POST",
+            body:JSON.stringify({
+              p_election_id:card.dataset.election,
+              p_candidate_character_id:candidateId,
+              p_character_id:characterId
+            })
+          });
+          await refreshPolitics("VOTE RECORDED",$("electionState"));
+        } catch (error) {
+          setState($("electionState"),"VOTE FAILED // "+error.message,"error");
+        }
+      });
+    });
+  }
+
   function renderBills() {
     const root = $("billList");
     if (!bills.length) {
@@ -582,6 +716,8 @@
     renderInfluence();
     renderPoliticalActivity();
     renderPolicies();
+    renderOffices();
+    renderElections();
     renderBills();
     renderBillForm();
     renderTaxAssessments();
