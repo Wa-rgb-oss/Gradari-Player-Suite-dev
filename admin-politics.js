@@ -333,6 +333,7 @@
               headers:{Prefer:"return=minimal"},
               body:JSON.stringify({
                 current_holder_character_id:null,
+                current_holder_name:null,
                 holder_since_world_hour:null,
                 holder_until_world_hour:null
               })
