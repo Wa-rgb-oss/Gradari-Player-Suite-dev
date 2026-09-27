@@ -489,6 +489,31 @@
     }
   });
 
+  $("officeCreateForm")?.addEventListener("submit",async event => {
+    event.preventDefault();
+    const form=event.currentTarget;
+    const d=Object.fromEntries(new FormData(form));
+    try {
+      await GMAuth.api("imperial_offices",{
+        method:"POST",
+        headers:{Prefer:"return=minimal"},
+        body:JSON.stringify({
+          code:d.code.trim().toUpperCase().replace(/[^A-Z0-9]+/g,"_").replace(/^_+|_+$/g,""),
+          name:d.name.trim(),
+          description:d.description.trim() || null,
+          selection_method:d.selection_method,
+          term_world_hours:d.term_world_hours ? Number(d.term_world_hours) : null,
+          candidate_influence_min:Number(d.candidate_influence_min || 0),
+          active:true
+        })
+      });
+      form.reset();
+      await refresh("OFFICE CREATED",$("officeCreateState"));
+    } catch (error) {
+      setState($("officeCreateState"),"OFFICE CREATE FAILED // "+error.message,"error");
+    }
+  });
+
   $("electionCreateForm")?.addEventListener("submit",async event => {
     event.preventDefault();
     const form=event.currentTarget;
