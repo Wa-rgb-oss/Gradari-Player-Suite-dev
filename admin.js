@@ -36,7 +36,9 @@
     armyMovements: [],
     militaryOperations: [],
     characterTravel: [],
-    economyCycleRuns: []
+    economyCycleRuns: [],
+    politicalActionTypes: [],
+    senateSeatHistory: []
   };
 
   const $ = id => document.getElementById(id);
@@ -345,7 +347,9 @@
       GMAuth.api("army_movements?select=*&order=created_at.desc&limit=100"),
       GMAuth.api("military_operations?select=*&order=created_at.desc&limit=100"),
       GMAuth.api("character_travel?select=*&order=created_at.desc&limit=100"),
-      GMAuth.api("economy_cycle_runs?select=*&order=cycle_index.desc&limit=12")
+      GMAuth.api("economy_cycle_runs?select=*&order=cycle_index.desc&limit=12"),
+      GMAuth.api("political_action_types?select=*&order=name.asc"),
+      GMAuth.api("senate_seat_history?select=*&order=changed_at.desc&limit=100")
     ]);
     [
       data.profiles,data.registrations,data.wallets,data.factions,data.memberships,
@@ -357,7 +361,7 @@
       data.republic,data.senateSeats,data.senateBills,data.senateVotes,
       data.federalTaxAssessments,data.federalPolicies,
       data.armies,data.armyMovements,data.militaryOperations,data.characterTravel,
-      data.economyCycleRuns
+      data.economyCycleRuns,data.politicalActionTypes,data.senateSeatHistory
     ] = results;
   }
 
