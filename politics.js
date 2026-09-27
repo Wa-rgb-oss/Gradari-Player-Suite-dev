@@ -82,6 +82,7 @@
   const senateCanvas = $("senateCanvas");
   const senateCtx = senateCanvas.getContext("2d");
   let chamberResizeObserver = null;
+  let chamberDrawFrame = 0;
 
   function buildSeatOwners(total) {
     const owners = [];
@@ -93,6 +94,7 @@
           owners.push(row.faction_id);
         }
       });
+
     while (owners.length < total) owners.push(null);
     return owners.slice(0,total);
   }
@@ -112,12 +114,14 @@
       used++;
       cursor = (cursor-1+counts.length)%counts.length;
     }
+
     while (used > total) {
       const index = counts.findIndex(value=>value>1);
       if (index < 0) break;
       counts[index]--;
       used--;
     }
+
     return counts;
   }
 
@@ -129,12 +133,12 @@
 
     counts.forEach((count,row) => {
       const radius = baseRadius + row*rowGap;
-      const start = Math.PI*1.05;
-      const finish = Math.PI*1.95;
+      const angleStart = Math.PI*1.05;
+      const angleEnd = Math.PI*1.95;
 
       for (let i=0;i<count;i++) {
         const t = count===1 ? .5 : i/(count-1);
-        const angle = start + (finish-start)*t;
+        const angle = angleStart+(angleEnd-angleStart)*t;
         positions.push({
           x:Math.cos(angle)*radius,
           y:Math.sin(angle)*radius,
@@ -151,27 +155,38 @@
     ctx.beginPath();
     for (let i=0;i<6;i++) {
       const angle = Math.PI/180*(60*i-30);
-      const px = x + size*Math.cos(angle);
-      const py = y + size*Math.sin(angle);
+      const px = x+size*Math.cos(angle);
+      const py = y+size*Math.sin(angle);
       if (i===0) ctx.moveTo(px,py);
       else ctx.lineTo(px,py);
     }
     ctx.closePath();
   }
 
-  function drawChamberCanvas(total,owners) {
-    const rect = senateCanvas.getBoundingClientRect();
-    const width = Math.max(320,rect.width || senateCanvas.parentElement?.clientWidth || 900);
-    const height = Math.max(360,rect.height || 640);
+  function currentChamberTotal() {
+    return Number(republic?.total_seats || player?.config?.senate_total_seats || 120);
+  }
+
+  function drawChamberCanvas() {
+    const stage = senateCanvas.closest(".senate-stage");
+    if (!stage) return;
+
+    const width = Math.max(460,stage.clientWidth || 900);
+    const height = Math.max(560,stage.clientHeight || 720);
     const dpr = Math.min(2,window.devicePixelRatio || 1);
+    const total = currentChamberTotal();
+    const owners = buildSeatOwners(total);
 
     senateCanvas.width = Math.round(width*dpr);
     senateCanvas.height = Math.round(height*dpr);
+    senateCanvas.style.width = width+"px";
+    senateCanvas.style.height = height+"px";
+
     senateCtx.setTransform(dpr,0,0,dpr,0,0);
     senateCtx.clearRect(0,0,width,height);
 
-    const scale = Math.min(width/860,height/760);
-    const center = {x:width/2,y:height*.73};
+    const scale = Math.min(width/930,height/790);
+    const center = {x:width/2,y:height*.72};
     const positions = buildSeatPositions(total);
 
     const ordered = positions
@@ -183,126 +198,114 @@
       ownerByPosition[entry.index] = owners[orderIndex] || null;
     });
 
-    senateCtx.save();
+    const background = senateCtx.createRadialGradient(
+      center.x,center.y*.62,30,
+      center.x,center.y,Math.max(width,height)*.72
+    );
+    background.addColorStop(0,"rgba(12,31,43,.44)");
+    background.addColorStop(.54,"rgba(4,16,23,.20)");
+    background.addColorStop(1,"rgba(1,7,10,0)");
+    senateCtx.fillStyle = background;
+    senateCtx.fillRect(0,0,width,height);
 
-    senateCtx.strokeStyle = "rgba(79,168,196,.34)";
-    senateCtx.lineWidth = Math.max(1,1.8*scale);
+    senateCtx.strokeStyle = "rgba(55,135,154,.58)";
+    senateCtx.lineWidth = Math.max(1,2*scale);
     [150,184,218,252,286,320,354].forEach(radius => {
       senateCtx.beginPath();
-      senateCtx.arc(
-        center.x,center.y,
-        radius*scale,
-        Math.PI*1.05,
-        Math.PI*1.95
-      );
+      senateCtx.arc(center.x,center.y,radius*scale,Math.PI*1.05,Math.PI*1.95);
       senateCtx.stroke();
     });
 
-    senateCtx.strokeStyle = "rgba(134,215,232,.11)";
+    senateCtx.strokeStyle = "rgba(79,205,227,.16)";
     senateCtx.lineWidth = 1;
     senateCtx.beginPath();
-    senateCtx.arc(center.x,center.y,382*scale,Math.PI*1.05,Math.PI*1.95);
+    senateCtx.arc(center.x,center.y,383*scale,Math.PI*1.05,Math.PI*1.95);
     senateCtx.stroke();
 
     positions.forEach((position,index) => {
       const factionId = ownerByPosition[index];
-      const x = center.x + position.x*scale;
-      const y = center.y + position.y*scale;
-      const size = Math.max(6,12.5*scale);
+      const x = center.x+position.x*scale;
+      const y = center.y+position.y*scale;
+      const size = Math.max(7,13*scale);
 
       hexPath(senateCtx,x,y,size);
 
       if (factionId) {
+        const color = seatColor(factionId);
         senateCtx.save();
-        senateCtx.shadowColor = seatColor(factionId);
+        senateCtx.shadowColor = color;
         senateCtx.shadowBlur = Math.max(2,6*scale);
-        senateCtx.fillStyle = seatColor(factionId);
+        senateCtx.fillStyle = color;
         senateCtx.fill();
         senateCtx.restore();
-        senateCtx.strokeStyle = "rgba(2,8,12,.9)";
+        senateCtx.strokeStyle = "rgba(2,8,12,.95)";
       } else {
-        senateCtx.fillStyle = "#e8edef";
+        senateCtx.fillStyle = "#edf1f2";
         senateCtx.fill();
-        senateCtx.strokeStyle = "#10181c";
+        senateCtx.strokeStyle = "#101619";
       }
 
-      senateCtx.lineWidth = Math.max(1,1.8*scale);
+      senateCtx.lineWidth = Math.max(1,2*scale);
       senateCtx.stroke();
     });
 
     const daisRadius = 120*scale;
-    const daisGradient = senateCtx.createRadialGradient(
-      center.x,center.y-daisRadius*.2,daisRadius*.1,
-      center.x,center.y,daisRadius
-    );
-    daisGradient.addColorStop(0,"rgba(11,28,37,.98)");
-    daisGradient.addColorStop(1,"rgba(3,10,14,.98)");
-
-    senateCtx.fillStyle = daisGradient;
+    senateCtx.fillStyle = "rgba(4,14,20,.97)";
     senateCtx.beginPath();
     senateCtx.arc(center.x,center.y,daisRadius,0,Math.PI*2);
     senateCtx.fill();
 
-    senateCtx.strokeStyle = "#4fcde3";
-    senateCtx.lineWidth = Math.max(1.4,2.2*scale);
-    senateCtx.shadowColor = "rgba(79,205,227,.24)";
+    senateCtx.strokeStyle = "#4fd4e8";
+    senateCtx.lineWidth = Math.max(1.5,2.2*scale);
+    senateCtx.shadowColor = "rgba(79,212,232,.28)";
     senateCtx.shadowBlur = 12*scale;
     senateCtx.stroke();
     senateCtx.shadowBlur = 0;
 
-    senateCtx.strokeStyle = "rgba(79,205,227,.22)";
+    senateCtx.strokeStyle = "rgba(79,212,232,.18)";
     senateCtx.lineWidth = 1;
     senateCtx.beginPath();
-    senateCtx.arc(center.x,center.y,daisRadius-9*scale,0,Math.PI*2);
+    senateCtx.arc(center.x,center.y,daisRadius-8*scale,0,Math.PI*2);
     senateCtx.stroke();
 
-    const titleY = center.y - 430*scale;
+    const titleY = center.y-430*scale;
     senateCtx.textAlign = "center";
     senateCtx.textBaseline = "middle";
     senateCtx.fillStyle = "#d8a35d";
-    senateCtx.font = `500 ${Math.max(17,23*scale)}px "Share Tech Mono", Consolas, monospace`;
+    senateCtx.font = `500 ${Math.max(17,22*scale)}px "Share Tech Mono", Consolas, monospace`;
     senateCtx.fillText("REPUBLIC OF WORLDS",center.x,titleY);
 
-    senateCtx.fillStyle = "rgba(134,215,232,.62)";
-    senateCtx.font = `400 ${Math.max(8,10.5*scale)}px "Share Tech Mono", Consolas, monospace`;
+    senateCtx.fillStyle = "rgba(134,215,232,.55)";
+    senateCtx.font = `400 ${Math.max(8,10*scale)}px "Share Tech Mono", Consolas, monospace`;
     senateCtx.fillText(
-      `FEDERAL SENATE // ${owners.filter(Boolean).length} ASSIGNED // ${total} TOTAL`,
-      center.x,
-      titleY+27*scale
+      `${owners.filter(Boolean).length} ASSIGNED // ${total} TOTAL SEATS`,
+      center.x,titleY+26*scale
     );
 
     senateCtx.fillStyle = "#91a9b1";
     senateCtx.font = `400 ${Math.max(9,12*scale)}px "Share Tech Mono", Consolas, monospace`;
-    senateCtx.fillText("FIRST CONSUL",center.x,center.y-11*scale);
+    senateCtx.fillText("FIRST CONSUL",center.x,center.y-10*scale);
 
     senateCtx.fillStyle = "#d8a35d";
     senateCtx.font = `500 ${Math.max(13,18*scale)}px "Share Tech Mono", Consolas, monospace`;
-    senateCtx.fillText(republic?.first_consul_name || "Vacant",center.x,center.y+18*scale);
+    senateCtx.fillText(republic?.first_consul_name || "Vacant",center.x,center.y+17*scale);
+  }
 
-    const bracketY = Math.max(16,titleY-34*scale);
-    senateCtx.strokeStyle = "rgba(79,205,227,.45)";
-    senateCtx.lineWidth = 1;
-    senateCtx.beginPath();
-    senateCtx.moveTo(24,bracketY+18);
-    senateCtx.lineTo(24,bracketY);
-    senateCtx.lineTo(Math.min(width*.18,150),bracketY);
-    senateCtx.moveTo(width-24,bracketY+18);
-    senateCtx.lineTo(width-24,bracketY);
-    senateCtx.lineTo(Math.max(width*.82,width-150),bracketY);
-    senateCtx.stroke();
-
-    senateCtx.restore();
+  function scheduleChamberDraw() {
+    cancelAnimationFrame(chamberDrawFrame);
+    chamberDrawFrame = requestAnimationFrame(() => {
+      drawChamberCanvas();
+      setTimeout(drawChamberCanvas,60);
+    });
   }
 
   function renderChamber() {
-    const total = Number(republic?.total_seats || player?.config?.senate_total_seats || 120);
-    const owners = buildSeatOwners(total);
-
-    drawChamberCanvas(total,owners);
+    scheduleChamberDraw();
 
     if (!chamberResizeObserver && "ResizeObserver" in window) {
-      chamberResizeObserver = new ResizeObserver(() => drawChamberCanvas(total,buildSeatOwners(total)));
-      chamberResizeObserver.observe(senateCanvas.parentElement);
+      const stage = senateCanvas.closest(".senate-stage");
+      chamberResizeObserver = new ResizeObserver(scheduleChamberDraw);
+      chamberResizeObserver.observe(stage);
     }
 
     $("senateLegend").innerHTML = seats
