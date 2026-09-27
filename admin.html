@@ -104,7 +104,11 @@
             <form id="factionForm" class="form-shell">
               <div class="form-grid"><label><span>Code</span><input name="code" maxlength="20"></label><label><span>Name *</span><input name="name" required maxlength="180"></label></div>
               <label><span>Description</span><textarea name="description"></textarea></label>
-              <label><span>Starting Treasury</span><input name="treasury" type="number" min="0" step="0.01" value="0"></label>
+              <div class="form-grid">
+                <label><span>Starting Treasury</span><input name="treasury" type="number" min="0" step="0.01" value="0"></label>
+                <label><span>Political Color</span><input name="color" type="color" value="#4fa8c4"></label>
+              </div>
+              <label class="checkbox-line"><input name="federal_member" type="checkbox" checked><span>Imperial federal member faction</span></label>
               <button class="hud-button" type="submit">CREATE FACTION</button>
               <div class="form-state" id="factionState"></div>
             </form>
