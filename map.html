@@ -8,7 +8,7 @@
   <title>Map | Gradari Mireris</title>
   <link rel="stylesheet" href="styles.css">
 </head>
-<body class="auth-pending">
+<body class="auth-pending map-body">
   <div class="app-shell protected-page">
     <aside class="sidebar">
       <div class="brand-block">
@@ -30,38 +30,115 @@
 
     <div class="main-frame">
       <header class="topbar">
-        <div class="page-id"><span class="page-bracket"></span><div><strong>MAP / GALACTIC DISPLAY</strong><span>TACTICAL INTERFACE PLACEHOLDER</span></div></div>
-        <div class="top-telemetry"><span><i class="status-dot"></i>DISPLAY ONLINE</span><span data-system-time>--:--:--</span></div>
+        <div class="page-id"><span class="page-bracket"></span><div><strong>MAP / GALACTIC CARTOGRAPHY</strong><span>HEX TERRITORY // CHARACTER PRESENCE // HOLDINGS</span></div></div>
+        <div class="top-telemetry"><span><i class="status-dot"></i>MAP ONLINE</span><span data-system-time>--:--:--</span></div>
       </header>
 
-      <main class="page-content">
-        <section class="hud-panel compact" style="margin-bottom:18px">
-          <div class="section-head">
-            <div><div class="section-code">NAVIGATION / 02</div><h2>Galactic Map</h2></div>
+      <main class="map-page">
+        <section class="map-hudbar">
+          <div class="map-hudbar-title">
+            <span class="section-code">GALACTIC CARTOGRAPHY</span>
+            <strong>STRATEGIC HEX MAP</strong>
           </div>
-          <p class="hero-copy" style="margin:0">This page establishes the map interface and navigation structure. The interactive hex map, systems, colonies, faction borders, and selectable locations will be connected here later.</p>
+          <div class="map-hudbar-metrics">
+            <span>HEXES <b id="mapHexCount">--</b></span>
+            <span>CLAIMED <b id="mapClaimedCount">--</b></span>
+            <span>HOLDINGS <b id="mapFacilityCount">--</b></span>
+            <span>ZOOM <b id="mapZoomReadout">100%</b></span>
+          </div>
         </section>
 
-        <section class="map-frame" aria-label="Temporary galactic map display">
-          <div class="map-center" title="Gradari Mireris"></div>
-          <div class="map-node node-a">Luminark Core</div>
-          <div class="map-node node-b">Virelac Enclave</div>
-          <div class="map-node node-c">Accordant Spiral</div>
-          <div class="map-node node-d">Gradari Mireris</div>
-          <div class="map-watermark">TACTICAL CARTOGRAPHY // INTERACTIVE LAYER PENDING</div>
-        </section>
+        <section class="map-workspace">
+          <aside class="map-tools map-side-panel">
+            <article class="hud-panel compact map-panel">
+              <div class="section-code">MAP / NAVIGATION</div>
+              <h2>Controls</h2>
+              <div class="map-button-grid">
+                <button class="hud-button secondary" id="mapCenterBtn" type="button">CENTER MAP</button>
+                <button class="hud-button secondary" id="mapCharacterBtn" type="button">MY CHARACTER</button>
+                <button class="hud-button secondary" id="mapRefreshBtn" type="button">REFRESH DATA</button>
+                <button class="hud-button secondary" id="mapCopyBtn" type="button">COPY HEX ID</button>
+              </div>
+              <div class="section-code map-help">DRAG TO PAN // SCROLL TO ZOOM // CLICK A HEX TO INSPECT</div>
+            </article>
 
-        <section class="metric-grid">
-          <article class="metric-card"><div class="metric-label">Map State</div><div class="metric-value">DEV</div><div class="metric-detail">PLACEHOLDER DISPLAY</div></article>
-          <article class="metric-card"><div class="metric-label">Hex Selection</div><div class="metric-value">--</div><div class="metric-detail">NOT CONNECTED</div></article>
-          <article class="metric-card"><div class="metric-label">System Layer</div><div class="metric-value">--</div><div class="metric-detail">PENDING</div></article>
-          <article class="metric-card"><div class="metric-label">Faction Layer</div><div class="metric-value">--</div><div class="metric-detail">PENDING</div></article>
+            <article class="hud-panel compact map-panel">
+              <div class="section-code">MAP / LAYERS</div>
+              <h2>Display</h2>
+              <label class="checkbox-line"><input id="layerTerritory" type="checkbox" checked><span>Faction territory</span></label>
+              <label class="checkbox-line"><input id="layerFacilities" type="checkbox" checked><span>Holdings</span></label>
+              <label class="checkbox-line"><input id="layerCharacter" type="checkbox" checked><span>Your character</span></label>
+              <label class="checkbox-line"><input id="layerModifiers" type="checkbox" checked><span>Location effects</span></label>
+            </article>
+
+            <article class="hud-panel compact map-panel">
+              <div class="section-code">CHARACTER / LOCATION</div>
+              <h2 id="mapCharacterName">No Character</h2>
+              <div class="telemetry-stack">
+                <div class="telemetry-row"><span>Life Status</span><strong id="mapCharacterStatus">--</strong></div>
+                <div class="telemetry-row"><span>Current Location</span><strong id="mapCharacterLocation">--</strong></div>
+                <div class="telemetry-row"><span>Faction</span><strong id="mapCharacterFaction">--</strong></div>
+              </div>
+              <button class="hud-button amber" id="setInitialLocationBtn" type="button" hidden>SET INITIAL LOCATION HERE</button>
+              <div class="form-state" id="mapCharacterState"></div>
+            </article>
+          </aside>
+
+          <section class="map-canvas-shell">
+            <canvas id="galaxyMap" aria-label="Interactive Gradari Mireris galactic hex map"></canvas>
+            <div class="map-reticle" aria-hidden="true"></div>
+            <div class="map-canvas-readout">
+              <span id="mapSelectedReadout">SELECT A HEX</span>
+              <span id="mapCoordinateReadout">Q -- // R --</span>
+            </div>
+          </section>
+
+          <aside class="map-inspector map-side-panel">
+            <article class="hud-panel compact map-panel">
+              <div class="section-code">SELECTED / LOCATION</div>
+              <h2 id="selectedHexName">No Hex Selected</h2>
+              <div class="telemetry-stack">
+                <div class="telemetry-row"><span>Hex ID</span><strong id="selectedHexRef">--</strong></div>
+                <div class="telemetry-row"><span>Faction</span><strong id="selectedHexFaction">UNCLAIMED</strong></div>
+                <div class="telemetry-row"><span>Status</span><strong id="selectedHexStatus">--</strong></div>
+                <div class="telemetry-row"><span>Production</span><strong id="selectedHexProduction">--</strong></div>
+              </div>
+              <div class="section-code map-panel-divider">LOCATION EFFECTS</div>
+              <div id="selectedModifierList" class="stack"></div>
+              <div class="empty-state map-mini-empty" id="selectedModifierEmpty">NO ACTIVE LOCATION EFFECTS.</div>
+            </article>
+
+            <article class="hud-panel compact map-panel">
+              <div class="section-code">SELECTED / HOLDINGS</div>
+              <h2>Facilities</h2>
+              <div id="selectedFacilityList" class="stack"></div>
+              <div class="empty-state map-mini-empty" id="selectedFacilityEmpty">NO VISIBLE HOLDINGS AT THIS LOCATION.</div>
+            </article>
+
+            <article class="hud-panel compact map-panel amber">
+              <div class="hud-kicker amber">CONSTRUCT HOLDING</div>
+              <form id="mapBuildForm" class="form-shell">
+                <label><span>Facility</span><select name="facility_type_id" id="mapFacilityType" required></select></label>
+                <label><span>Name</span><input name="name" maxlength="160" placeholder="Optional holding name"></label>
+                <div class="telemetry-stack">
+                  <div class="telemetry-row"><span>Build Cost</span><strong id="mapBuildCost">--</strong></div>
+                  <div class="telemetry-row"><span>Upkeep / Cycle</span><strong id="mapBuildUpkeep">--</strong></div>
+                  <div class="telemetry-row"><span>Your Aureum</span><strong id="mapWalletBalance">--</strong></div>
+                </div>
+                <button class="hud-button amber" id="mapBuildBtn" type="submit">CONSTRUCT HERE</button>
+                <div class="form-state" id="mapBuildState"></div>
+              </form>
+              <div class="empty-state map-mini-empty" id="mapBuildLocked" hidden></div>
+            </article>
+          </aside>
         </section>
       </main>
     </div>
   </div>
+
   <script src="auth.js"></script>
   <script src="ui.js"></script>
-  <script>GMUI.initProtected();</script>
+  <script src="player-data.js"></script>
+  <script src="map.js"></script>
 </body>
 </html>
