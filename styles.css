@@ -185,6 +185,7 @@ button{cursor:pointer}
 }
 .user-readout{font:400 .7rem/1.45 var(--mono);color:var(--muted);overflow-wrap:anywhere}
 .user-readout strong{display:block;color:var(--cyan);font-weight:400;margin-bottom:2px}
+.admin-access-btn,
 .signout-btn{
   width:100%;
   margin-top:13px;
@@ -195,6 +196,19 @@ button{cursor:pointer}
   font:400 .72rem var(--mono);
   text-transform:uppercase;
   letter-spacing:.1em;
+}
+.admin-access-btn{
+  display:block;
+  text-align:center;
+  text-decoration:none;
+  color:var(--amber);
+  border-color:rgba(216,163,93,.38);
+  background:linear-gradient(180deg,rgba(47,34,18,.34),#091219);
+}
+.admin-access-btn:hover{
+  color:#f0c98f;
+  border-color:var(--amber);
+  box-shadow:0 0 10px rgba(216,163,93,.12);
 }
 .signout-btn:hover{color:var(--text);border-color:var(--cyan2)}
 
