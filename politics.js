@@ -506,11 +506,11 @@
     }
     $("officeEmpty").hidden=true;
     root.innerHTML=rows.map(office => {
-      const holder=characterById(office.current_holder_character_id);
+      const holderName=office.current_holder_name || characterById(office.current_holder_character_id)?.name || null;
       const term=office.holder_until_world_hour ? worldTimeLabel(office.holder_until_world_hour) : "NO FIXED TERM";
       return '<article class="notice">'+
         '<div class="split-actions"><div><strong style="color:var(--text)">'+esc(office.name)+'</strong><div class="section-code">'+esc(String(office.selection_method).toUpperCase().replaceAll("_"," "))+'</div></div>'+
-        '<span class="status-chip '+(holder?"":"muted")+'">'+esc(holder?.name || "VACANT")+'</span></div>'+
+        '<span class="status-chip '+(holderName?"":"muted")+'">'+esc(holderName || "VACANT")+'</span></div>'+
         (office.description?'<div style="margin-top:9px">'+esc(office.description)+'</div>':"")+
         '<div class="section-code" style="margin-top:9px">TERM // '+esc(term)+' // CANDIDATE MINIMUM '+esc(fmt(office.candidate_influence_min))+' INF</div>'+
         '</article>';
