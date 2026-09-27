@@ -117,6 +117,76 @@
     }).join("") || '<tr><td colspan="6">No player profiles.</td></tr>';
   }
 
+  function renderCharactersAdmin() {
+    const root = $("adminCharacterList");
+    const empty = $("adminCharacterEmpty");
+    if (!root || !empty) return;
+
+    if (!data.characters.length) {
+      root.innerHTML = "";
+      empty.hidden = false;
+      return;
+    }
+
+    empty.hidden = true;
+    root.innerHTML = data.characters
+      .slice()
+      .sort((a,b) => {
+        const aAlive = a.status === "active" && a.life_status === "alive";
+        const bAlive = b.status === "active" && b.life_status === "alive";
+        if (aAlive !== bAlive) return aAlive ? -1 : 1;
+        return new Date(b.created_at) - new Date(a.created_at);
+      })
+      .map(row => {
+        const alive = row.status === "active" && row.life_status === "alive";
+        const faction = factionById(row.faction_id);
+        const death = !alive && row.died_at
+          ? '<div class="section-code" style="margin-top:8px">DIED // ' + esc(new Date(row.died_at).toLocaleString()) +
+            (row.death_cause ? ' // ' + esc(row.death_cause) : '') + '</div>'
+          : "";
+        return `
+          <article class="notice">
+            <div class="split-actions">
+              <div>
+                <strong style="color:var(--text)">${esc(row.name)}</strong>
+                <div class="section-code">${esc(profileName(row.user_id))} // ${esc(faction?.name || "NO FACTION")}</div>
+              </div>
+              <div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap">
+                <span class="status-chip ${alive ? "" : "muted"}">${alive ? "ALIVE" : "DECEASED"}</span>
+                ${alive ? '<button class="hud-button danger mark-character-deceased" type="button" data-id="' + esc(row.id) + '">MARK DECEASED</button>' : ""}
+              </div>
+            </div>
+            ${death}
+            ${row.death_notes ? '<div style="margin-top:8px">' + esc(row.death_notes) + '</div>' : ""}
+          </article>`;
+      }).join("");
+
+    root.querySelectorAll(".mark-character-deceased").forEach(button => {
+      button.addEventListener("click", async () => {
+        const cause = prompt("Cause of death / record label (optional):", "");
+        if (cause === null) return;
+        const notes = prompt("Death record notes (optional):", "");
+        if (notes === null) return;
+        if (!confirm("Mark this character as deceased? This removes them from active play.")) return;
+
+        try {
+          await GMAuth.api("rpc/mark_character_deceased", {
+            method:"POST",
+            body:JSON.stringify({
+              p_character_id:button.dataset.id,
+              p_cause:cause.trim() || null,
+              p_notes:notes.trim() || null,
+              p_died_at:null
+            })
+          });
+          await refreshData("CHARACTER MARKED DECEASED");
+        } catch (error) {
+          setState($("adminCharacterState"), "CHARACTER UPDATE FAILED // " + error.message, "error");
+        }
+      });
+    });
+  }
+
   function renderFactions() {
     const root = $("adminFactionList");
     root.innerHTML = data.factions.map(row => `
@@ -283,6 +353,7 @@
     fillSelects();
     renderOverview();
     renderPlayers();
+    renderCharactersAdmin();
     renderFactions();
     renderWallets();
     renderAssets();
