@@ -16,7 +16,7 @@
       GMAuth.api("players_tab?user_id=eq." + uid + "&select=*&limit=1"),
       GMAuth.api("player_wallets?user_id=eq." + uid + "&select=*&limit=1"),
       GMAuth.api("faction_memberships?user_id=eq." + uid + "&select=*&order=created_at.asc"),
-      GMAuth.api("factions?select=id,code,name,description,treasury,status,leader_user_id,tax_rate&order=name.asc"),
+      GMAuth.api("factions?select=id,code,name,description,treasury,status,leader_user_id,tax_rate,federal_tax_rate,color&order=name.asc"),
       GMAuth.api("player_assets?user_id=eq." + uid + "&select=*&order=updated_at.desc"),
       GMAuth.api("asset_catalog?select=id,code,name,kind,unit,description&order=name.asc"),
       GMAuth.api("characters?user_id=eq." + uid + "&select=*&order=is_main.desc,created_at.asc"),
