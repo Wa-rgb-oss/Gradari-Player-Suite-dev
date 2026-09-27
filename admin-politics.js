@@ -60,7 +60,7 @@
     const config=data?.config?.[0] || {};
     const form=$("republicStateForm");
     form.elements.government_name.value=republic.government_name || "Gradari Mireris Empire";
-    form.elements.chamber_name.value=republic.chamber_name || "Republic of Worlds Senate";
+    form.elements.chamber_name.value=republic.chamber_name || "Senate";
     form.elements.total_seats.value=republic.total_seats || config.senate_total_seats || 120;
     form.elements.current_session.value=republic.current_session || "";
     form.elements.first_consul_name.value=republic.first_consul_name === "Vacant" ? "" : (republic.first_consul_name || "");
@@ -95,8 +95,8 @@
             <label><span>Senate Seats</span><input name="seats" type="number" min="0" value="${esc(String(seats))}"></label>
             <label><span>Political Color</span><input name="color" type="color" value="${esc(faction.color || "#4fa8c4")}"></label>
           </div>
-          <label class="checkbox-line"><input name="federal_member" type="checkbox" ${faction.federal_member ? "checked" : ""}><span>Imperial federal member</span></label>
-          <label><span>Federal Tax Rate %</span><input name="federal_tax_rate" type="number" min="0" max="100" step="0.1" value="${esc(String(faction.federal_tax_rate ?? 10))}"></label>
+          <label class="checkbox-line"><input name="federal_member" type="checkbox" ${faction.federal_member ? "checked" : ""}><span>Imperial faction</span></label>
+          <label><span>Imperial Tax Rate %</span><input name="federal_tax_rate" type="number" min="0" max="100" step="0.1" value="${esc(String(faction.federal_tax_rate ?? 10))}"></label>
         </form>`;
     }).join("");
 
@@ -186,7 +186,7 @@
       return `
         <article class="notice">
           <div class="split-actions">
-            <div><strong style="color:var(--text)">${esc(bill.title)}</strong><div class="section-code">${esc(String(bill.bill_type || "LEGISLATION").toUpperCase())} // ${esc(sponsor?.name || "FEDERAL")} // ${esc(bill.sponsor_character_name || "NO CHARACTER")}</div></div>
+            <div><strong style="color:var(--text)">${esc(bill.title)}</strong><div class="section-code">${esc(String(bill.bill_type || "LEGISLATION").toUpperCase())} // ${esc(sponsor?.name || "SENATE")} // ${esc(bill.sponsor_character_name || "NO CHARACTER")}</div></div>
             <span class="status-chip ${bill.status==="open"?"amber":""}">${esc(bill.status==="resolved" ? bill.result : bill.status)}</span>
           </div>
           ${bill.description?'<div style="margin-top:10px">'+esc(bill.description)+'</div>':""}
@@ -215,7 +215,7 @@
     const root=$("adminFederalPolicyList");
     const rows=data?.federalPolicies || [];
     if (!rows.length) {
-      root.innerHTML='<div class="empty-state">NO FEDERAL POLICIES HAVE BEEN ENACTED.</div>';
+      root.innerHTML='<div class="empty-state">NO POLICIES HAVE BEEN ENACTED.</div>';
       return;
     }
 
@@ -256,7 +256,7 @@
               repealed_at:status==="repealed" ? new Date().toISOString() : null
             })
           });
-          await refresh("FEDERAL POLICY UPDATED",$("federalPolicyState"));
+          await refresh("POLICY UPDATED",$("federalPolicyState"));
         } catch (error) {
           setState($("federalPolicyState"),"POLICY UPDATE FAILED // "+error.message,"error");
         }
@@ -267,7 +267,7 @@
   function renderTaxAssessments() {
     const root=$("adminTaxAssessmentList");
     if (!(data?.federalTaxAssessments||[]).length) {
-      root.innerHTML='<div class="empty-state">NO FEDERAL TAX ASSESSMENTS.</div>';
+      root.innerHTML='<div class="empty-state">NO IMPERIAL TAX ASSESSMENTS.</div>';
       return;
     }
 
@@ -306,9 +306,9 @@
           p_first_consul_name:d.first_consul_name.trim() || null
         })
       });
-      await refresh("FEDERAL STATE UPDATED",$("republicStateState"));
+      await refresh("SENATE UPDATED",$("republicStateState"));
     } catch (error) {
-      setState($("republicStateState"),"FEDERAL STATE UPDATE FAILED // "+error.message,"error");
+      setState($("republicStateState"),"SENATE UPDATE FAILED // "+error.message,"error");
     }
   });
 
@@ -361,9 +361,9 @@
         method:"POST",
         body:JSON.stringify({p_cycle_key:form.elements.cycle_key.value.trim()})
       });
-      await refresh("FEDERAL TAX ASSESSMENT COMPLETE // "+result.processed_factions+" FACTIONS",$("federalTaxState"));
+      await refresh("IMPERIAL TAX ASSESSMENT COMPLETE // "+result.processed_factions+" FACTIONS",$("federalTaxState"));
     } catch (error) {
-      setState($("federalTaxState"),"FEDERAL TAX ASSESSMENT FAILED // "+error.message,"error");
+      setState($("federalTaxState"),"IMPERIAL TAX ASSESSMENT FAILED // "+error.message,"error");
     }
   });
 
