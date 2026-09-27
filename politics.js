@@ -51,7 +51,7 @@
   function eligibleCharacters() {
     const faction = ownFaction();
     if (!faction) return [];
-    return (player.characters || []).filter(char => char.status === "active" && char.faction_id === faction.id);
+    return (player.characters || []).filter(char => char.status === "active" && char.life_status === "alive" && char.faction_id === faction.id);
   }
 
   async function loadPolitics() {
@@ -327,7 +327,7 @@
 
     $("governmentName").textContent = republic?.government_name || "Gradari Mireris Empire";
     $("firstConsul").textContent = republic?.first_consul_name || "Vacant";
-    $("politicsAuthority").textContent = authority ? "POLITICS AUTHORIZED" : "VIEW ONLY";
+    $("politicsAuthority").textContent = authority ? "DELEGATE" : "OBSERVER";
     $("totalSeats").textContent = total;
     $("assignedSeats").textContent = assigned;
     $("unassignedSeats").textContent = Math.max(0,total-assigned);
@@ -366,12 +366,13 @@
     $("influenceEmpty").hidden = true;
     root.innerHTML = chars.map(char => {
       const wallet = influenceByCharacter(char.id);
+      const alive = char.status === "active" && char.life_status === "alive";
       const recent = influenceTransactions.filter(tx=>tx.character_id===char.id).slice(0,3);
       const history = recent.length
         ? recent.map(tx=>'<div class="section-code">'+esc(new Date(tx.created_at).toLocaleDateString())+' // '+(Number(tx.amount)>=0?"+":"")+esc(fmt(tx.amount))+' // '+esc(tx.description || tx.kind)+'</div>').join("")
         : '<div class="section-code">NO INFLUENCE LEDGER ACTIVITY</div>';
       return '<article class="notice">'+
-        '<div class="split-actions"><div><strong style="color:var(--text)">'+esc(char.name)+'</strong><div class="section-code">'+esc(char.title || "NO TITLE")+'</div></div>'+
+        '<div class="split-actions"><div><strong style="color:var(--text)">'+esc(char.name)+'</strong><div class="section-code">'+esc(char.title || "NO TITLE")+' // '+(alive?"ALIVE":"DECEASED")+'</div></div>'+
         '<span class="influence-badge"><b>'+esc(fmt(wallet.balance))+'</b> INFLUENCE</span></div>'+
         '<div class="telemetry-stack" style="margin-top:10px">'+
         '<div class="telemetry-row"><span>Lifetime Earned</span><strong>'+esc(fmt(wallet.lifetime_earned))+'</strong></div>'+
