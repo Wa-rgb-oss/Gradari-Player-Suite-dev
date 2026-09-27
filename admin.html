@@ -405,6 +405,25 @@
               </form>
             </section>
             <section class="hud-panel compact">
+              <div class="section-head"><div><div class="section-code">MAP / GRID</div><h2>Hex Registry</h2></div><p>AUTHORITATIVE MAP</p></div>
+              <form id="mapGridForm" class="form-shell">
+                <div class="form-grid"><label><span>Radius</span><input name="radius" type="number" min="4" max="40" required></label><label><span>Hex Size</span><input name="hex_size" type="number" min="16" max="64" required></label></div>
+                <button class="hud-button" type="submit">SAVE MAP GRID</button>
+                <div class="form-state" id="mapGridState"></div>
+              </form>
+              <div class="section-code" style="margin-top:18px">HEX METADATA</div>
+              <form id="mapHexForm" class="form-shell" style="margin-top:10px">
+                <label><span>Hex ID *</span><input name="location_ref" required placeholder="HEX_0_0"></label>
+                <div class="form-grid"><label><span>Display Name</span><input name="display_name"></label><label><span>Region</span><input name="region_name"></label></div>
+                <div class="form-grid"><label><span>Terrain / Space Type</span><input name="terrain_type"></label><label><span>Habitable Systems</span><input name="habitable_systems" type="number" min="0" value="0"></label></div>
+                <label><span>Status</span><input name="status" value="open"></label>
+                <label><span>Notes</span><textarea name="notes"></textarea></label>
+                <label class="checkbox-line"><input name="player_visible" type="checkbox" checked><span>Visible on player map</span></label>
+                <button class="hud-button" type="submit">SAVE HEX METADATA</button>
+                <div class="form-state" id="mapHexState"></div>
+              </form>
+            </section>
+            <section class="hud-panel compact">
               <div class="section-head"><div><div class="section-code">MAP / TERRITORY</div><h2>Territory Registry</h2></div><p>HEX OWNERSHIP READY</p></div>
               <div id="territoryList" class="stack"></div>
             </section>
