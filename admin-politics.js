@@ -279,13 +279,14 @@
 
     root.innerHTML=offices.map(office => {
       const holder=characterById(office.current_holder_character_id);
+      const holderName=holder?.name || office.current_holder_name || null;
       const candidateOptions='<option value="">Vacant</option>' + living.map(char =>
         '<option value="'+esc(char.id)+'" '+(char.id===office.current_holder_character_id?"selected":"")+'>'+esc(char.name)+'</option>'
       ).join("");
       return `
         <form class="office-admin-form notice form-shell" data-id="${esc(office.id)}">
           <div class="split-actions">
-            <div><strong style="color:var(--text)">${esc(office.name)}</strong><div class="section-code">${esc(office.code)} // ${holder ? "HELD BY "+esc(holder.name) : "VACANT"}</div></div>
+            <div><strong style="color:var(--text)">${esc(office.name)}</strong><div class="section-code">${esc(office.code)} // ${holderName ? "HELD BY "+esc(holderName) : "VACANT"}</div></div>
             <button class="hud-button secondary" type="submit">SAVE OFFICE</button>
           </div>
           <label><span>Description</span><textarea name="description">${esc(office.description || "")}</textarea></label>
