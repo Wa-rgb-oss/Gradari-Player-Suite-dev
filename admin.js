@@ -31,7 +31,11 @@
     senateBills: [],
     senateVotes: [],
     federalTaxAssessments: [],
-    federalPolicies: []
+    federalPolicies: [],
+    armies: [],
+    armyMovements: [],
+    militaryOperations: [],
+    characterTravel: []
   };
 
   const $ = id => document.getElementById(id);
@@ -335,7 +339,11 @@
       GMAuth.api("senate_bills?select=*&order=created_at.desc"),
       GMAuth.api("senate_votes?select=*&order=updated_at.desc"),
       GMAuth.api("federal_tax_assessments?select=*&order=assessed_at.desc&limit=100"),
-      GMAuth.api("federal_policies?select=*&order=enacted_at.desc")
+      GMAuth.api("federal_policies?select=*&order=enacted_at.desc"),
+      GMAuth.api("armies?select=*&order=name.asc"),
+      GMAuth.api("army_movements?select=*&order=created_at.desc&limit=100"),
+      GMAuth.api("military_operations?select=*&order=created_at.desc&limit=100"),
+      GMAuth.api("character_travel?select=*&order=created_at.desc&limit=100")
     ]);
     [
       data.profiles,data.registrations,data.wallets,data.factions,data.memberships,
@@ -345,7 +353,8 @@
       data.territories,data.locationModifiers,data.factionTransactions,
       data.characters,data.characterInfluence,data.influenceTransactions,
       data.republic,data.senateSeats,data.senateBills,data.senateVotes,
-      data.federalTaxAssessments,data.federalPolicies
+      data.federalTaxAssessments,data.federalPolicies,
+      data.armies,data.armyMovements,data.militaryOperations,data.characterTravel
     ] = results;
   }
 
