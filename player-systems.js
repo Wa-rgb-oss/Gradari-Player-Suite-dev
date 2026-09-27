@@ -288,7 +288,7 @@
     renderFactionLedger();
 
     const faction = membership.faction;
-    const isLeader = faction.leader_user_id === session.user.id;
+    const isLeader = faction.leader_user_id === session.user.id && faction.leadership_status !== "vacant";
     leaderControls.hidden = !isLeader;
 
     if (isLeader) {
