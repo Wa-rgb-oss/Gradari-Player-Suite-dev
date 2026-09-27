@@ -73,3 +73,24 @@ The frontend does not rely on hidden buttons for security.
 ## Visual direction
 
 Mid-2000s military science-fiction command console: angular HUD panels, technical typography, cyan/steel instrumentation, restrained amber indicators, tactical grids, and dense system readouts.
+
+
+## Politics and federal government
+
+Gradari now includes a Republic of Worlds federal politics framework.
+
+- Influence is a character-level political currency with its own ledger.
+- Imperial federal member factions can hold Senate seats.
+- Senate voting is faction-based and weighted by the number of seats controlled.
+- Faction leaders automatically retain political authority and can delegate the `politics` permission to members.
+- Authorized characters can spend Influence to sponsor legislation.
+- Passed Senate bills automatically enter the federal policy register.
+- Federal policies can carry structured effects for later integration with economy, military, map, and character systems.
+- Imperial federal member factions have a configurable federal tax rate.
+- Federal tax assessments apply to configured faction-generated Aureum revenue, not member deposits or founding capital.
+- External / non-federal factions can be excluded from Senate representation and Imperial taxation.
+- The First Consul and Republic of Worlds chamber are controlled from the Game Master backend.
+
+The Politics player page is `politics.html`. Politics administration is part of the restricted `admin.html` backend.
+
+The uploaded legacy Senate, economy, and map HTML files are design references only and are not part of this implementation.
