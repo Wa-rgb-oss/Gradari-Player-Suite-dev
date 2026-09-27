@@ -378,6 +378,8 @@
                 <div class="form-grid"><label><span>Minimum Founders</span><input name="faction_min_founders" type="number" min="2" required></label><label><span>Faction Creation Cost</span><input name="faction_creation_cost" type="number" min="0" step="0.01" required></label></div>
                 <div class="form-grid"><label><span>Minimum Founder Contribution</span><input name="faction_min_contribution" type="number" min="0" step="0.01" required></label><label><span>Default Faction Tax %</span><input name="faction_default_tax_rate" type="number" min="0" max="100" step="0.1" required></label></div>
                 <label><span>Maximum Faction Tax %</span><input name="faction_max_tax_rate" type="number" min="0" max="100" step="0.1" required></label>
+                <div class="form-grid"><label><span>Character Travel Hours / Hex</span><input name="character_travel_hours_per_hex" type="number" min="0.1" step="0.1" required></label><label><span>Army Travel Hours / Hex</span><input name="army_travel_hours_per_hex" type="number" min="0.1" step="0.1" required></label></div>
+                <div class="form-grid"><label><span>Military Operation Hours</span><input name="military_operation_hours" type="number" min="0.1" step="0.1" required></label><label><span>Raid Effect World Hours</span><input name="raid_effect_world_hours" type="number" min="0.1" step="0.1" required></label></div>
                 <button class="hud-button" type="submit">SAVE GAME RULES</button>
                 <div class="form-state" id="gameConfigState"></div>
               </form>
@@ -452,6 +454,27 @@
                 <div class="form-state" id="locationModifierState"></div>
               </form>
             </article>
+            <article class="hud-panel compact">
+              <div class="section-code">MILITARY / ARMY</div><h2 style="margin:5px 0 16px;text-transform:uppercase">Create Army</h2>
+              <form id="armyAdminForm" class="form-shell">
+                <label><span>Faction</span><select name="faction_id" data-faction-select required></select></label>
+                <label><span>Name *</span><input name="name" required></label>
+                <div class="form-grid"><label><span>Strength</span><input name="strength" type="number" min="0" step="1" value="100"></label><label><span>Maximum Strength</span><input name="max_strength" type="number" min="1" step="1" value="100"></label></div>
+                <label><span>Starting Hex</span><input name="location_ref" placeholder="HEX_0_0"></label>
+                <button class="hud-button" type="submit">CREATE ARMY</button>
+                <div class="form-state" id="armyAdminState"></div>
+              </form>
+              <div class="section-code" style="margin-top:18px">ACTIVE ARMIES</div>
+              <div id="adminArmyList" class="resource-list" style="margin-top:8px"></div>
+            </article>
+
+            <article class="hud-panel compact">
+              <div class="section-head"><div><div class="section-code">MILITARY / OPERATIONS</div><h2>Operations Awaiting Resolution</h2></div><p>RAID // CONQUEST</p></div>
+              <div id="militaryOperationList" class="stack"></div>
+              <div class="empty-state" id="militaryOperationEmpty" hidden>NO OPERATIONS ARE AWAITING RESOLUTION.</div>
+              <div class="form-state" id="militaryOperationState"></div>
+            </article>
+
             <article class="hud-panel compact">
               <div class="section-code">HOLDING / CREATE</div><h2 style="margin:5px 0 16px;text-transform:uppercase">Place Facility</h2>
               <form id="facilityAdminForm" class="form-shell">
