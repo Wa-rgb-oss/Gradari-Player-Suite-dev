@@ -167,6 +167,11 @@
     ["faction_min_founders","faction_creation_cost","faction_min_contribution","faction_default_tax_rate","faction_max_tax_rate"].forEach(key => {
       if (form.elements[key]) form.elements[key].value=cfg[key];
     });
+    const mapForm=$("mapGridForm");
+    if(mapForm){
+      mapForm.elements.radius.value=cfg.map_radius ?? 14;
+      mapForm.elements.hex_size.value=cfg.map_hex_size ?? 32;
+    }
   }
 
   function renderFacilityTypes() {
@@ -452,6 +457,52 @@
       await refresh("FACILITY TYPE CREATED",$("facilityTypeState"));
     } catch (error) {
       setState($("facilityTypeState"),"FACILITY TYPE FAILED // "+error.message,"error");
+    }
+  });
+
+  $("mapGridForm")?.addEventListener("submit",async event => {
+    event.preventDefault();
+    const form=event.currentTarget;
+    try{
+      const result=await GMAuth.api("rpc/configure_map_grid",{
+        method:"POST",
+        body:JSON.stringify({
+          p_radius:Number(form.elements.radius.value),
+          p_hex_size:Number(form.elements.hex_size.value)
+        })
+      });
+      await refresh("MAP GRID SAVED // "+result.visible_hexes+" VISIBLE HEXES",$("mapGridState"));
+    }catch(error){
+      setState($("mapGridState"),"MAP GRID UPDATE FAILED // "+error.message,"error");
+    }
+  });
+
+  $("mapHexForm")?.addEventListener("submit",async event => {
+    event.preventDefault();
+    const form=event.currentTarget;
+    const d=Object.fromEntries(new FormData(form));
+    const match=/^HEX_(-?\d+)_(-?\d+)$/.exec(d.location_ref.trim());
+    if(!match){
+      setState($("mapHexState"),"HEX ID MUST USE FORMAT HEX_Q_R","error");
+      return;
+    }
+    try{
+      await GMAuth.api("map_hexes?location_ref=eq."+encodeURIComponent(d.location_ref.trim()),{
+        method:"PATCH",
+        headers:{Prefer:"return=minimal"},
+        body:JSON.stringify({
+          display_name:d.display_name.trim() || null,
+          region_name:d.region_name.trim() || null,
+          terrain_type:d.terrain_type.trim() || null,
+          habitable_systems:Number(d.habitable_systems || 0),
+          status:d.status.trim() || "open",
+          notes:d.notes.trim() || null,
+          player_visible:form.elements.player_visible.checked
+        })
+      });
+      setState($("mapHexState"),"HEX METADATA SAVED","success");
+    }catch(error){
+      setState($("mapHexState"),"HEX UPDATE FAILED // "+error.message,"error");
     }
   });
 
