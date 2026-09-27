@@ -8,6 +8,7 @@
   let influence = [];
   let influenceTransactions = [];
   let taxAssessments = [];
+  let policies = [];
 
   const $ = id => document.getElementById(id);
   const esc = value => GMUI.esc(value);
@@ -54,14 +55,15 @@
   }
 
   async function loadPolitics() {
-    const [republicRows,seatRows,billRows,voteRows,influenceRows,txRows,taxRows] = await Promise.all([
+    const [republicRows,seatRows,billRows,voteRows,influenceRows,txRows,taxRows,policyRows] = await Promise.all([
       GMAuth.api("republic_state?select=*&limit=1"),
       GMAuth.api("senate_faction_seats?select=*&order=seats.desc"),
       GMAuth.api("senate_bills?select=*&order=created_at.desc"),
       GMAuth.api("senate_votes?select=*&order=updated_at.desc"),
       GMAuth.api("character_influence?select=*&order=updated_at.desc"),
       GMAuth.api("influence_transactions?select=*&order=created_at.desc&limit=50"),
-      GMAuth.api("federal_tax_assessments?select=*&order=assessed_at.desc&limit=20")
+      GMAuth.api("federal_tax_assessments?select=*&order=assessed_at.desc&limit=20"),
+      GMAuth.api("federal_policies?select=*&order=enacted_at.desc")
     ]);
     republic = republicRows?.[0] || null;
     seats = seatRows || [];
@@ -70,6 +72,7 @@
     influence = influenceRows || [];
     influenceTransactions = txRows || [];
     taxAssessments = taxRows || [];
+    policies = policyRows || [];
   }
 
   function seatColor(factionId) {
@@ -167,7 +170,8 @@
     $("politicalFactionCode").textContent = faction?.code || "UNASSIGNED";
     $("factionSeatCount").textContent = faction ? ownSeats : "--";
     $("factionSeatPercent").textContent = faction && total ? ((ownSeats/total)*100).toFixed(1)+"%" : "--";
-    $("factionFederalTax").textContent = faction ? fmt(faction.federal_tax_rate)+"%" : "--";
+    $("factionFederalStatus").textContent = faction ? (faction.federal_member ? "IMPERIAL MEMBER" : "EXTERNAL / NON-FEDERAL") : "--";
+    $("factionFederalTax").textContent = faction && faction.federal_member ? fmt(faction.federal_tax_rate)+"%" : "--";
 
     const arrears = taxAssessments.reduce((sum,row)=>sum+Number(row.arrears || 0),0);
     $("factionTaxArrears").textContent = faction ? fmt(arrears)+" A" : "--";
@@ -214,6 +218,24 @@
       no:rows.filter(v=>v.choice==="no").reduce((s,v)=>s+Number(v.seats_at_vote||0),0),
       abstain:rows.filter(v=>v.choice==="abstain").reduce((s,v)=>s+Number(v.seats_at_vote||0),0)
     };
+  }
+
+  function renderPolicies() {
+    const root = $("policyList");
+    const rows = policies || [];
+    if (!rows.length) {
+      root.innerHTML = "";
+      $("policyEmpty").hidden = false;
+      return;
+    }
+    $("policyEmpty").hidden = true;
+    root.innerHTML = rows.map(row =>
+      '<article class="notice">'+
+      '<div class="split-actions"><div><strong style="color:var(--text)">'+esc(row.title)+'</strong><div class="section-code">'+esc(String(row.policy_type || "LEGISLATION").toUpperCase())+' // ENACTED '+esc(new Date(row.enacted_at).toLocaleDateString())+'</div></div>'+
+      '<span class="status-chip '+(row.status==="active"?"":"muted")+'">'+esc(row.status)+'</span></div>'+
+      (row.description?'<div style="margin-top:10px">'+esc(row.description)+'</div>':"")+
+      '</article>'
+    ).join("");
   }
 
   function renderBills() {
@@ -312,6 +334,7 @@
     renderSummary();
     renderChamber();
     renderInfluence();
+    renderPolicies();
     renderBills();
     renderBillForm();
     renderTaxAssessments();
