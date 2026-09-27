@@ -6,7 +6,7 @@
     const uid = encode(userId);
 
     const [
-      profiles, registrations, wallets, memberships, factions, assets, catalog,
+      profiles, registrations, wallets, memberships, factions, assets, factionAssets, catalog,
       characters, actions, transactions, world, news, config, directory,
       proposals, proposalMembers, factionInvitations, factionTransactions,
       facilityTypes, facilities, markets, marketListings, events,
@@ -18,6 +18,7 @@
       GMAuth.api("faction_memberships?user_id=eq." + uid + "&select=*&order=created_at.asc"),
       GMAuth.api("factions?select=id,code,name,description,treasury,status,leader_user_id,tax_rate,federal_tax_rate,federal_member,color&order=name.asc"),
       GMAuth.api("player_assets?user_id=eq." + uid + "&select=*&order=updated_at.desc"),
+      GMAuth.api("faction_assets?select=*&order=updated_at.desc"),
       GMAuth.api("asset_catalog?select=id,code,name,kind,unit,description&order=name.asc"),
       GMAuth.api("characters?user_id=eq." + uid + "&select=*&order=is_main.desc,created_at.asc"),
       GMAuth.api("actions_tab?user_id=eq." + uid + "&select=id,action_title,category,status,created_at,resolution,resolved_at&order=created_at.desc"),
@@ -82,6 +83,7 @@
       primaryMembership: enrichedMemberships.find(row => row.status === "active") || enrichedMemberships[0] || null,
       factions: factions || [],
       assets: enrichedAssets,
+      factionAssets: factionAssets || [],
       catalog: catalog || [],
       characters: characters || [],
       actions: actions || [],
