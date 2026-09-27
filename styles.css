@@ -1187,43 +1187,67 @@ dialog::backdrop{background:rgba(0,0,0,.72);backdrop-filter:blur(2px)}
 }
 
 @media(max-width:1320px){
+  .senate-reference-layout{padding:10px}
   .senate-console{
-    grid-template-columns:190px minmax(460px,1fr) 250px;
+    grid-template-columns:175px minmax(420px,1fr) 225px;
+    gap:9px;
   }
+  .senate-console-panel{padding:12px}
 }
-@media(max-width:1040px){
+@media(max-width:1100px){
+  .senate-reference-layout{padding:8px}
+  .senate-console{
+    grid-template-columns:155px minmax(370px,1fr) 205px;
+    gap:8px;
+    min-height:640px;
+  }
+  .senate-console-panel{
+    padding:10px;
+    margin-bottom:8px;
+  }
+  .senate-console-panel h2{font-size:.9rem}
+  .senate-console-panel .telemetry-row{gap:6px}
+  .senate-console-panel .telemetry-row span,
+  .senate-console-panel .telemetry-row strong{font-size:.61rem}
+  .senate-console-left .senate-legend-item strong{font-size:.65rem}
+  .senate-console-left .senate-legend-item small{font-size:.55rem}
+}
+@media(max-width:820px){
+  .senate-reference-layout{padding:8px}
+  .senate-console{
+    grid-template-columns:145px minmax(350px,1fr) 190px;
+    gap:7px;
+    height:680px;
+    min-height:680px;
+  }
+  .senate-stage{
+    min-height:680px;
+    height:680px;
+  }
+  .senate-console-panel{padding:9px}
+  .senate-console-title{font-size:.9rem}
+  .senate-console-subtitle{font-size:.53rem}
+}
+@media(max-width:720px){
+  .senate-reference-layout{padding:10px}
   .senate-console{
     grid-template-columns:1fr;
     height:auto;
+    min-height:0;
     max-height:none;
   }
   .senate-stage{
     grid-row:1;
-    min-height:620px;
-    height:620px;
-  }
-  .senate-console-left,
-  .senate-console-right{
-    overflow:visible;
-    display:grid;
-    grid-template-columns:repeat(2,minmax(0,1fr));
-    gap:12px;
-  }
-  .senate-console-panel{
-    margin:0;
-  }
-}
-@media(max-width:720px){
-  .senate-reference-layout{padding:10px}
-  .senate-stage{
     min-height:440px;
     height:440px;
   }
   .senate-console-left,
   .senate-console-right{
+    overflow:visible;
+    display:grid;
     grid-template-columns:1fr;
+    gap:10px;
   }
-  .senate-console-right .senate-tally{
-    grid-template-columns:1fr;
-  }
+  .senate-console-panel{margin:0}
+  .senate-console-right .senate-tally{grid-template-columns:1fr}
 }
