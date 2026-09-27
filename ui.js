@@ -47,6 +47,21 @@
       el.textContent = session.user?.email || "Authenticated Player";
     });
 
+    const email = String(session.user?.email || "").trim().toLowerCase();
+    if (email === "wadejclaussen@gmail.com") {
+      document.querySelectorAll(".sidebar-footer").forEach(footer => {
+        if (footer.querySelector("[data-admin-link]")) return;
+        const link = document.createElement("a");
+        link.href = "admin.html";
+        link.className = "admin-access-btn";
+        link.dataset.adminLink = "";
+        link.textContent = "ADMIN CONSOLE";
+        const signout = footer.querySelector("[data-signout]");
+        if (signout) footer.insertBefore(link, signout);
+        else footer.appendChild(link);
+      });
+    }
+
     document.querySelectorAll("[data-signout]").forEach(button => {
       button.addEventListener("click", async () => {
         button.disabled = true;
