@@ -293,6 +293,35 @@
     }).join("");
   }
 
+  function renderSuccession() {
+    const root=$("characterSuccessionList");
+    const empty=$("characterSuccessionEmpty");
+    const rows=state.characterSuccessions || [];
+    if (!root || !empty) return;
+
+    if (!rows.length) {
+      root.innerHTML="";
+      empty.hidden=false;
+      return;
+    }
+
+    empty.hidden=true;
+    root.innerHTML=rows.map(row => {
+      const predecessor=state.characters.find(char=>char.id===row.predecessor_character_id);
+      const successor=state.characters.find(char=>char.id===row.successor_character_id);
+      return '<article class="notice">'+
+        '<div class="split-actions"><div><strong style="color:var(--text)">'+esc(predecessor?.name || "Predecessor")+' → '+esc(successor?.name || "Successor")+'</strong>'+
+        '<div class="section-code">'+esc(new Date(row.created_at).toLocaleDateString())+'</div></div>'+
+        '<span class="status-chip">'+esc(fmt(row.influence_inherited || 0))+' INF</span></div>'+
+        '<div class="telemetry-stack" style="margin-top:10px">'+
+        '<div class="telemetry-row"><span>Account Assets</span><strong>'+(row.assets_continued ? "CONTINUED" : "RESTRICTED")+'</strong></div>'+
+        '<div class="telemetry-row"><span>Influence Inherited</span><strong>'+esc(fmt(row.influence_inherited || 0))+'</strong></div>'+
+        '</div>'+
+        (row.notes?'<div style="margin-top:9px">'+esc(row.notes)+'</div>':"")+
+        '</article>';
+    }).join("");
+  }
+
   function renderActions() {
     const root = $("actionHistory");
     if (!state.actions.length) {
@@ -327,6 +356,7 @@
     renderFaction();
     renderCharacterFactionOptions();
     renderCharacters();
+    renderSuccession();
     renderActions();
     setActionIdentity();
     window.GMPlayerSuiteState = state;
