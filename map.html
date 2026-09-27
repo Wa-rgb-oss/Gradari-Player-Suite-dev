@@ -77,6 +77,7 @@
               <div class="telemetry-stack">
                 <div class="telemetry-row"><span>Life Status</span><strong id="mapCharacterStatus">--</strong></div>
                 <div class="telemetry-row"><span>Current Location</span><strong id="mapCharacterLocation">--</strong></div>
+                <div class="telemetry-row"><span>Movement</span><strong id="mapCharacterMovement">--</strong></div>
                 <div class="telemetry-row"><span>Faction</span><strong id="mapCharacterFaction">--</strong></div>
               </div>
               <button class="hud-button amber" id="setInitialLocationBtn" type="button" hidden>SET INITIAL LOCATION HERE</button>
@@ -113,6 +114,35 @@
               <h2>Facilities</h2>
               <div id="selectedFacilityList" class="stack"></div>
               <div class="empty-state map-mini-empty" id="selectedFacilityEmpty">NO VISIBLE HOLDINGS AT THIS LOCATION.</div>
+            </article>
+
+            <article class="hud-panel compact map-panel">
+              <div class="section-code">CHARACTER / TRAVEL</div>
+              <h2>Move Character</h2>
+              <div class="telemetry-stack">
+                <div class="telemetry-row"><span>Distance</span><strong id="mapTravelDistance">--</strong></div>
+                <div class="telemetry-row"><span>Travel Time</span><strong id="mapTravelHours">--</strong></div>
+                <div class="telemetry-row"><span>Arrival</span><strong id="mapTravelArrival">--</strong></div>
+              </div>
+              <button class="hud-button" id="mapTravelBtn" type="button">TRAVEL TO SELECTED HEX</button>
+              <div class="form-state" id="mapTravelState"></div>
+            </article>
+
+            <article class="hud-panel compact map-panel">
+              <div class="section-code">FACTION / MILITARY</div>
+              <h2>Army Orders</h2>
+              <label><span>Army</span><select id="mapArmySelect"></select></label>
+              <div class="telemetry-stack" style="margin-top:10px">
+                <div class="telemetry-row"><span>Strength</span><strong id="mapArmyStrength">--</strong></div>
+                <div class="telemetry-row"><span>Location</span><strong id="mapArmyLocation">--</strong></div>
+                <div class="telemetry-row"><span>Status</span><strong id="mapArmyStatus">--</strong></div>
+              </div>
+              <div class="map-button-grid" style="margin-top:10px">
+                <button class="hud-button secondary" id="mapArmyMoveBtn" type="button">MOVE ARMY</button>
+                <button class="hud-button secondary" id="mapRaidBtn" type="button">RAID</button>
+                <button class="hud-button secondary" id="mapConquestBtn" type="button">CONQUEST</button>
+              </div>
+              <div class="form-state" id="mapMilitaryState"></div>
             </article>
 
             <article class="hud-panel compact map-panel amber">
