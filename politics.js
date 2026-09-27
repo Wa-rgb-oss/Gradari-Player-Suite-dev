@@ -273,7 +273,7 @@
     senateCtx.textBaseline = "middle";
     senateCtx.fillStyle = "#d8a35d";
     senateCtx.font = `500 ${Math.max(17,22*scale)}px "Share Tech Mono", Consolas, monospace`;
-    senateCtx.fillText("REPUBLIC OF WORLDS",center.x,titleY);
+    senateCtx.fillText("SENATE",center.x,titleY);
 
     senateCtx.fillStyle = "rgba(134,215,232,.55)";
     senateCtx.font = `400 ${Math.max(8,10*scale)}px "Share Tech Mono", Consolas, monospace`;
@@ -326,7 +326,6 @@
     const authority = canPolitics();
 
     $("governmentName").textContent = republic?.government_name || "Gradari Mireris Empire";
-    $("chamberName").textContent = republic?.chamber_name || "Republic of Worlds Senate";
     $("firstConsul").textContent = republic?.first_consul_name || "Vacant";
     $("politicsAuthority").textContent = authority ? "POLITICS AUTHORIZED" : "VIEW ONLY";
     $("totalSeats").textContent = total;
@@ -341,7 +340,6 @@
     $("politicalFactionCode").textContent = faction?.code || "UNASSIGNED";
     $("factionSeatCount").textContent = faction ? ownSeats : "--";
     $("factionSeatPercent").textContent = faction && total ? ((ownSeats/total)*100).toFixed(1)+"%" : "--";
-    $("factionFederalStatus").textContent = faction ? (faction.federal_member ? "IMPERIAL MEMBER" : "EXTERNAL / NON-FEDERAL") : "--";
     $("factionFederalTax").textContent = faction && faction.federal_member ? fmt(faction.federal_tax_rate)+"%" : "--";
 
     const arrears = taxAssessments.reduce((sum,row)=>sum+Number(row.arrears || 0),0);
@@ -438,7 +436,7 @@
           '</div>';
 
       return '<article class="notice senate-bill">'+
-        '<div class="split-actions"><div><strong style="color:var(--text)">'+esc(bill.title)+'</strong><div class="section-code">'+esc(String(bill.bill_type || "LEGISLATION").toUpperCase())+' // '+esc(sponsor?.name || "FEDERAL")+' // SPONSOR: '+esc(bill.sponsor_character_name || "UNLISTED")+'</div></div>'+
+        '<div class="split-actions"><div><strong style="color:var(--text)">'+esc(bill.title)+'</strong><div class="section-code">'+esc(String(bill.bill_type || "LEGISLATION").toUpperCase())+' // '+esc(sponsor?.name || "SENATE")+' // SPONSOR: '+esc(bill.sponsor_character_name || "UNLISTED")+'</div></div>'+
         '<span class="status-chip '+(bill.status==="open"?"amber":"")+'">'+esc(bill.status==="resolved" ? bill.result : bill.status)+'</span></div>'+
         (bill.description?'<div style="margin-top:10px">'+esc(bill.description)+'</div>':"")+
         '<div class="senate-tally" style="margin-top:12px"><span>YES <b>'+esc(String(bill.status==="resolved" ? bill.final_yes ?? tally.yes : tally.yes))+'</b></span><span>NO <b>'+esc(String(bill.status==="resolved" ? bill.final_no ?? tally.no : tally.no))+'</b></span><span>ABSTAIN <b>'+esc(String(bill.status==="resolved" ? bill.final_abstain ?? tally.abstain : tally.abstain))+'</b></span></div>'+
@@ -528,7 +526,7 @@
         })
       });
       form.reset();
-      await refreshPolitics("BILL FILED WITH THE REPUBLIC OF WORLDS SENATE",$("billState"));
+      await refreshPolitics("BILL FILED WITH THE SENATE",$("billState"));
     } catch (error) {
       setState($("billState"),"BILL FILING FAILED // "+error.message,"error");
     }
