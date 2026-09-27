@@ -22,7 +22,15 @@
     eventAwards: [],
     territories: [],
     locationModifiers: [],
-    factionTransactions: []
+    factionTransactions: [],
+    characters: [],
+    characterInfluence: [],
+    influenceTransactions: [],
+    republic: [],
+    senateSeats: [],
+    senateBills: [],
+    senateVotes: [],
+    federalTaxAssessments: []
   };
 
   const $ = id => document.getElementById(id);
@@ -247,14 +255,25 @@
       GMAuth.api("event_awards?select=*&order=awarded_at.desc"),
       GMAuth.api("territories?select=*&order=location_ref.asc"),
       GMAuth.api("location_modifiers?select=*&order=created_at.desc"),
-      GMAuth.api("faction_transactions?select=*&order=created_at.desc&limit=100")
+      GMAuth.api("faction_transactions?select=*&order=created_at.desc&limit=100"),
+      GMAuth.api("characters?select=*&order=created_at.asc"),
+      GMAuth.api("character_influence?select=*&order=updated_at.desc"),
+      GMAuth.api("influence_transactions?select=*&order=created_at.desc&limit=100"),
+      GMAuth.api("republic_state?select=*&limit=1"),
+      GMAuth.api("senate_faction_seats?select=*&order=seats.desc"),
+      GMAuth.api("senate_bills?select=*&order=created_at.desc"),
+      GMAuth.api("senate_votes?select=*&order=updated_at.desc"),
+      GMAuth.api("federal_tax_assessments?select=*&order=assessed_at.desc&limit=100")
     ]);
     [
       data.profiles,data.registrations,data.wallets,data.factions,data.memberships,
       data.catalog,data.playerAssets,data.factionAssets,data.actions,data.world,
       data.config,data.markets,data.marketListings,data.facilityTypes,data.facilities,
       data.events,data.eventObjectives,data.eventParticipants,data.eventAwards,
-      data.territories,data.locationModifiers,data.factionTransactions
+      data.territories,data.locationModifiers,data.factionTransactions,
+      data.characters,data.characterInfluence,data.influenceTransactions,
+      data.republic,data.senateSeats,data.senateBills,data.senateVotes,
+      data.federalTaxAssessments
     ] = results;
   }
 
