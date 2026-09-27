@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#050a0e">
   <meta name="robots" content="noindex,nofollow">
-  <title>Politics | Gradari Mireris</title>
+  <title>Senate | Gradari Mireris</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body class="auth-pending politics-body">
@@ -30,7 +30,7 @@
 
     <div class="main-frame">
       <header class="topbar">
-        <div class="page-id"><span class="page-bracket"></span><div><strong>POLITICS / REPUBLIC OF WORLDS</strong><span>SENATE CHAMBER OF THE EMPIRE</span></div></div>
+        <div class="page-id"><span class="page-bracket"></span><div><strong>POLITICS / SENATE</strong><span>SENATE CHAMBER OF THE GRADARI MIRERIS EMPIRE</span></div></div>
         <div class="top-telemetry"><span><i class="status-dot"></i>CHAMBER ONLINE</span><span data-system-time>--:--:--</span></div>
       </header>
 
@@ -38,30 +38,18 @@
         <section class="senate-console">
           <aside class="senate-console-side senate-console-left">
             <article class="hud-panel compact senate-console-panel senate-title-panel">
-              <div class="senate-console-title">REPUBLIC</div>
-              <div class="senate-console-subtitle">Senate Chamber of the Empire</div>
+              <div class="senate-console-title">SENATE</div>
+              <div class="senate-console-subtitle">Political Chamber of the Gradari Mireris Empire</div>
             </article>
 
             <article class="hud-panel compact senate-console-panel">
-              <div class="section-code">REPUBLIC / STATE</div>
-              <h2>Federal State</h2>
+              <div class="section-code">EMPIRE / SENATE</div>
+              <h2>Chamber Status</h2>
               <div class="telemetry-stack">
-                <div class="telemetry-row"><span>Government</span><strong id="governmentName">GRADARI MIRERIS EMPIRE</strong></div>
-                <div class="telemetry-row"><span>Legislature</span><strong id="chamberName">REPUBLIC OF WORLDS SENATE</strong></div>
-                <div class="telemetry-row"><span>Federal Treasury</span><strong><span id="federalTreasury">--</span> A</strong></div>
+                <div class="telemetry-row"><span>Empire</span><strong id="governmentName">GRADARI MIRERIS EMPIRE</strong></div>
+                <div class="telemetry-row"><span>Imperial Treasury</span><strong><span id="federalTreasury">--</span> A</strong></div>
+                <div class="telemetry-row"><span>First Consul</span><strong id="firstConsul">VACANT</strong></div>
               </div>
-            </article>
-
-            <article class="hud-panel compact senate-console-panel">
-              <div class="section-code">SENATE / SEAT CONTROL</div>
-              <h2>Seat Distribution</h2>
-              <div class="telemetry-stack">
-                <div class="telemetry-row"><span>Total Seats</span><strong id="totalSeats">--</strong></div>
-                <div class="telemetry-row"><span>Assigned Seats</span><strong id="assignedSeats">--</strong></div>
-                <div class="telemetry-row"><span>Unassigned Seats</span><strong id="unassignedSeats">--</strong></div>
-              </div>
-              <div class="section-code senate-console-divider">FACTION BLOCS</div>
-              <div class="senate-legend" id="senateLegend"></div>
             </article>
 
             <article class="hud-panel compact senate-console-panel">
@@ -72,20 +60,68 @@
             </article>
           </aside>
 
-          <section class="senate-stage" aria-label="Republic of Worlds Senate chamber">
-            <div class="senate-stage-label">REPUBLIC OF WORLDS // FEDERAL CHAMBER</div>
-            <canvas id="senateCanvas" width="1000" height="760" aria-label="Semicircular Republic of Worlds Senate seat display"></canvas>
-            <div class="senate-stage-footer">
-              <span>LIVE REPRESENTATION</span>
-              <span id="senateStageStatus">120-SEAT CHAMBER</span>
-            </div>
-          </section>
+          <div class="senate-center-column">
+            <section class="senate-stage" aria-label="Senate chamber">
+              <div class="senate-seat-strip">
+                <div class="senate-seat-strip-heading">
+                  <div>
+                    <span class="section-code">SENATE / SEAT CONTROL</span>
+                    <strong>SEAT DISTRIBUTION</strong>
+                  </div>
+                  <div class="senate-seat-strip-totals">
+                    <span>TOTAL <b id="totalSeats">--</b></span>
+                    <span>ASSIGNED <b id="assignedSeats">--</b></span>
+                    <span>UNASSIGNED <b id="unassignedSeats">--</b></span>
+                  </div>
+                </div>
+                <div class="senate-seat-strip-legend" id="senateLegend"></div>
+              </div>
+
+              <div class="senate-stage-label">SENATE // LIVE REPRESENTATION</div>
+              <canvas id="senateCanvas" width="1000" height="760" aria-label="Semicircular Senate seat display"></canvas>
+              <div class="senate-stage-footer">
+                <span>SEAT WEIGHT // ONE VOTE PER ASSIGNED SEAT</span>
+                <span id="senateStageStatus">120-SEAT CHAMBER</span>
+              </div>
+            </section>
+
+            <section class="senate-below-grid">
+              <article class="hud-panel compact senate-console-panel">
+                <div class="section-code">SENATE / VOTING</div>
+                <h2>Active Legislation</h2>
+                <div id="billList" class="stack senate-below-stack"></div>
+                <div class="empty-state" id="billEmpty" hidden>NO SENATE LEGISLATION HAS BEEN FILED.</div>
+                <div class="form-state" id="voteState"></div>
+              </article>
+
+              <article class="hud-panel compact senate-console-panel amber">
+                <div class="hud-kicker amber">SPONSOR LEGISLATION</div>
+                <p class="hero-copy senate-side-copy">Filing currently costs <strong id="billInfluenceCost">--</strong> Influence.</p>
+                <form id="billForm" class="form-shell">
+                  <label><span>Sponsoring Character</span><select name="character_id" id="billCharacter" required></select></label>
+                  <label><span>Bill Type</span><select name="bill_type"><option value="legislation">Legislation</option><option value="budget">Budget / Appropriation</option><option value="taxation">Taxation</option><option value="military">Military / Security</option><option value="foreign_policy">Foreign Policy</option><option value="constitutional">Constitutional / Institutional</option><option value="other">Other</option></select></label>
+                  <label><span>Title *</span><input name="title" required maxlength="180"></label>
+                  <label><span>Description</span><textarea name="description" maxlength="4000"></textarea></label>
+                  <label><span>Voting Closes</span><input name="closes_at" type="datetime-local"></label>
+                  <button class="hud-button amber" type="submit">SPONSOR BILL</button>
+                  <div class="form-state" id="billState"></div>
+                </form>
+                <div class="empty-state" id="billFormLocked" hidden>POLITICS AUTHORITY, SENATE REPRESENTATION, AND A FACTION-ALIGNED CHARACTER ARE REQUIRED TO SPONSOR LEGISLATION.</div>
+              </article>
+
+              <article class="hud-panel compact senate-console-panel">
+                <div class="section-code">EMPIRE / TAX RECORD</div>
+                <h2>Assessments</h2>
+                <div id="taxAssessmentList" class="stack senate-below-stack"></div>
+                <div class="empty-state" id="taxAssessmentEmpty" hidden>NO IMPERIAL TAX ASSESSMENTS ARE RECORDED FOR YOUR FACTION.</div>
+              </article>
+            </section>
+          </div>
 
           <aside class="senate-console-side senate-console-right">
             <article class="hud-panel compact senate-console-panel amber">
               <div class="hud-kicker amber">CURRENT SENATE</div>
               <div class="telemetry-stack">
-                <div class="telemetry-row"><span>First Consul</span><strong id="firstConsul">VACANT</strong></div>
                 <div class="telemetry-row"><span>Your Authority</span><strong id="politicsAuthority">VIEW ONLY</strong></div>
                 <div class="telemetry-row"><span>Your Faction Seats</span><strong id="yourFactionSeats">--</strong></div>
                 <div class="telemetry-row"><span>Chamber Share</span><strong id="yourFactionSeatShare">NO REPRESENTATION</strong></div>
@@ -94,54 +130,23 @@
 
             <article class="hud-panel compact senate-console-panel">
               <div class="section-head">
-                <div><div class="section-code">FACTION / FEDERAL POSITION</div><h2 id="politicalFactionName">No Active Faction</h2></div>
+                <div><div class="section-code">FACTION / SENATE POSITION</div><h2 id="politicalFactionName">No Active Faction</h2></div>
                 <p id="politicalFactionCode">UNASSIGNED</p>
               </div>
               <div class="telemetry-stack">
                 <div class="telemetry-row"><span>Senate Seats</span><strong id="factionSeatCount">--</strong></div>
                 <div class="telemetry-row"><span>Chamber Share</span><strong id="factionSeatPercent">--</strong></div>
-                <div class="telemetry-row"><span>Federal Status</span><strong id="factionFederalStatus">--</strong></div>
-                <div class="telemetry-row"><span>Federal Tax Rate</span><strong id="factionFederalTax">--</strong></div>
+                <div class="telemetry-row"><span>Imperial Tax Rate</span><strong id="factionFederalTax">--</strong></div>
                 <div class="telemetry-row"><span>Current Arrears</span><strong id="factionTaxArrears">--</strong></div>
               </div>
               <div class="permission-list" id="politicsPermissionList"></div>
             </article>
 
             <article class="hud-panel compact senate-console-panel">
-              <div class="section-code">SENATE / VOTING</div>
-              <h2>Active Legislation</h2>
-              <div id="billList" class="stack senate-side-stack"></div>
-              <div class="empty-state" id="billEmpty" hidden>NO SENATE LEGISLATION HAS BEEN FILED.</div>
-              <div class="form-state" id="voteState"></div>
-            </article>
-
-            <article class="hud-panel compact senate-console-panel amber">
-              <div class="hud-kicker amber">SPONSOR LEGISLATION</div>
-              <p class="hero-copy senate-side-copy">Filing currently costs <strong id="billInfluenceCost">--</strong> Influence.</p>
-              <form id="billForm" class="form-shell">
-                <label><span>Sponsoring Character</span><select name="character_id" id="billCharacter" required></select></label>
-                <label><span>Bill Type</span><select name="bill_type"><option value="legislation">Legislation</option><option value="budget">Budget / Appropriation</option><option value="taxation">Taxation</option><option value="military">Military / Security</option><option value="foreign_policy">Foreign Policy</option><option value="constitutional">Constitutional / Institutional</option><option value="other">Other</option></select></label>
-                <label><span>Title *</span><input name="title" required maxlength="180"></label>
-                <label><span>Description</span><textarea name="description" maxlength="4000"></textarea></label>
-                <label><span>Voting Closes</span><input name="closes_at" type="datetime-local"></label>
-                <button class="hud-button amber" type="submit">SPONSOR BILL</button>
-                <div class="form-state" id="billState"></div>
-              </form>
-              <div class="empty-state" id="billFormLocked" hidden>POLITICS AUTHORITY, SENATE REPRESENTATION, AND A FACTION-ALIGNED CHARACTER ARE REQUIRED TO SPONSOR LEGISLATION.</div>
-            </article>
-
-            <article class="hud-panel compact senate-console-panel">
-              <div class="section-code">FEDERAL / TAX RECORD</div>
-              <h2>Assessments</h2>
-              <div id="taxAssessmentList" class="stack senate-side-stack"></div>
-              <div class="empty-state" id="taxAssessmentEmpty" hidden>NO FEDERAL TAX ASSESSMENTS ARE RECORDED FOR YOUR FACTION.</div>
-            </article>
-
-            <article class="hud-panel compact senate-console-panel">
-              <div class="section-code">FEDERAL / POLICY REGISTER</div>
+              <div class="section-code">SENATE / POLICY REGISTER</div>
               <h2>Enacted Policy</h2>
               <div id="policyList" class="stack senate-side-stack"></div>
-              <div class="empty-state" id="policyEmpty" hidden>NO FEDERAL POLICIES HAVE BEEN ENACTED.</div>
+              <div class="empty-state" id="policyEmpty" hidden>NO POLICIES HAVE BEEN ENACTED.</div>
             </article>
           </aside>
         </section>
