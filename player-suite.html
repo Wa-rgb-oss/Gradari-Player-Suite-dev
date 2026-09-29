@@ -322,39 +322,96 @@
         </section>
 
         <section class="panel" id="suite-characters" data-tab-panel>
-          <div class="content-grid">
-            <article class="hud-panel">
-              <div class="section-head"><div><div class="section-code">PLAYER / CHARACTER</div><h2>Your Character</h2></div></div>
-              <p class="hero-copy" style="margin:0 0 18px">Each player may have one active living character at a time. Deceased characters remain in the record, and a new character can be created after the previous character dies.</p>
-              <div id="characterList" class="stack"></div>
-              <div class="empty-state" id="characterEmpty" hidden>NO CHARACTER HAS BEEN CREATED.</div>
-            </article>
-            <aside class="hud-panel compact" id="characterCreatePanel">
+          <div id="characterEmptyState" class="character-empty-shell" hidden>
+            <article class="hud-panel character-create-hero">
               <div class="section-code">CHARACTER / CREATE</div>
-              <h2 style="margin:5px 0 16px;text-transform:uppercase">Create Character</h2>
-              <form id="characterForm" class="form-shell">
-                <label><span>Name *</span><input name="name" required maxlength="140"></label>
-                <label><span>Title</span><input name="title" maxlength="160"></label>
+              <h2>Create a Character</h2>
+              <p class="hero-copy">Your character is your presence within the Living Record. Create a character to enter the world, hold positions, participate in events, and interact with other characters.</p>
+              <button class="hud-button" id="openCharacterCreate" type="button">CREATE CHARACTER</button>
+              <form id="characterForm" class="form-shell character-create-form" hidden>
+                <div class="form-grid">
+                  <label><span>Name *</span><input name="name" required maxlength="140"></label>
+                  <label><span>Title</span><input name="title" maxlength="160"></label>
+                </div>
                 <label><span>Faction</span><select name="faction_id" id="characterFaction"><option value="">No faction</option></select></label>
                 <label><span>Bio / Notes</span><textarea name="bio" maxlength="2500"></textarea></label>
-                <button class="hud-button" type="submit">CREATE CHARACTER</button>
+                <div class="form-actions">
+                  <button class="hud-button" type="submit">CREATE CHARACTER</button>
+                  <button class="hud-button secondary" id="cancelCharacterCreate" type="button">CANCEL</button>
+                </div>
                 <div class="form-state" id="characterState"></div>
               </form>
-              <div class="empty-state" id="characterLimitNotice" hidden>YOU ALREADY HAVE AN ACTIVE LIVING CHARACTER.</div>
-            </aside>
+            </article>
           </div>
-          <article class="hud-panel compact" style="margin-top:18px">
-            <div class="section-head"><div><div class="section-code">CHARACTER / LOCATION</div><h2>Physical Presence</h2></div></div>
-            <p class="hero-copy" style="margin:0 0 18px">Your living character has a physical game location. Other characters are not automatically identified; when another visible character is present at the same location, you can see a presence count without automatically learning their identity.</p>
-            <div id="characterLocationList" class="stack"></div>
-            <div class="empty-state" id="characterLocationEmpty" hidden>NO ACTIVE CHARACTER LOCATION DATA AVAILABLE.</div>
-          </article>
-          <article class="hud-panel compact" style="margin-top:18px">
-            <div class="section-head"><div><div class="section-code">CHARACTER / SUCCESSION</div><h2>Continuity Record</h2></div></div>
-            <p class="hero-copy" style="margin:0 0 18px">Account assets continue between characters. Political Influence belongs to the character; any configured succession share is recorded when a successor enters play.</p>
-            <div id="characterSuccessionList" class="stack"></div>
-            <div class="empty-state" id="characterSuccessionEmpty" hidden>NO CHARACTER SUCCESSION HAS OCCURRED.</div>
-          </article>
+
+          <div id="characterDashboard" hidden>
+            <div class="character-dashboard-grid">
+              <article class="hud-panel character-standing-panel">
+                <div class="section-head">
+                  <div><div class="section-code">CHARACTER / OVERVIEW</div><h2>Current Standing</h2></div>
+                  <span class="status-chip" id="characterStandingStatus">ACTIVE</span>
+                </div>
+                <div class="character-standing-grid">
+                  <div class="character-standing-block">
+                    <span class="character-field-label">TITLE / POSITION</span>
+                    <strong id="characterStandingTitle">—</strong>
+                  </div>
+                  <div class="character-standing-block">
+                    <span class="character-field-label">FACTION</span>
+                    <strong id="characterStandingFaction">—</strong>
+                  </div>
+                  <div class="character-standing-block">
+                    <span class="character-field-label">POLITICAL INFLUENCE</span>
+                    <strong id="characterStandingInfluence">—</strong>
+                  </div>
+                  <div class="character-standing-block">
+                    <span class="character-field-label">CURRENT LOCATION</span>
+                    <strong id="characterStandingLocation">—</strong>
+                  </div>
+                </div>
+                <div class="character-standing-section">
+                  <div class="section-code">CURRENT INVOLVEMENT</div>
+                  <div id="characterInvolvement" class="character-involvement">No active events or assignments.</div>
+                </div>
+                <div class="character-standing-section">
+                  <div class="section-code">BIO / NOTES</div>
+                  <div id="characterStandingBio" class="character-involvement">No character notes recorded.</div>
+                </div>
+              </article>
+
+              <aside class="hud-panel compact character-identity-panel">
+                <div class="section-code">PLAYER / CHARACTER</div>
+                <div class="character-identity-head">
+                  <div>
+                    <h2 id="characterIdentityName">Your Character</h2>
+                    <div class="section-code" id="characterIdentityMeta">NO TITLE // NO FACTION</div>
+                  </div>
+                  <span class="status-chip" id="characterIdentityLife">ALIVE</span>
+                </div>
+                <div class="character-identity-location">
+                  <span class="character-field-label">CURRENT LOCATION</span>
+                  <strong id="characterIdentityLocation">LOCATION NOT SET</strong>
+                  <span id="characterPresenceSummary">0 OTHER CHARACTERS PRESENT</span>
+                </div>
+                <button class="hud-button secondary character-presence-button" id="toggleCharacterPresence" type="button">PHYSICAL PRESENCE</button>
+                <div id="characterPresenceDrawer" class="character-presence-drawer" hidden>
+                  <div id="characterLocationList" class="stack"></div>
+                  <div class="empty-state" id="characterLocationEmpty" hidden>NO ACTIVE CHARACTER LOCATION DATA AVAILABLE.</div>
+                </div>
+              </aside>
+            </div>
+
+            <article class="hud-panel compact character-record-panel">
+              <div class="section-head"><div><div class="section-code">CHARACTER / RECORD</div><h2>Character Record</h2></div></div>
+              <p class="hero-copy character-record-copy">Significant character history and succession are preserved here as the Living Record develops.</p>
+              <div id="characterSuccessionList" class="stack"></div>
+              <div class="empty-state character-record-empty" id="characterSuccessionEmpty" hidden>FIRST LIVING CHARACTER // NO SUCCESSION RECORDED.</div>
+            </article>
+          </div>
+          <div id="characterList" hidden></div>
+          <div id="characterEmpty" hidden></div>
+          <div id="characterCreatePanel" hidden></div>
+          <div id="characterLimitNotice" hidden></div>
         </section>
 
         <section class="panel" id="suite-actions" data-tab-panel>
