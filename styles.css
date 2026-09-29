@@ -2090,3 +2090,35 @@ dialog::backdrop{background:rgba(0,0,0,.72);backdrop-filter:blur(2px)}
   .account-photo-frame{width:110px}
   .account-user-id-value,.registration-complete{align-items:flex-start;flex-direction:column}
 }
+
+
+/* Player Suite consolidation */
+.inventory-grid-shell{padding:14px;border:1px solid var(--line-soft);background:rgba(2,8,12,.62)}
+.inventory-slot-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px}
+.inventory-slot{
+  position:relative;min-height:104px;padding:10px 8px 8px;border:1px solid rgba(79,168,196,.32);
+  background:linear-gradient(180deg,rgba(13,34,45,.96),rgba(5,13,18,.98));color:var(--text);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;cursor:pointer;
+}
+.inventory-slot:hover{border-color:var(--cyan);box-shadow:inset 0 0 18px rgba(69,215,232,.08)}
+.inventory-slot-icon{display:grid;place-items:center;width:38px;height:38px;border:1px solid rgba(216,163,93,.55);background:rgba(216,163,93,.08);color:var(--amber);font:600 .72rem var(--ui)}
+.inventory-slot strong{max-width:100%;font-size:.66rem;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.inventory-slot small{color:var(--muted);font:.52rem var(--mono);text-transform:uppercase}
+.inventory-slot-qty{position:absolute;right:6px;bottom:5px;color:var(--amber);font:600 .65rem var(--mono)}
+.character-inventory-panel{margin-top:18px}
+.character-holdings-panel{margin-top:18px}
+.faction-dashboard-grid{display:grid;grid-template-columns:minmax(0,1.8fr) minmax(260px,.72fr);gap:18px;align-items:start}
+.faction-side-stack{display:grid;gap:12px}
+.faction-side-stack .hud-panel{min-width:0}
+.faction-resource-panel .resource-row{padding:8px 0}
+.faction-resource-panel .resource-row .section-code{display:none}
+.faction-resource-panel .resource-row span{font-size:.65rem}
+.friends-grid{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(280px,.8fr);gap:18px;align-items:start}
+.player-search-bar{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:9px;margin-bottom:16px}
+.player-search-bar input{width:100%;padding:11px;border:1px solid var(--line);background:#050d12;color:var(--text);font:400 .72rem var(--mono)}
+#suite-friends h2,.faction-side-stack h2{margin:5px 0 12px;text-transform:uppercase}
+@media(max-width:760px){
+ .faction-dashboard-grid,.friends-grid{grid-template-columns:1fr}
+ .inventory-slot-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+ .player-search-bar{grid-template-columns:1fr}
+}
