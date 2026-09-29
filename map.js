@@ -815,6 +815,20 @@
     draw();
   },{passive:false});
 
+  document.querySelectorAll("[data-map-tab]").forEach(button => {
+    button.addEventListener("click", () => {
+      document.querySelectorAll("[data-map-tab]").forEach(tab => tab.classList.toggle("active", tab === button));
+      document.querySelectorAll(".map-command-page").forEach(page => page.classList.toggle("active", page.id === button.dataset.mapTab));
+    });
+  });
+
+  $("mapPanelCollapse")?.addEventListener("click", () => {
+    const workspace = document.querySelector(".map-workspace-unified");
+    workspace?.classList.toggle("map-panel-collapsed");
+    $("mapPanelCollapse").textContent = workspace?.classList.contains("map-panel-collapsed") ? "›" : "‹";
+    setTimeout(resize, 180);
+  });
+
   $("mapCenterBtn").addEventListener("click",centerMap);
 
   $("mapCharacterBtn").addEventListener("click",() => {
