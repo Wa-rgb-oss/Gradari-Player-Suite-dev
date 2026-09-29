@@ -46,12 +46,12 @@
     });
     const hash = location.hash.replace("#","").trim();
     const map = {
-      overview:"suite-overview",
       account:"suite-account",
       economy:"suite-economy",
-      inventory:"suite-inventory",
+      inventory:"suite-characters",
       faction:"suite-faction",
       characters:"suite-characters",
+      friends:"suite-friends",
       actions:"suite-actions",
       markets:"suite-markets",
       canon:"suite-canon"
@@ -220,11 +220,18 @@
       return;
     }
     $("playerAssetEmpty").hidden = true;
-    root.innerHTML = state.assets.map(row => `
-      <div class="resource-row">
-        <div><strong>${esc(row.asset?.name || "Unknown Asset")}</strong><div class="section-code">${esc((row.asset?.kind || "asset").toUpperCase())} // ${esc(row.asset?.description || "")}</div></div>
-        <span>${esc(fmt(row.quantity))} ${esc(row.asset?.unit || "unit")}</span>
-      </div>`).join("");
+    root.innerHTML = state.assets.map((row,index) => {
+      const name = row.asset?.name || "Unknown Asset";
+      const kind = row.asset?.kind || "asset";
+      const initials = String(name).split(/\s+/).slice(0,2).map(part => part[0] || "").join("").toUpperCase();
+      return `
+        <button class="inventory-slot" type="button" title="${esc(name)} — ${esc(row.asset?.description || kind)}">
+          <span class="inventory-slot-icon">${esc(initials || "•")}</span>
+          <strong>${esc(name)}</strong>
+          <span class="inventory-slot-qty">${esc(fmt(row.quantity))}</span>
+          <small>${esc(row.asset?.unit || kind)}</small>
+        </button>`;
+    }).join("");
   }
 
   function renderFaction() {
@@ -388,6 +395,21 @@
     window.GMPlayerSuiteState = state;
     document.dispatchEvent(new CustomEvent("gm:player-state",{detail:state}));
   }
+
+  $("friendSearchButton")?.addEventListener("click", () => {
+    const query = $("friendSearchInput")?.value.trim();
+    const root = $("friendSearchResults");
+    const empty = $("friendSearchEmpty");
+    if (!query) {
+      root.innerHTML = "";
+      empty.textContent = "ENTER A USERNAME OR ACCOUNT NAME.";
+      empty.hidden = false;
+      return;
+    }
+    root.innerHTML = "";
+    empty.textContent = "PLAYER DISCOVERY IS READY FOR THE FRIENDS DATABASE CONNECTION.";
+    empty.hidden = false;
+  });
 
   $("registerAgain")?.addEventListener("click", enableRegistrationAgain);
   $("copyAccountUserId")?.addEventListener("click", async () => {
