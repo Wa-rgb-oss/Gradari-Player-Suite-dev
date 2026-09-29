@@ -382,7 +382,6 @@
   async function refreshState() {
     state = await GMPlayerData.load(session);
     await loadFactionAssets();
-    renderOverview();
     renderAccount();
     renderEconomy();
     renderAssets();
