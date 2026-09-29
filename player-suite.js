@@ -163,7 +163,6 @@
   function renderAccount() {
     $("accountUserId").textContent = session.user.id;
     profileForm.elements.display_name.value = state.profile?.display_name || "";
-    profileForm.elements.handle.value = state.profile?.handle || "";
 
     const displayName = state.profile?.display_name || state.registration?.preferred || state.registration?.player || session.user.email || "Player";
     const initials = String(displayName).trim().split(/\s+/).slice(0,2).map(part => part[0] || "").join("").toUpperCase() || "PL";
@@ -444,8 +443,7 @@
         method:"PATCH",
         headers:{Prefer:"return=minimal"},
         body:JSON.stringify({
-          display_name:data.display_name?.trim() || null,
-          handle:data.handle?.trim() || null
+          display_name:data.display_name?.trim() || null
         })
       });
       setState(profileState, "PROFILE SAVED", "success");
