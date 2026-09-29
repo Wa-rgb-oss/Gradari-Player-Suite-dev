@@ -65,10 +65,7 @@
                   <span id="accountProfileInitials">PL</span>
                 </div>
                 <form id="profileForm" class="form-shell account-profile-form">
-                  <div class="form-grid">
-                    <label><span>Display Name</span><input name="display_name" maxlength="120"></label>
-                    <label><span>Handle</span><input name="handle" maxlength="80" placeholder="Optional unique player handle"></label>
-                  </div>
+                  <label><span>Profile Name</span><input name="display_name" maxlength="120" placeholder="Your public player name"></label>
                   <div class="form-actions"><button class="hud-button" type="submit">SAVE PROFILE</button></div>
                   <div class="form-state" id="profileState"></div>
                 </form>
@@ -362,8 +359,8 @@
           <div class="friends-grid">
             <article class="hud-panel">
               <div class="section-head"><div><div class="section-code">PLAYER NETWORK / DISCOVERY</div><h2>Find Players</h2></div></div>
-              <p class="hero-copy" style="margin:0 0 18px">Find another player by their public display name or handle. Account IDs remain useful for direct administrative support, but are not required to connect.</p>
-              <div class="player-search-bar"><input id="friendSearchInput" type="search" placeholder="Search username or account name"><button class="hud-button" id="friendSearchButton" type="button">SEARCH</button></div>
+              <p class="hero-copy" style="margin:0 0 18px">Find another player by their public profile name. Account IDs remain available for administrative support, but are not required to connect.</p>
+              <div class="player-search-bar"><input id="friendSearchInput" type="search" placeholder="Search profile name"><button class="hud-button" id="friendSearchButton" type="button">SEARCH</button></div>
               <div id="friendSearchResults" class="stack"></div>
               <div class="empty-state" id="friendSearchEmpty">SEARCH FOR A PLAYER TO CONNECT.</div>
             </article>
