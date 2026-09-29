@@ -48,54 +48,21 @@
           </div>
         </section>
 
-        <section class="map-workspace">
-          <aside class="map-tools map-side-panel">
-            <article class="hud-panel compact map-panel">
-              <div class="section-code">MAP / NAVIGATION</div>
-              <h2>Controls</h2>
-              <div class="map-button-grid">
-                <button class="hud-button secondary" id="mapCenterBtn" type="button">CENTER MAP</button>
-                <button class="hud-button secondary" id="mapCharacterBtn" type="button">MY CHARACTER</button>
-                <button class="hud-button secondary" id="mapRefreshBtn" type="button">REFRESH DATA</button>
-                <button class="hud-button secondary" id="mapCopyBtn" type="button">COPY HEX ID</button>
-              </div>
-              <div class="section-code map-help">DRAG TO PAN // SCROLL TO ZOOM // CLICK A HEX TO INSPECT</div>
-            </article>
-
-            <article class="hud-panel compact map-panel">
-              <div class="section-code">MAP / LAYERS</div>
-              <h2>Display</h2>
-              <label class="checkbox-line"><input id="layerTerritory" type="checkbox" checked><span>Faction territory</span></label>
-              <label class="checkbox-line"><input id="layerFacilities" type="checkbox" checked><span>Holdings</span></label>
-              <label class="checkbox-line"><input id="layerCharacter" type="checkbox" checked><span>Your character</span></label>
-              <label class="checkbox-line"><input id="layerModifiers" type="checkbox" checked><span>Location effects</span></label>
-            </article>
-
-            <article class="hud-panel compact map-panel">
-              <div class="section-code">CHARACTER / LOCATION</div>
-              <h2 id="mapCharacterName">No Character</h2>
-              <div class="telemetry-stack">
-                <div class="telemetry-row"><span>Life Status</span><strong id="mapCharacterStatus">--</strong></div>
-                <div class="telemetry-row"><span>Current Location</span><strong id="mapCharacterLocation">--</strong></div>
-                <div class="telemetry-row"><span>Movement</span><strong id="mapCharacterMovement">--</strong></div>
-                <div class="telemetry-row"><span>Faction</span><strong id="mapCharacterFaction">--</strong></div>
-              </div>
-              <button class="hud-button amber" id="setInitialLocationBtn" type="button" hidden>SET INITIAL LOCATION HERE</button>
-              <div class="form-state" id="mapCharacterState"></div>
-            </article>
-          </aside>
-
-          <section class="map-canvas-shell">
-            <canvas id="galaxyMap" aria-label="Interactive Gradari Mireris galactic hex map"></canvas>
-            <div class="map-reticle" aria-hidden="true"></div>
-            <div class="map-canvas-readout">
-              <span id="mapSelectedReadout">SELECT A HEX</span>
-              <span id="mapCoordinateReadout">Q -- // R --</span>
+        <section class="map-workspace map-workspace-unified">
+          <aside class="map-command-panel">
+            <div class="map-command-head">
+              <div><span class="section-code">GALACTIC CARTOGRAPHY</span><strong>MAP COMMAND</strong></div>
+              <button class="map-panel-collapse" id="mapPanelCollapse" type="button" aria-label="Collapse map controls">‹</button>
             </div>
-          </section>
-
-          <aside class="map-inspector map-side-panel">
-            <article class="hud-panel compact map-panel">
+            <div class="map-command-tabs" data-map-tabs>
+              <button class="map-command-tab active" type="button" data-map-tab="map-tab-location">LOCATION</button>
+              <button class="map-command-tab" type="button" data-map-tab="map-tab-character">CHARACTER</button>
+              <button class="map-command-tab" type="button" data-map-tab="map-tab-military">MILITARY</button>
+              <button class="map-command-tab" type="button" data-map-tab="map-tab-build">BUILD</button>
+              <button class="map-command-tab" type="button" data-map-tab="map-tab-display">DISPLAY</button>
+            </div>
+            <div class="map-command-content">
+              <div class="map-command-page active" id="map-tab-location">
               <div class="section-code">SELECTED / LOCATION</div>
               <h2 id="selectedHexName">No Hex Selected</h2>
               <div class="telemetry-stack">
@@ -107,16 +74,24 @@
               <div class="section-code map-panel-divider">LOCATION EFFECTS</div>
               <div id="selectedModifierList" class="stack"></div>
               <div class="empty-state map-mini-empty" id="selectedModifierEmpty">NO ACTIVE LOCATION EFFECTS.</div>
-            </article>
-
-            <article class="hud-panel compact map-panel">
+            
               <div class="section-code">SELECTED / HOLDINGS</div>
               <h2>Facilities</h2>
               <div id="selectedFacilityList" class="stack"></div>
               <div class="empty-state map-mini-empty" id="selectedFacilityEmpty">NO VISIBLE HOLDINGS AT THIS LOCATION.</div>
-            </article>
-
-            <article class="hud-panel compact map-panel">
+            </div>
+              <div class="map-command-page" id="map-tab-character">
+              <div class="section-code">CHARACTER / LOCATION</div>
+              <h2 id="mapCharacterName">No Character</h2>
+              <div class="telemetry-stack">
+                <div class="telemetry-row"><span>Life Status</span><strong id="mapCharacterStatus">--</strong></div>
+                <div class="telemetry-row"><span>Current Location</span><strong id="mapCharacterLocation">--</strong></div>
+                <div class="telemetry-row"><span>Movement</span><strong id="mapCharacterMovement">--</strong></div>
+                <div class="telemetry-row"><span>Faction</span><strong id="mapCharacterFaction">--</strong></div>
+              </div>
+              <button class="hud-button amber" id="setInitialLocationBtn" type="button" hidden>SET INITIAL LOCATION HERE</button>
+              <div class="form-state" id="mapCharacterState"></div>
+            
               <div class="section-code">CHARACTER / TRAVEL</div>
               <h2>Move Character</h2>
               <div class="telemetry-stack">
@@ -126,9 +101,8 @@
               </div>
               <button class="hud-button" id="mapTravelBtn" type="button">TRAVEL TO SELECTED HEX</button>
               <div class="form-state" id="mapTravelState"></div>
-            </article>
-
-            <article class="hud-panel compact map-panel">
+            </div>
+              <div class="map-command-page" id="map-tab-military">
               <div class="section-code">FACTION / MILITARY</div>
               <h2>Army Orders</h2>
               <label><span>Army</span><select id="mapArmySelect"></select></label>
@@ -143,9 +117,8 @@
                 <button class="hud-button secondary" id="mapConquestBtn" type="button">CONQUEST</button>
               </div>
               <div class="form-state" id="mapMilitaryState"></div>
-            </article>
-
-            <article class="hud-panel compact map-panel amber">
+            </div>
+              <div class="map-command-page" id="map-tab-build">
               <div class="hud-kicker amber">CONSTRUCT HOLDING</div>
               <form id="mapBuildForm" class="form-shell">
                 <label><span>Facility</span><select name="facility_type_id" id="mapFacilityType" required></select></label>
@@ -159,8 +132,35 @@
                 <div class="form-state" id="mapBuildState"></div>
               </form>
               <div class="empty-state map-mini-empty" id="mapBuildLocked" hidden></div>
-            </article>
+            </div>
+              <div class="map-command-page" id="map-tab-display">
+              <div class="section-code">MAP / NAVIGATION</div>
+              <h2>Controls</h2>
+              <div class="map-button-grid">
+                <button class="hud-button secondary" id="mapCenterBtn" type="button">CENTER MAP</button>
+                <button class="hud-button secondary" id="mapCharacterBtn" type="button">MY CHARACTER</button>
+                <button class="hud-button secondary" id="mapRefreshBtn" type="button">REFRESH DATA</button>
+                <button class="hud-button secondary" id="mapCopyBtn" type="button">COPY HEX ID</button>
+              </div>
+              <div class="section-code map-help">DRAG TO PAN // SCROLL TO ZOOM // CLICK A HEX TO INSPECT</div>
+            
+              <div class="section-code">MAP / LAYERS</div>
+              <h2>Display</h2>
+              <label class="checkbox-line"><input id="layerTerritory" type="checkbox" checked><span>Faction territory</span></label>
+              <label class="checkbox-line"><input id="layerFacilities" type="checkbox" checked><span>Holdings</span></label>
+              <label class="checkbox-line"><input id="layerCharacter" type="checkbox" checked><span>Your character</span></label>
+              <label class="checkbox-line"><input id="layerModifiers" type="checkbox" checked><span>Location effects</span></label>
+            </div>
+            </div>
           </aside>
+          <section class="map-canvas-shell">
+            <canvas id="galaxyMap" aria-label="Interactive Gradari Mireris galactic hex map"></canvas>
+            <div class="map-reticle" aria-hidden="true"></div>
+            <div class="map-canvas-readout">
+              <span id="mapSelectedReadout">SELECT A HEX</span>
+              <span id="mapCoordinateReadout">Q -- // R --</span>
+            </div>
+          </section>
         </section>
       </main>
     </div>
