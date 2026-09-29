@@ -26,7 +26,7 @@
       GMAuth.api("world_state?select=key,label,category,value,updated_at&order=category.asc,key.asc"),
       GMAuth.api("game_news?select=id,title,body,visibility,faction_id,published_at&order=published_at.desc&limit=12"),
       GMAuth.api("game_config?select=*&limit=1"),
-      GMAuth.api("player_profiles?is_discoverable=eq.true&select=user_id,display_name,handle&order=display_name.asc"),
+      GMAuth.api("player_profiles?is_discoverable=eq.true&select=user_id,display_name&order=display_name.asc"),
       GMAuth.api("faction_proposals?select=*&order=created_at.desc"),
       GMAuth.api("faction_proposal_members?select=*&order=created_at.asc"),
       GMAuth.api("faction_invitations?select=*&order=created_at.desc"),
