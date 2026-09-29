@@ -70,8 +70,19 @@
   }
 
   function disableRegistration() {
-    registrationForm.querySelectorAll("input,textarea,select,button").forEach(control => control.disabled = true);
-    setState(registrationState, "PLAYER REGISTRATION ALREADY EXISTS FOR THIS ACCOUNT", "success");
+    registrationForm.hidden = true;
+    $("registrationComplete").hidden = false;
+    $("registrationPanel").classList.add("is-registered");
+    setState(registrationState, "");
+  }
+
+  function enableRegistrationAgain() {
+    registrationForm.reset();
+    registrationForm.querySelectorAll("input,textarea,select,button").forEach(control => control.disabled = false);
+    $("registrationComplete").hidden = true;
+    $("registrationPanel").classList.remove("is-registered");
+    registrationForm.hidden = false;
+    setState(registrationState, "");
   }
 
   function addCommitment(item="", detail="") {
@@ -153,9 +164,31 @@
     $("accountUserId").textContent = session.user.id;
     profileForm.elements.display_name.value = state.profile?.display_name || "";
     profileForm.elements.handle.value = state.profile?.handle || "";
+
+    const displayName = state.profile?.display_name || state.registration?.preferred || state.registration?.player || session.user.email || "Player";
+    const initials = String(displayName).trim().split(/\s+/).slice(0,2).map(part => part[0] || "").join("").toUpperCase() || "PL";
+    $("accountProfileInitials").textContent = initials;
+
+    const photoUrl = state.profile?.avatar_url || state.profile?.profile_photo_url || state.profile?.photo_url || "";
+    const photo = $("accountProfilePhoto");
+    if (photoUrl) {
+      photo.src = photoUrl;
+      photo.alt = displayName + " profile photo";
+      photo.hidden = false;
+      $("accountProfileInitials").hidden = true;
+    } else {
+      photo.removeAttribute("src");
+      photo.hidden = true;
+      $("accountProfileInitials").hidden = false;
+    }
+
     if (state.registration) {
       restoreForm(registrationForm, state.registration);
       disableRegistration();
+    } else {
+      $("registrationComplete").hidden = true;
+      $("registrationPanel").classList.remove("is-registered");
+      registrationForm.hidden = false;
     }
   }
 
@@ -356,6 +389,16 @@
     document.dispatchEvent(new CustomEvent("gm:player-state",{detail:state}));
   }
 
+  $("registerAgain")?.addEventListener("click", enableRegistrationAgain);
+  $("copyAccountUserId")?.addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText(session.user.id);
+      setState($("copyUserIdState"), "USER ID COPIED", "success");
+    } catch {
+      setState($("copyUserIdState"), "COPY FAILED", "error");
+    }
+  });
+
   $("openCharacterCreate")?.addEventListener("click", () => {
     $("openCharacterCreate").hidden = true;
     $("characterForm").hidden = false;
@@ -393,12 +436,12 @@
 
   registrationForm.addEventListener("submit", async event => {
     event.preventDefault();
-    if (state.registration || !registrationForm.reportValidity()) return;
+    if (!registrationForm.reportValidity()) return;
     const data = formObject(registrationForm);
     setState(registrationState, "SUBMITTING PLAYER REGISTRATION...");
     try {
-      await GMAuth.api("players_tab", {
-        method:"POST",
+      await GMAuth.api(state.registration ? "players_tab?user_id=eq." + encodeURIComponent(session.user.id) : "players_tab", {
+        method:state.registration ? "PATCH" : "POST",
         headers:{Prefer:"return=minimal"},
         body:JSON.stringify({
           user_id:session.user.id,
