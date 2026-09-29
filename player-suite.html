@@ -43,50 +43,17 @@
         </section>
 
         <div class="tabs" data-tabs>
-          <button class="tab active" type="button" data-tab-target="suite-overview">OVERVIEW</button>
-          <button class="tab" type="button" data-tab-target="suite-account">ACCOUNT</button>
+          <button class="tab active" type="button" data-tab-target="suite-account">ACCOUNT</button>
           <button class="tab" type="button" data-tab-target="suite-economy">ECONOMY</button>
           <button class="tab" type="button" data-tab-target="suite-markets">MARKETS</button>
-          <button class="tab" type="button" data-tab-target="suite-inventory">INVENTORY</button>
           <button class="tab" type="button" data-tab-target="suite-faction">FACTION</button>
-          <button class="tab" type="button" data-tab-target="suite-characters">CHARACTER</button>
+          <button class="tab" type="button" data-tab-target="suite-characters">CHARACTER & INVENTORY</button>
+          <button class="tab" type="button" data-tab-target="suite-friends">FRIENDS</button>
           <button class="tab" type="button" data-tab-target="suite-actions">ACTIONS</button>
           <button class="tab" type="button" data-tab-target="suite-canon">CANON</button>
         </div>
 
-        <section class="panel active" id="suite-overview" data-tab-panel>
-          <div class="content-grid">
-            <article class="hud-panel compact">
-              <div class="section-code">PLAYER SUITE / SYSTEMS</div>
-              <h2 style="margin:5px 0 12px;text-transform:uppercase">Your Account Systems</h2>
-              <div class="command-list">
-                <div class="command-row"><div class="command-icon">A</div><div><h3>Account</h3><p>Player identity and game registration connected only to your login.</p></div><button class="hud-button secondary" type="button" data-open-tab="suite-account">OPEN</button></div>
-                <div class="command-row"><div class="command-icon">E</div><div><h3>Economy</h3><p>Your personal bank balance and transaction record.</p></div><button class="hud-button secondary" type="button" data-open-tab="suite-economy">OPEN</button></div>
-                <div class="command-row"><div class="command-icon">I</div><div><h3>Inventory</h3><p>Resources and assets currently owned by your player account.</p></div><button class="hud-button secondary" type="button" data-open-tab="suite-inventory">OPEN</button></div>
-                <div class="command-row"><div class="command-icon">F</div><div><h3>Faction</h3><p>Your faction membership, role, permissions, treasury, and faction resources.</p></div><button class="hud-button secondary" type="button" data-open-tab="suite-faction">OPEN</button></div>
-                <div class="command-row"><div class="command-icon">C</div><div><h3>Character</h3><p>View your active character, life status, location, and character record.</p></div><button class="hud-button secondary" type="button" data-open-tab="suite-characters">OPEN</button></div>
-                <div class="command-row"><div class="command-icon">X</div><div><h3>Actions</h3><p>Submit formal actions and review the status of your own requests.</p></div><button class="hud-button secondary" type="button" data-open-tab="suite-actions">OPEN</button></div>
-              </div>
-            </article>
-
-            <aside class="stack">
-              <article class="hud-panel compact">
-                <div class="hud-kicker">ACCOUNT TELEMETRY</div>
-                <div class="telemetry-stack">
-                  <div class="telemetry-row"><span>Registration</span><strong id="suiteProfileStatus">SCANNING</strong></div>
-                  <div class="telemetry-row"><span>Personal Bank</span><strong id="suiteWallet">--</strong></div>
-                  <div class="telemetry-row"><span>Faction</span><strong id="suiteFaction">--</strong></div>
-                  <div class="telemetry-row"><span>Assets</span><strong id="suiteAssetCount">--</strong></div>
-                  <div class="telemetry-row"><span>Active Character</span><strong id="suiteCharacterCount">--</strong></div>
-                  <div class="telemetry-row"><span>Actions</span><strong id="suiteActionCount">--</strong></div>
-                </div>
-              </article>
-              <div class="notice" id="suiteNotice">PLAYER DATA IS LOADING.</div>
-            </aside>
-          </div>
-        </section>
-
-        <section class="panel" id="suite-account" data-tab-panel>
+        <section class="panel active" id="suite-account" data-tab-panel>
           <div class="content-grid">
             <article class="hud-panel">
               <div class="section-head">
@@ -198,23 +165,8 @@
           <div class="form-state" id="marketState"></div>
         </section>
 
-        <section class="panel" id="suite-inventory" data-tab-panel>
-          <article class="hud-panel">
-            <div class="section-head"><div><div class="section-code">PLAYER / INVENTORY</div><h2>Inventory & Resources</h2></div></div>
-            <p class="hero-copy" style="margin:0 0 20px">Assets listed here are currently held by your account. Quantities change through trade, production, rewards, losses, and other game activity.</p>
-            <div class="resource-list" id="playerAssetList"></div>
-            <div class="empty-state" id="playerAssetEmpty" hidden>NO PLAYER ASSETS OR RESOURCES ASSIGNED.</div>
-          </article>
-          <article class="hud-panel compact" style="margin-top:18px">
-            <div class="section-head"><div><div class="section-code">PLAYER / HOLDINGS</div><h2>Facilities & Holdings</h2></div></div>
-            <p class="hero-copy" style="margin:0 0 18px">Mines, factories, refineries, trading posts, research sites, and other holdings will be constructed through the map. The Player Suite acts as the informational ledger for what you own, where it is, its upkeep, and its current status.</p>
-            <div id="facilityList" class="stack"></div>
-            <div class="empty-state" id="facilityEmpty" hidden>NO FACILITIES OR HOLDINGS ARE ASSIGNED TO THIS ACCOUNT.</div>
-          </article>
-        </section>
-
         <section class="panel" id="suite-faction" data-tab-panel>
-          <div class="content-grid">
+          <div class="faction-dashboard-grid">
             <article class="hud-panel">
               <div class="section-head"><div><div class="section-code">FACTION / MEMBERSHIP</div><h2 id="factionName">No Active Faction</h2></div><p id="factionCode">UNASSIGNED</p></div>
               <p class="hero-copy" id="factionDescription" style="margin:0 0 20px">Your current faction membership, position, treasury access, and permissions are shown here.</p>
@@ -226,17 +178,26 @@
               </div>
               <div class="permission-list" id="permissionList"></div>
             </article>
-            <aside class="hud-panel compact amber">
-              <div class="hud-kicker amber">FACTION ACCESS</div>
-              <p class="hero-copy" style="margin:0">Available faction tools reflect your current position and any permissions granted by the faction leader.</p>
+            <aside class="faction-side-stack">
+              <article class="hud-panel compact amber">
+                <div class="hud-kicker amber">FACTION ACCESS</div>
+                <p class="hero-copy" style="margin:0">Your available faction tools reflect your current position and permissions.</p>
+              </article>
+              <article class="hud-panel compact faction-resource-panel">
+                <div class="section-code">FACTION / RESOURCES</div><h2>Faction Resources</h2>
+                <div class="resource-list" id="factionAssetList"></div>
+                <div class="empty-state" id="factionAssetEmpty" hidden>NO VISIBLE FACTION RESOURCES.</div>
+              </article>
+              <article class="hud-panel compact" id="factionSupportCompact">
+                <div class="section-code">FACTION / TREASURY</div><h2>Support Your Faction</h2>
+                <form id="factionFundingForm" class="form-shell">
+                  <label><span>Contribution Amount</span><input name="amount" type="number" min="0.01" step="0.01" required></label>
+                  <button class="hud-button" type="submit">TRANSFER TO FACTION</button>
+                  <div class="form-state" id="factionFundingState"></div>
+                </form>
+              </article>
             </aside>
           </div>
-          <article class="hud-panel compact" style="margin-top:18px">
-            <div class="section-head"><div><div class="section-code">FACTION / RESOURCES</div><h2>Faction Resources</h2></div></div>
-            <div class="resource-list" id="factionAssetList"></div>
-            <div class="empty-state" id="factionAssetEmpty" hidden>NO VISIBLE FACTION RESOURCES.</div>
-          </article>
-
           <div id="factionNoMembership" class="content-grid" style="margin-top:18px" hidden>
             <article class="hud-panel">
               <div class="section-head"><div><div class="section-code">FACTION / FOUNDING</div><h2>Create a Faction</h2></div></div>
@@ -268,20 +229,10 @@
             </aside>
           </div>
 
-          <div id="factionMemberControls" class="content-grid" style="margin-top:18px" hidden>
-            <article class="hud-panel">
-              <div class="section-head"><div><div class="section-code">FACTION / TREASURY</div><h2>Support your Faction</h2></div><p>DIRECT CONTRIBUTION</p></div>
-              <p class="hero-copy" style="margin:0 0 20px">Any active member can move Aureum from their personal account into the faction treasury. Contributions are logged in both the personal and faction ledgers.</p>
-              <form id="factionFundingForm" class="form-shell">
-                <label><span>Contribution Amount</span><input name="amount" type="number" min="0.01" step="0.01" required></label>
-                <button class="hud-button" type="submit">TRANSFER TO FACTION</button>
-                <div class="form-state" id="factionFundingState"></div>
-              </form>
-              <div class="section-code" style="margin-top:24px">TREASURY / RECENT ACTIVITY</div>
-              <div id="factionLedger" class="stack"></div>
-              <div class="empty-state" id="factionLedgerEmpty" hidden>NO FACTION TRANSACTIONS RECORDED.</div>
-            </article>
-
+          <div id="factionMemberControls" style="margin-top:18px" hidden>
+            <div class="section-code">TREASURY / RECENT ACTIVITY</div>
+            <div id="factionLedger" class="stack"></div>
+            <div class="empty-state" id="factionLedgerEmpty" hidden>NO FACTION TRANSACTIONS RECORDED.</div>
             <aside id="factionLeaderControls" class="stack" hidden>
               <article class="hud-panel compact amber">
                 <div class="hud-kicker amber">FACTION LEADER CONTROLS</div>
@@ -384,7 +335,17 @@
               </aside>
             </div>
 
-            <article class="hud-panel compact character-record-panel">
+            <article class="hud-panel character-inventory-panel">
+        <div class="section-head"><div><div class="section-code">CHARACTER / INVENTORY</div><h2>Inventory</h2></div><p>ACCOUNT HOLDINGS</p></div>
+        <div class="inventory-grid-shell"><div class="inventory-slot-grid" id="playerAssetList"></div></div>
+        <div class="empty-state" id="playerAssetEmpty" hidden>NO PLAYER ASSETS OR RESOURCES ASSIGNED.</div>
+      </article>
+      <article class="hud-panel compact character-holdings-panel">
+        <div class="section-head"><div><div class="section-code">PLAYER / HOLDINGS</div><h2>Facilities & Holdings</h2></div></div>
+        <div id="facilityList" class="stack"></div>
+        <div class="empty-state" id="facilityEmpty" hidden>NO FACILITIES OR HOLDINGS ARE ASSIGNED TO THIS ACCOUNT.</div>
+      </article>
+      <article class="hud-panel compact character-record-panel">
               <div class="section-head"><div><div class="section-code">CHARACTER / RECORD</div><h2>Character Record</h2></div></div>
               <p class="hero-copy character-record-copy">Significant character history and succession are preserved here as the Living Record develops.</p>
               <div id="characterSuccessionList" class="stack"></div>
@@ -395,6 +356,22 @@
           <div id="characterEmpty" hidden></div>
           <div id="characterCreatePanel" hidden></div>
           <div id="characterLimitNotice" hidden></div>
+        </section>
+
+        <section class="panel" id="suite-friends" data-tab-panel>
+          <div class="friends-grid">
+            <article class="hud-panel">
+              <div class="section-head"><div><div class="section-code">PLAYER NETWORK / DISCOVERY</div><h2>Find Players</h2></div></div>
+              <p class="hero-copy" style="margin:0 0 18px">Find another player by their public display name or handle. Account IDs remain useful for direct administrative support, but are not required to connect.</p>
+              <div class="player-search-bar"><input id="friendSearchInput" type="search" placeholder="Search username or account name"><button class="hud-button" id="friendSearchButton" type="button">SEARCH</button></div>
+              <div id="friendSearchResults" class="stack"></div>
+              <div class="empty-state" id="friendSearchEmpty">SEARCH FOR A PLAYER TO CONNECT.</div>
+            </article>
+            <aside class="stack">
+              <article class="hud-panel compact"><div class="section-code">PLAYER NETWORK / FRIENDS</div><h2>Friends</h2><div id="friendList" class="stack"></div><div class="empty-state" id="friendListEmpty">NO FRIENDS ADDED YET.</div></article>
+              <article class="hud-panel compact"><div class="section-code">PLAYER NETWORK / REQUESTS</div><h2>Pending Requests</h2><div id="friendRequestList" class="stack"></div><div class="empty-state" id="friendRequestEmpty">NO PENDING REQUESTS.</div></article>
+            </aside>
+          </div>
         </section>
 
         <section class="panel" id="suite-actions" data-tab-panel>
