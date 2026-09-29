@@ -479,6 +479,35 @@
     });
   }
 
+  function drawCanonLocations() {
+    ctx.save();
+    Object.entries(canonLocations).forEach(([ref,location]) => {
+      const h=parseRef(ref);
+      if (!h || !mapHexSet.has(ref)) return;
+      const p=worldToScreen(hexToWorld(h.q,h.r));
+      const markerSize=Math.max(5,7*camera.zoom);
+      ctx.beginPath();
+      ctx.arc(p.x,p.y,markerSize,0,Math.PI*2);
+      ctx.fillStyle="rgb(216,163,93)";
+      ctx.fill();
+      ctx.strokeStyle="rgb(255,232,190)";
+      ctx.lineWidth=Math.max(1,1.5*camera.zoom);
+      ctx.stroke();
+      if (camera.zoom >= .55) {
+        const fontSize=Math.max(9,11*camera.zoom);
+        ctx.font="600 "+fontSize+"px Share Tech Mono, Consolas, monospace";
+        ctx.textAlign="center";
+        ctx.textBaseline="bottom";
+        ctx.strokeStyle="rgb(2,8,12)";
+        ctx.lineWidth=4;
+        ctx.strokeText(location.name,p.x,p.y-markerSize-5);
+        ctx.fillStyle="rgb(241,215,176)";
+        ctx.fillText(location.name,p.x,p.y-markerSize-5);
+      }
+    });
+    ctx.restore();
+  }
+
   function draw() {
     const rect=canvas.getBoundingClientRect();
     ctx.clearRect(0,0,rect.width,rect.height);
@@ -486,6 +515,7 @@
     drawBaseHexes();
     drawTerritories();
     drawMapLabels();
+    drawCanonLocations();
     drawModifiers();
     drawFacilities();
     drawArmies();
