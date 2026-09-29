@@ -36,6 +36,7 @@
   };
 
   const dirs = [[1,0],[1,-1],[0,-1],[-1,0],[-1,1],[0,1]];
+  const canonLocations = {"HEX_-2_-2":{name:"VIRETHON PRIMARIS",type:"IMPERIAL CAPITAL",faction:"GRADARI MIRERIS"}};
 
   function refFor(q,r) {
     return "HEX_" + q + "_" + r;
@@ -709,7 +710,8 @@
     const territory=territoryByRef(selectedHex.ref);
     const mapHex=mapHexes.find(row=>row.ref===selectedHex.ref) || selectedHex;
     const faction=factionById(territory?.faction_id);
-    const name=territory?.display_name || mapHex.display_name || "Hex "+selectedHex.q+", "+selectedHex.r;
+    const canon=canonLocations[selectedHex.ref];
+    const name=canon?.name || territory?.display_name || mapHex.display_name || "Hex "+selectedHex.q+", "+selectedHex.r;
     const production=Number(territory?.production_modifier ?? 1);
     const locationStatus=territory?.status || mapHex.status || "open";
     const context=[
@@ -722,8 +724,8 @@
     $("mapCoordinateReadout").textContent=context || ("Q "+selectedHex.q+" // R "+selectedHex.r);
     $("selectedHexName").textContent=name;
     $("selectedHexRef").textContent=selectedHex.ref;
-    $("selectedHexFaction").textContent=faction?.name || "UNCLAIMED";
-    $("selectedHexStatus").textContent=String(locationStatus).toUpperCase();
+    $("selectedHexFaction").textContent=faction?.name || canon?.faction || "UNCLAIMED";
+    $("selectedHexStatus").textContent=canon?.type || String(locationStatus).toUpperCase();
     $("selectedHexProduction").textContent=Math.round(production*100)+"%";
 
     const selectedFacilities=player.facilities.filter(row=>row.location_ref===selectedHex.ref);
