@@ -433,6 +433,13 @@
       catch { return 0; }
     }));
 
+    const living = chars[0];
+    const livingCount = counts[0] || 0;
+    const summary = $("characterPresenceSummary");
+    if (summary) summary.textContent = livingCount + " OTHER CHARACTER" + (livingCount === 1 ? "" : "S") + " PRESENT";
+    const identityLocation = $("characterIdentityLocation");
+    if (identityLocation && living) identityLocation.textContent = String(living.location_name || living.location_ref || "LOCATION NOT SET").toUpperCase();
+
     root.innerHTML = chars.map((char,index) => `
       <article class="notice character-presence-row" data-id="${esc(char.id)}">
         <div class="split-actions">
