@@ -92,14 +92,20 @@
               <div class="section-head">
                 <div><div class="section-code">ACCOUNT / PLAYER IDENTITY</div><h2>Account Profile</h2></div>
               </div>
-              <form id="profileForm" class="form-shell">
-                <div class="form-grid">
-                  <label><span>Display Name</span><input name="display_name" maxlength="120"></label>
-                  <label><span>Handle</span><input name="handle" maxlength="80" placeholder="Optional unique player handle"></label>
+              <div class="account-profile-layout">
+                <div class="account-photo-frame" aria-label="Profile photo">
+                  <img id="accountProfilePhoto" alt="" hidden>
+                  <span id="accountProfileInitials">PL</span>
                 </div>
-                <div class="form-actions"><button class="hud-button" type="submit">SAVE PROFILE</button></div>
-                <div class="form-state" id="profileState"></div>
-              </form>
+                <form id="profileForm" class="form-shell account-profile-form">
+                  <div class="form-grid">
+                    <label><span>Display Name</span><input name="display_name" maxlength="120"></label>
+                    <label><span>Handle</span><input name="handle" maxlength="80" placeholder="Optional unique player handle"></label>
+                  </div>
+                  <div class="form-actions"><button class="hud-button" type="submit">SAVE PROFILE</button></div>
+                  <div class="form-state" id="profileState"></div>
+                </form>
+              </div>
             </article>
 
             <aside class="hud-panel compact">
@@ -107,15 +113,23 @@
               <h2 style="margin:5px 0 12px;text-transform:uppercase">Account Identity</h2>
               <div class="telemetry-stack">
                 <div class="telemetry-row"><span>Email</span><strong data-user-email>--</strong></div>
-                <div class="telemetry-row"><span>User ID</span><strong id="accountUserId" style="max-width:180px;overflow-wrap:anywhere">--</strong></div>
+                <div class="account-user-id-row">
+                  <span>User ID</span>
+                  <div class="account-user-id-value"><strong id="accountUserId">--</strong><button class="hud-button secondary account-copy-button" id="copyAccountUserId" type="button">COPY</button></div>
+                  <div class="form-state" id="copyUserIdState"></div>
+                </div>
               </div>
             </aside>
           </div>
 
-          <article class="hud-panel" style="margin-top:18px">
+          <article class="hud-panel registration-panel" id="registrationPanel" style="margin-top:18px">
             <div class="section-head">
               <div><div class="section-code">PLAYER RECORD / REGISTRATION</div><h2>Game Registration</h2></div>
               <p>ONE RECORD PER ACCOUNT</p>
+            </div>
+            <div id="registrationComplete" class="registration-complete" hidden>
+              <strong>YOUR PLAYER ACCOUNT IS REGISTERED</strong>
+              <button class="hud-button secondary" id="registerAgain" type="button">REGISTER AGAIN</button>
             </div>
             <form id="registrationForm" class="form-shell">
               <div class="form-grid">
@@ -148,14 +162,15 @@
               <div class="metric-detail" id="economyCurrency">AUREUM</div>
               <p class="hero-copy">This balance belongs to your account. Transactions are created through purchases, rewards, transfers, economic activity, and resolved game events.</p>
             </article>
-            <aside class="hud-panel compact amber">
-              <div class="hud-kicker amber">ACCOUNT ACTIVITY</div>
-              <div class="telemetry-stack">
-                <div class="telemetry-row"><span>Currency</span><strong>AUREUM</strong></div>
-                <div class="telemetry-row"><span>Ledger</span><strong>ACTIVE</strong></div>
-                <div class="telemetry-row"><span>Market Purchases</span><strong>ENABLED</strong></div>
-                <div class="telemetry-row"><span>Faction Transfers</span><strong>ENABLED</strong></div>
-              </div>
+            <aside class="hud-panel compact">
+              <div class="section-code">ECONOMY / TRANSFER</div>
+              <h2 style="margin:5px 0 12px;text-transform:uppercase">Transfer Aureum</h2>
+              <p class="hero-copy" style="margin:0 0 16px">Send currency directly to another player account. Player transfers will be enabled in a later update.</p>
+              <form class="form-shell">
+                <label><span>Recipient User ID</span><input type="text" placeholder="Player account ID" disabled></label>
+                <label><span>Amount</span><input type="number" min="0" step="0.01" placeholder="0.00" disabled></label>
+                <button class="hud-button" type="button" disabled>TRANSFER AUREUM</button>
+              </form>
             </aside>
           </div>
           <article class="hud-panel compact">
@@ -166,52 +181,20 @@
         </section>
 
         <section class="panel" id="suite-markets" data-tab-panel>
-          <div class="content-grid">
-            <article class="hud-panel">
-              <div class="section-head"><div><div class="section-code">ECONOMY / MARKETS</div><h2>Exchange Markets</h2></div><p>PLAYER PURCHASING</p></div>
-              <p class="hero-copy" style="margin:0 0 20px">The Guilded Concord Exchange acts as the baseline NPC market so common resources remain obtainable even when player trade is thin. Faction markets can be added later and may offer better local prices.</p>
-              <div id="marketList" class="stack"></div>
-              <div class="empty-state" id="marketEmpty" hidden>NO ACTIVE MARKET LISTINGS ARE CURRENTLY AVAILABLE.</div>
-            </article>
-            <aside class="stack">
-              <article class="hud-panel compact amber">
-                <div class="hud-kicker amber">MARKET NETWORK</div>
-                <div class="telemetry-stack">
-                  <div class="telemetry-row"><span>NPC Baseline</span><strong>GUILDED CONCORD</strong></div>
-                  <div class="telemetry-row"><span>Faction Markets</span><strong>ACTIVE</strong></div>
-                  <div class="telemetry-row"><span>Market Sales</span><strong>FACTION TREASURY</strong></div>
-                  <div class="telemetry-row"><span>Location</span><strong>MAP-BASED</strong></div>
-                </div>
-              </article>
-
-              <article class="hud-panel compact" id="factionMarketControls" hidden>
-                <div class="section-code">FACTION / MARKET</div>
-                <h2 style="margin:5px 0 16px;text-transform:uppercase">Establish Market</h2>
-                <form id="factionMarketForm" class="form-shell">
-                  <label><span>Name *</span><input name="name" required maxlength="160"></label>
-                  <label><span>Hex ID *</span><input name="location_ref" required placeholder="HEX_0_0"></label>
-                  <label><span>Description</span><textarea name="description" maxlength="1200"></textarea></label>
-                  <button class="hud-button amber" type="submit">ESTABLISH MARKET</button>
-                  <div class="form-state" id="factionMarketState"></div>
-                </form>
-
-                <div class="section-code" style="margin-top:20px">MARKET LISTING</div>
-                <form id="factionListingForm" class="form-shell" style="margin-top:10px">
-                  <label><span>Market</span><select name="market_id" id="factionMarketSelect" required></select></label>
-                  <label><span>Resource</span><select name="asset_id" id="factionListingAsset" required></select></label>
-                  <div class="form-grid"><label><span>Price / Unit</span><input name="price_per_unit" type="number" min="0.01" step="0.01" required></label><label><span>Stock</span><input name="stock" type="number" min="0" step="0.0001"></label></div>
-                  <button class="hud-button" type="submit">SAVE LISTING</button>
-                  <div class="form-state" id="factionListingState"></div>
-                </form>
-              </article>
-
-              <article class="hud-panel compact" id="factionMarketUnavailable">
-                <div class="section-code">FACTION / MARKET</div>
-                <h2 style="margin:5px 0 10px;text-transform:uppercase">Market Access</h2>
-                <p class="hero-copy" style="margin:0">Faction market controls appear for the faction leader or members granted Market authority.</p>
-              </article>
-            </aside>
-          </div>
+          <article class="hud-panel">
+            <div class="section-head"><div><div class="section-code">ECONOMY / MARKETS</div><h2>Exchange Markets</h2></div></div>
+            <p class="hero-copy" style="margin:0 0 20px">Browse available resources and goods through the Guilded Concord Exchange and other markets accessible to your player account.</p>
+            <div id="marketList" class="stack"></div>
+            <div class="empty-state" id="marketEmpty" hidden>NO ACTIVE MARKET LISTINGS ARE CURRENTLY AVAILABLE.</div>
+          </article>
+          <div id="factionMarketControls" hidden></div>
+          <div id="factionMarketUnavailable" hidden></div>
+          <form id="factionMarketForm" hidden></form>
+          <form id="factionListingForm" hidden></form>
+          <select id="factionMarketSelect" hidden></select>
+          <select id="factionListingAsset" hidden></select>
+          <div class="form-state" id="factionMarketState" hidden></div>
+          <div class="form-state" id="factionListingState" hidden></div>
           <div class="form-state" id="marketState"></div>
         </section>
 
