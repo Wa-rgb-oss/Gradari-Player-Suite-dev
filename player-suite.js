@@ -247,50 +247,43 @@
   }
 
   function renderCharacters() {
-    const root = $("characterList");
     const living = state.characters.find(row => row.status === "active" && row.life_status === "alive");
+    const emptyState = $("characterEmptyState");
+    const dashboard = $("characterDashboard");
     const createForm = $("characterForm");
-    const limitNotice = $("characterLimitNotice");
 
-    createForm.hidden = Boolean(living);
-    limitNotice.hidden = !living;
-
-    if (!state.characters.length) {
-      root.innerHTML = "";
-      $("characterEmpty").hidden = false;
+    emptyState.hidden = Boolean(living);
+    dashboard.hidden = !living;
+    if (!living) {
+      createForm.hidden = true;
+      $("openCharacterCreate").hidden = false;
       return;
     }
 
-    $("characterEmpty").hidden = true;
-    const factionMap = new Map(state.factions.map(row => [row.id,row]));
-    const ordered = [...state.characters].sort((a,b) => {
-      const aAlive = a.status === "active" && a.life_status === "alive";
-      const bAlive = b.status === "active" && b.life_status === "alive";
-      if (aAlive !== bAlive) return aAlive ? -1 : 1;
-      return new Date(b.created_at) - new Date(a.created_at);
-    });
+    const faction = state.factions.find(row => row.id === living.faction_id);
+    const title = living.title || "No formal title";
+    const factionName = faction?.name || "No faction";
+    const influence = living.political_influence ?? living.influence ?? 0;
+    const location = living.location_name || living.location_ref || "Location not set";
 
-    root.innerHTML = ordered.map(row => {
-      const alive = row.status === "active" && row.life_status === "alive";
-      const lifeLabel = alive ? "ALIVE" : "DECEASED";
-      const deathRecord = !alive && row.died_at
-        ? '<div class="section-code" style="margin-top:9px">DIED // ' + esc(new Date(row.died_at).toLocaleDateString()) +
-          (row.death_cause ? ' // ' + esc(row.death_cause) : '') + '</div>'
-        : "";
-      return `
-        <article class="notice">
-          <div class="split-actions">
-            <div>
-              <strong style="color:var(--text)">${esc(row.name)}</strong>
-              <div class="section-code">${esc(row.title || "NO TITLE")} // ${esc(factionMap.get(row.faction_id)?.name || "NO FACTION")}</div>
-            </div>
-            <span class="status-chip ${alive ? "" : "muted"}">${lifeLabel}</span>
-          </div>
-          ${row.bio ? '<div style="margin-top:10px">' + esc(row.bio) + '</div>' : ""}
-          ${deathRecord}
-          ${row.death_notes ? '<div style="margin-top:8px">' + esc(row.death_notes) + '</div>' : ""}
-        </article>`;
-    }).join("");
+    $("characterStandingTitle").textContent = title;
+    $("characterStandingFaction").textContent = factionName;
+    $("characterStandingInfluence").textContent = fmt(influence);
+    $("characterStandingLocation").textContent = location;
+    $("characterStandingBio").textContent = living.bio || "No character notes recorded.";
+    $("characterStandingStatus").textContent = "ACTIVE";
+
+    $("characterIdentityName").textContent = living.name;
+    $("characterIdentityMeta").textContent = String(title).toUpperCase() + " // " + String(factionName).toUpperCase();
+    $("characterIdentityLife").textContent = "ALIVE";
+    $("characterIdentityLocation").textContent = String(location).toUpperCase();
+
+    const involvement = (state.eventParticipation || []).filter(row =>
+      row.character_id === living.id || (!row.character_id && row.user_id === session.user.id)
+    );
+    $("characterInvolvement").textContent = involvement.length
+      ? involvement.length + " active event" + (involvement.length === 1 ? "" : "s") + " / assignment" + (involvement.length === 1 ? "" : "s") + "."
+      : "No active events or assignments.";
   }
 
   function renderSuccession() {
@@ -362,6 +355,21 @@
     window.GMPlayerSuiteState = state;
     document.dispatchEvent(new CustomEvent("gm:player-state",{detail:state}));
   }
+
+  $("openCharacterCreate")?.addEventListener("click", () => {
+    $("openCharacterCreate").hidden = true;
+    $("characterForm").hidden = false;
+  });
+  $("cancelCharacterCreate")?.addEventListener("click", () => {
+    $("characterForm").reset();
+    $("characterForm").hidden = true;
+    $("openCharacterCreate").hidden = false;
+    setState(characterState, "");
+  });
+  $("toggleCharacterPresence")?.addEventListener("click", () => {
+    const drawer = $("characterPresenceDrawer");
+    drawer.hidden = !drawer.hidden;
+  });
 
   profileForm.addEventListener("submit", async event => {
     event.preventDefault();
