@@ -12,7 +12,7 @@
       facilityTypes, facilities, markets, marketListings, events,
       eventObjectives, eventParticipation, characterSuccessions,
       resourceCatalog, factionResources, systemEconomies, resourceDeposits,
-      facilityConnections, factoryRecipes, factoryOrders, tradeStations
+      facilityConnections, factoryRecipes, factoryOrders, tradeStations, tradeStationResources
     ] = await Promise.all([
       GMAuth.api("player_profiles?user_id=eq." + uid + "&select=*&limit=1"),
       GMAuth.api("players_tab?user_id=eq." + uid + "&select=*&limit=1"),
@@ -48,7 +48,8 @@
       GMAuth.api("facility_connections?select=*").catch(() => []),
       GMAuth.api("factory_recipes?player_visible=eq.true&select=*&order=name.asc").catch(() => []),
       GMAuth.api("factory_orders?select=*").catch(() => []),
-      GMAuth.api("trade_station_markets?player_visible=eq.true&select=*").catch(() => [])
+      GMAuth.api("trade_station_markets?player_visible=eq.true&select=*").catch(() => []),
+      GMAuth.api("trade_station_resource_listings?select=*&order=resource_code.asc").catch(() => [])
     ]);
 
     const factionMap = new Map((factions || []).map(row => [row.id,row]));
@@ -122,7 +123,8 @@
       facilityConnections: facilityConnections || [],
       factoryRecipes: factoryRecipes || [],
       factoryOrders: factoryOrders || [],
-      tradeStations: tradeStations || []
+      tradeStations: tradeStations || [],
+      tradeStationResources: tradeStationResources || []
     };
   }
 
