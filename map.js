@@ -364,6 +364,42 @@
     ctx.restore();
   }
 
+  function drawTradeStations() {
+    const stations=player?.tradeStations || [];
+    if(!stations.length) return;
+    ctx.save();
+    ctx.textAlign="center";
+    ctx.textBaseline="middle";
+    stations.forEach(station => {
+      const h=parseRef(station.location_ref);
+      if(!h || !mapHexSet.has(station.location_ref)) return;
+      const p=worldToScreen(hexToWorld(h.q,h.r));
+      const size=Math.max(9,13*camera.zoom);
+      ctx.beginPath();
+      ctx.arc(p.x,p.y,size,0,Math.PI*2);
+      ctx.fillStyle="rgba(5,13,18,.96)";
+      ctx.fill();
+      ctx.strokeStyle="#d8a35d";
+      ctx.lineWidth=Math.max(1.5,2.2*camera.zoom);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(p.x,p.y,Math.max(4,6*camera.zoom),0,Math.PI*2);
+      ctx.strokeStyle="#f1d7b0";
+      ctx.lineWidth=Math.max(1,1.2*camera.zoom);
+      ctx.stroke();
+      if(camera.zoom>=.72){
+        ctx.font=`600 ${Math.max(8,10*camera.zoom)}px "Share Tech Mono", Consolas, monospace`;
+        ctx.textBaseline="bottom";
+        ctx.strokeStyle="rgba(2,8,12,.95)";
+        ctx.lineWidth=4;
+        ctx.strokeText(String(station.station_name||"GUILDED CONCORD").toUpperCase(),p.x,p.y-size-4);
+        ctx.fillStyle="#f1d7b0";
+        ctx.fillText(String(station.station_name||"GUILDED CONCORD").toUpperCase(),p.x,p.y-size-4);
+      }
+    });
+    ctx.restore();
+  }
+
   function drawFacilities() {
     if (!layers.facilities) return;
     ctx.save();
@@ -517,6 +553,7 @@
     drawMapLabels();
     drawCanonLocations();
     drawModifiers();
+    drawTradeStations();
     drawFacilities();
     drawArmies();
     drawCharacter();
@@ -826,11 +863,28 @@
     }).join("");
 
     const factionId=activeMembership()?.faction_id;
-    const ownedRefineries=selectedFacilities.filter(row => (row.owner_faction_id===factionId || row.controlling_faction_id===factionId) && facilityCode(facilityTypeById(row.facility_type_id)).includes("REFIN"));
-    $("selectedFacilityControls").innerHTML=ownedRefineries.map(refinery => {
+    const ownedFacilities=selectedFacilities.filter(row => row.owner_faction_id===factionId || row.controlling_faction_id===factionId);
+    const ownedRefineries=ownedFacilities.filter(row => facilityCode(facilityTypeById(row.facility_type_id)).includes("REFIN"));
+    const ownedFactories=ownedFacilities.filter(row => facilityCode(facilityTypeById(row.facility_type_id)).includes("FACTORY"));
+    const station=(player.tradeStations || []).find(row=>row.location_ref===selectedHex.ref);
+
+    let facilityControls="";
+    ownedRefineries.forEach(refinery => {
       const links=(player.facilityConnections || []).filter(link=>link.refinery_facility_id===refinery.id);
-      return '<article class="notice"><strong>'+esc(refinery.name || "Refinery")+'</strong><div class="section-code">'+links.length+' / 3 EXTRACTOR CONNECTIONS</div><button class="hud-button secondary refinery-connect-btn" type="button" data-refinery="'+esc(refinery.id)+'">CONNECT EXTRACTOR</button></article>';
-    }).join("");
+      facilityControls += '<article class="notice"><strong>'+esc(refinery.name || "Refinery")+'</strong><div class="section-code">'+links.length+' / 3 EXTRACTORS</div><button class="hud-button secondary refinery-connect-btn" type="button" data-refinery="'+esc(refinery.id)+'">CONNECT EXTRACTOR</button></article>';
+    });
+    ownedFactories.forEach(factory => {
+      const order=(player.factoryOrders || []).find(row=>row.facility_id===factory.id);
+      facilityControls += '<article class="notice"><strong>'+esc(factory.name || "Factory")+'</strong><div class="section-code">PRODUCTION LINE</div><select class="factory-recipe-select" data-factory="'+esc(factory.id)+'">'+
+        '<option value="">Select production</option>'+
+        (player.factoryRecipes || []).map(recipe=>'<option value="'+esc(recipe.code)+'" '+(order?.recipe_code===recipe.code?'selected':'')+'>'+esc(recipe.name)+'</option>').join("")+
+        '</select><button class="hud-button secondary factory-recipe-save" type="button" data-factory="'+esc(factory.id)+'" style="margin-top:8px">SET PRODUCTION</button></article>';
+    });
+    if(station){
+      facilityControls += '<article class="notice"><strong>'+esc(station.station_name || "Guilded Concord Trade Station")+'</strong><div class="section-code">GUILDED CONCORD EXCHANGE</div><a class="hud-button secondary" href="player-suite.html#markets" style="display:inline-flex;margin-top:8px">OPEN MARKET</a></article>';
+    }
+    $("selectedFacilityControls").innerHTML=facilityControls;
+
     document.querySelectorAll(".refinery-connect-btn").forEach(button=>button.addEventListener("click",async()=>{
       const refineryId=button.dataset.refinery;
       const linked=new Set((player.facilityConnections||[]).filter(x=>x.refinery_facility_id===refineryId).map(x=>x.extractor_facility_id));
@@ -846,6 +900,15 @@
         await GMAuth.api("rpc/connect_refinery_extractor",{method:"POST",body:JSON.stringify({p_refinery_id:refineryId,p_extractor_id:candidates[choice].id})});
         await refreshAll("EXTRACTOR CONNECTED",$("mapBuildState"));
       }catch(error){setState($("mapBuildState"),"CONNECTION FAILED // "+error.message,"error")}
+    }));
+
+    document.querySelectorAll(".factory-recipe-save").forEach(button=>button.addEventListener("click",async()=>{
+      const select=document.querySelector('.factory-recipe-select[data-factory="'+button.dataset.factory+'"]');
+      if(!select?.value) return;
+      try{
+        await GMAuth.api("rpc/set_factory_recipe",{method:"POST",body:JSON.stringify({p_facility_id:button.dataset.factory,p_recipe_code:select.value})});
+        await refreshAll("FACTORY PRODUCTION SET",$("mapBuildState"));
+      }catch(error){setState($("mapBuildState"),"PRODUCTION UPDATE FAILED // "+error.message,"error")}
     }));
 
     const selectedModifiers=activeModifiersFor(selectedHex.ref);
