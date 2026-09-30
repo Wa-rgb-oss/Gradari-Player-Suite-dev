@@ -413,6 +413,10 @@
   function renderGMTools() {
     if (!$("gmResourceCode")) return;
     const current=$("gmResourceCode").value;
+    const playerCurrent=$("gmPlayerResourceCode")?.value;
+    if($("gmPlayerResourceCode")){$("gmPlayerResourceCode").innerHTML=(data.resourceCatalog||[]).map(r=>'<option value="'+esc(r.code)+'">'+esc(r.name)+' // '+esc((r.category||"RESOURCE").toUpperCase())+'</option>').join("");if((data.resourceCatalog||[]).some(r=>r.code===playerCurrent))$("gmPlayerResourceCode").value=playerCurrent;
+      const uid=document.querySelector("#gmPlayerResourceForm [name=user_id]")?.value;const prows=(data.playerResources||[]).filter(r=>!uid||r.user_id===uid).filter(r=>Number(r.quantity)>0);$("gmPlayerStockpileList").innerHTML=prows.map(r=>'<div class="resource-row"><div><strong>'+esc((data.resourceCatalog||[]).find(x=>x.code===r.resource_code)?.name||r.resource_code)+'</strong></div><span>'+esc(fmt(r.quantity))+'</span></div>').join("")||'<div class="empty-state">NO PERSONAL RESOURCES HELD.</div>';}
+    
     $("gmResourceCode").innerHTML=(data.resourceCatalog||[]).map(r=>'<option value="'+esc(r.code)+'">'+esc(r.name)+' // '+esc((r.category||"RESOURCE").toUpperCase())+'</option>').join("");
     if((data.resourceCatalog||[]).some(r=>r.code===current)) $("gmResourceCode").value=current;
     const factionId=document.querySelector("#gmResourceForm [name=faction_id]")?.value;
@@ -496,6 +500,8 @@
   });
   $("statusFilter").addEventListener("change", renderActions);
 
+  $("gmPlayerResourceForm").addEventListener("submit",async event=>{event.preventDefault();const d=Object.fromEntries(new FormData(event.currentTarget));try{const n=await GMAuth.api("rpc/admin_adjust_player_resource",{method:"POST",body:JSON.stringify({p_user_id:d.user_id,p_resource_code:d.resource_code,p_mode:d.mode,p_amount:Number(d.amount)})});setState($("gmPlayerResourceState"),"PLAYER RESOURCE UPDATED // "+fmt(n),"success");await refreshData()}catch(e){setState($("gmPlayerResourceState"),"PLAYER RESOURCE UPDATE FAILED // "+e.message,"error")}});
+  document.querySelector("#gmPlayerResourceForm [name=user_id]").addEventListener("change",renderGMTools);
   $("gmResourceForm").addEventListener("submit",async event=>{event.preventDefault();const d=Object.fromEntries(new FormData(event.currentTarget));try{const n=await GMAuth.api("rpc/admin_adjust_faction_resource",{method:"POST",body:JSON.stringify({p_faction_id:d.faction_id,p_resource_code:d.resource_code,p_mode:d.mode,p_amount:Number(d.amount)})});setState($("gmResourceState"),"RESOURCE UPDATED // "+fmt(n),"success");await refreshData()}catch(e){setState($("gmResourceState"),"RESOURCE UPDATE FAILED // "+e.message,"error")}});
   document.querySelector("#gmResourceForm [name=faction_id]").addEventListener("change",renderGMTools);
   $("gmWalletForm").addEventListener("submit",async event=>{event.preventDefault();const d=Object.fromEntries(new FormData(event.currentTarget));try{const n=await GMAuth.api("rpc/admin_adjust_player_wallet",{method:"POST",body:JSON.stringify({p_user_id:d.user_id,p_mode:d.mode,p_amount:Number(d.amount),p_reason:d.reason||null})});setState($("gmWalletState"),"WALLET UPDATED // "+fmt(n)+" AUREUM","success");await refreshData()}catch(e){setState($("gmWalletState"),"WALLET UPDATE FAILED // "+e.message,"error")}});
