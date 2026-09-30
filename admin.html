@@ -45,6 +45,7 @@
         <button class="tab" data-tab-target="admin-factions" type="button">FACTIONS</button>
         <button class="tab" data-tab-target="admin-politics" type="button">POLITICS</button>
         <button class="tab" data-tab-target="admin-economy" type="button">ECONOMY</button>
+        <button class="tab" data-tab-target="admin-gm-tools" type="button">GM TOOLS</button>
         <button class="tab" data-tab-target="admin-events" type="button">EVENTS</button>
         <button class="tab" data-tab-target="admin-systems" type="button">SYSTEMS</button>
         <button class="tab" data-tab-target="admin-actions" type="button">ACTIONS</button>
@@ -279,6 +280,41 @@
               <button class="hud-button" type="submit">APPLY BALANCE</button>
               <div class="form-state" id="walletState"></div>
             </form>
+          </aside>
+        </div>
+      </section>
+
+      <section class="panel" id="admin-gm-tools" data-tab-panel>
+        <div class="section-head"><div><div class="section-code">ADMIN / OPERATIONS</div><h2>Day-to-Day GM Tools</h2></div><p>LIVE GAME STATE</p></div>
+        <div class="content-grid">
+          <article class="stack">
+            <section class="hud-panel compact"><div class="section-code">RESOURCES</div><h2>Faction Stockpile</h2>
+              <form id="gmResourceForm" class="form-shell">
+                <label><span>Faction</span><select name="faction_id" data-faction-select required></select></label>
+                <label><span>Resource</span><select name="resource_code" id="gmResourceCode" required></select></label>
+                <div class="form-grid"><label><span>Action</span><select name="mode"><option value="add">Grant</option><option value="remove">Remove</option><option value="set">Set Exact</option></select></label><label><span>Quantity</span><input name="amount" type="number" min="0" step="0.01" required></label></div>
+                <button class="hud-button amber" type="submit">APPLY RESOURCE</button><div id="gmResourceState" class="form-state"></div>
+              </form><div id="gmStockpileList" class="resource-list" style="margin-top:14px"></div>
+            </section>
+            <section class="hud-panel compact"><div class="section-code">FACILITIES</div><h2>Facility Control</h2>
+              <form id="gmFacilityForm" class="form-shell"><label><span>Facility</span><select name="facility_id" id="gmFacilitySelect" required></select></label>
+                <div class="form-grid"><label><span>Status</span><select name="status"><option>active</option><option>inactive</option><option>damaged</option><option>disabled</option></select></label><label><span>Health %</span><input name="health" type="number" min="0" max="100" value="100"></label></div>
+                <button class="hud-button" type="submit">UPDATE FACILITY</button><div id="gmFacilityState" class="form-state"></div></form>
+            </section>
+          </article>
+          <aside class="stack">
+            <section class="hud-panel compact"><div class="section-code">AUREUM</div><h2>Player Wallet</h2>
+              <form id="gmWalletForm" class="form-shell"><label><span>Player</span><select name="user_id" data-player-select required></select></label>
+                <div class="form-grid"><label><span>Action</span><select name="mode"><option value="add">Grant</option><option value="remove">Remove</option><option value="set">Set Exact</option></select></label><label><span>Aureum</span><input name="amount" type="number" min="0" step="0.01" required></label></div>
+                <label><span>Reason</span><input name="reason" placeholder="GM adjustment"></label><button class="hud-button amber" type="submit">APPLY AUREUM</button><div id="gmWalletState" class="form-state"></div></form>
+            </section>
+            <section class="hud-panel compact"><div class="section-code">FACTION TREASURY</div><h2>Treasury Adjustment</h2>
+              <form id="gmTreasuryForm" class="form-shell"><label><span>Faction</span><select name="faction_id" data-faction-select required></select></label>
+                <div class="form-grid"><label><span>Action</span><select name="mode"><option value="add">Grant</option><option value="remove">Remove</option><option value="set">Set Exact</option></select></label><label><span>Aureum</span><input name="amount" type="number" min="0" step="0.01" required></label></div>
+                <button class="hud-button" type="submit">APPLY TREASURY</button><div id="gmTreasuryState" class="form-state"></div></form>
+            </section>
+            <section class="hud-panel compact"><div class="section-code">PRODUCTION</div><h2>Factory Orders</h2><div id="gmFactoryOrders" class="stack"></div><div id="gmFactoryState" class="form-state"></div></section>
+            <section class="hud-panel compact"><div class="section-code">QUICK STATUS</div><h2>Operational Snapshot</h2><div id="gmOpsSnapshot" class="telemetry-stack"></div></section>
           </aside>
         </div>
       </section>
