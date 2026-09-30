@@ -930,6 +930,7 @@
     const ownedFacilities=selectedFacilities.filter(row => row.owner_faction_id===factionId || row.controlling_faction_id===factionId);
     const ownedRefineries=ownedFacilities.filter(row => facilityCode(facilityTypeById(row.facility_type_id)).includes("REFIN"));
     const ownedFactories=ownedFacilities.filter(row => facilityCode(facilityTypeById(row.facility_type_id)).includes("FACTORY"));
+    const ownedShipyards=ownedFacilities.filter(row => facilityCode(facilityTypeById(row.facility_type_id)).includes("SHIP"));
     const station=(player.tradeStations || []).find(row=>row.location_ref===selectedHex.ref);
 
     let facilityControls="";
@@ -946,6 +947,15 @@
         '<option value="">Select production</option>'+
         (player.factoryRecipes || []).map(recipe=>'<option value="'+esc(recipe.code)+'" '+(order?.recipe_code===recipe.code?'selected':'')+'>'+esc(recipe.name)+'</option>').join("")+
         '</select><button class="hud-button secondary factory-recipe-save" type="button" data-factory="'+esc(factory.id)+'" style="margin-top:8px">SET PRODUCTION</button></article>';
+    });
+    ownedShipyards.forEach(shipyard => {
+      const orders=(player.shipyardOrders||[]).filter(row=>row.shipyard_facility_id===shipyard.id && row.status==="building");
+      facilityControls += '<article class="notice"><strong>'+esc(shipyard.name || "Shipyard")+'</strong><div class="section-code">CONSTRUCTION QUEUE // '+orders.length+' ACTIVE</div>'+
+        orders.map(order=>'<div class="split-actions" style="margin-top:8px"><span>'+esc(order.ship_name)+'</span><strong>'+esc(order.cycles_remaining)+' CYCLES</strong></div>').join("")+
+        '<select class="shipyard-blueprint-select" data-shipyard="'+esc(shipyard.id)+'" style="margin-top:8px"><option value="">Select hull</option>'+
+        (player.shipBlueprints||[]).map(bp=>'<option value="'+esc(bp.id)+'">'+esc(bp.name)+' // '+esc(bp.build_cycles)+' cycles</option>').join("")+
+        '</select><input class="shipyard-name-input" data-shipyard="'+esc(shipyard.id)+'" placeholder="Ship name (optional)" style="margin-top:8px">'+
+        '<button class="hud-button secondary shipyard-queue-btn" type="button" data-shipyard="'+esc(shipyard.id)+'" style="margin-top:8px">BEGIN CONSTRUCTION</button></article>';
     });
     if(station){
       facilityControls += '<article class="notice"><strong>'+esc(station.station_name || "Guilded Concord Trade Station")+'</strong><div class="section-code">GUILDED CONCORD EXCHANGE</div><a class="hud-button secondary" href="player-suite.html#markets" style="display:inline-flex;margin-top:8px">OPEN MARKET</a></article>';
@@ -974,6 +984,17 @@
         await GMAuth.api("rpc/disconnect_refinery_extractor",{method:"POST",body:JSON.stringify({p_refinery_id:button.dataset.refinery,p_extractor_id:button.dataset.extractor})});
         await refreshAll("EXTRACTOR DISCONNECTED",$("mapBuildState"));
       }catch(error){setState($("mapBuildState"),"DISCONNECT FAILED // "+error.message,"error")}
+    }));
+
+    document.querySelectorAll(".shipyard-queue-btn").forEach(button=>button.addEventListener("click",async()=>{
+      const id=button.dataset.shipyard;
+      const blueprint=document.querySelector('.shipyard-blueprint-select[data-shipyard="'+id+'"]')?.value;
+      const name=document.querySelector('.shipyard-name-input[data-shipyard="'+id+'"]')?.value || null;
+      if(!blueprint) return setState($("mapBuildState"),"SELECT A SHIP BLUEPRINT","error");
+      try{
+        await GMAuth.api("rpc/queue_ship_construction",{method:"POST",body:JSON.stringify({p_shipyard_id:id,p_blueprint_id:blueprint,p_ship_name:name})});
+        await refreshAll("SHIP CONSTRUCTION STARTED",$("mapBuildState"));
+      }catch(error){setState($("mapBuildState"),"SHIP CONSTRUCTION FAILED // "+error.message,"error")}
     }));
 
     document.querySelectorAll(".factory-recipe-save").forEach(button=>button.addEventListener("click",async()=>{
