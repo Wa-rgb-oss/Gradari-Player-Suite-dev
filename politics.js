@@ -804,4 +804,13 @@
       if (root) root.insertAdjacentHTML("afterbegin",'<div class="notice">POLITICAL SYSTEM ERROR // '+esc(error.message)+'</div>');
     }
   })();
+
+  function initStageTabs(){
+    document.querySelectorAll(".politics-stage-tab").forEach(button=>button.addEventListener("click",()=>{
+      document.querySelectorAll(".politics-stage-tab").forEach(x=>x.classList.toggle("active",x===button));
+      document.querySelectorAll(".politics-stage-panel").forEach(panel=>panel.classList.toggle("active",panel.id===button.dataset.stageTab));
+    }));
+  }
+
+  initStageTabs();
 })();
