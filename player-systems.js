@@ -516,8 +516,6 @@
     });
   }
 
-  window.addEventListener("gm:player-state",event=>renderAll(event.detail));
-
   async function renderAll(nextState) {
     state = nextState;
     if (!session) session = state.session;
