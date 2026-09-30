@@ -2232,7 +2232,7 @@ dialog::backdrop{background:rgba(0,0,0,.72);backdrop-filter:blur(2px)}
 @media(max-width:900px){.politics-workspace{grid-template-columns:1fr;height:auto}.politics-command-panel{max-height:none}.politics-stage{min-height:560px}.politics-command-panel.collapsed{width:100%;min-width:0;height:54px}.politics-workspace:has(.politics-command-panel.collapsed){grid-template-columns:1fr}}
 
 /* Game chat */
-.game-chat{position:fixed;z-index:850;right:18px;top:76px;width:min(350px,calc(100vw - 36px));height:330px;display:flex;flex-direction:column;border:1px solid rgba(79,212,232,.34);background:rgba(4,10,14,.60);backdrop-filter:blur(7px);box-shadow:0 12px 35px rgba(0,0,0,.22);font-size:.78rem}
+.game-chat{position:fixed;z-index:850;right:18px;bottom:18px;width:min(350px,calc(100vw - 36px));height:330px;display:flex;flex-direction:column;border:1px solid rgba(79,212,232,.34);background:rgba(4,10,14,.60);backdrop-filter:blur(7px);box-shadow:0 12px 35px rgba(0,0,0,.22);font-size:.78rem}
 .game-chat-head{min-height:42px;padding:8px 10px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(79,212,232,.2);background:rgba(5,12,17,.38)}
 .game-chat-head>div{display:flex;align-items:baseline;gap:8px}.game-chat-head span{font-size:.6rem;letter-spacing:.13em;color:var(--muted)}.game-chat-head strong{font-size:.76rem;letter-spacing:.08em}
 .game-chat-head button{border:0;background:transparent;color:var(--text);font:inherit;cursor:pointer;font-size:1rem}
@@ -2243,4 +2243,4 @@ dialog::backdrop{background:rgba(0,0,0,.72);backdrop-filter:blur(2px)}
 .game-chat-form{display:grid;grid-template-columns:1fr auto;border-top:1px solid rgba(79,212,232,.18);background:rgba(4,10,14,.42)}.game-chat-form input{border:0!important;background:transparent!important;padding:10px!important}.game-chat-form button{border:0;border-left:1px solid rgba(79,212,232,.18);background:rgba(79,212,232,.08);color:var(--text);padding:0 12px;font:inherit;font-size:.62rem;letter-spacing:.06em;cursor:pointer}
 .game-chat.minimized{height:42px}.game-chat.minimized .game-chat-tabs,.game-chat.minimized #gmChatFriend,.game-chat.minimized .game-chat-log,.game-chat.minimized .game-chat-form{display:none}
 .friend-row{display:flex;justify-content:space-between;align-items:center;gap:12px}.friend-row .form-actions{margin:0;flex-wrap:nowrap}
-@media(max-width:700px){.game-chat{right:10px;top:66px;width:min(330px,calc(100vw - 20px));height:280px}}
+@media(max-width:700px){.game-chat{right:10px;bottom:10px;width:min(330px,calc(100vw - 20px));height:280px}}
