@@ -223,7 +223,8 @@
           '<div><strong>'+esc(row.name || type?.name || "Facility")+'</strong>'+
           '<div class="section-code">'+esc(type?.name || "FACILITY")+' // '+esc(row.location_ref || "LOCATION UNSET")+'</div></div>'+
           '<div class="economy-facility-meta"><span class="status-chip '+(status==="ACTIVE"?"":"muted")+'">'+esc(status)+'</span>'+
-          '<strong class="economy-facility-cost">'+(upkeep?'-'+esc(fmt(upkeep)):'0')+' AUREUM / DAY</strong></div>'+
+          '<strong class="economy-facility-cost">'+(upkeep?'-'+esc(fmt(upkeep)):'0')+' AUREUM / DAY</strong>'+
+          '<div class="facility-edit-actions"><button class="hud-button secondary edit-owned-facility" type="button" data-id="'+esc(row.id)+'">EDIT</button><button class="hud-button danger scrap-owned-facility" type="button" data-id="'+esc(row.id)+'">SCRAP</button></div></div>'+
           '</article>';
       }).join("");
     }else{
@@ -232,6 +233,43 @@
       facilityList.innerHTML="";
       facilityEmpty.hidden=false;
     }
+
+    facilityList.querySelectorAll(".edit-owned-facility").forEach(button=>button.addEventListener("click",async()=>{
+      const facility=ownedFacilities.find(row=>row.id===button.dataset.id);
+      if(!facility) return;
+      const type=typeMap.get(facility.facility_type_id);
+      const choice=await GMUI.modal({
+        code:"FACILITY / EDIT",
+        title:facility.name || type?.name || "Facility",
+        message:"Rename this facility or scrap it permanently.",
+        input:true,
+        inputLabel:"Facility Name",
+        defaultValue:facility.name || "",
+        confirmText:"SAVE NAME"
+      });
+      if(choice===null) return;
+      try{
+        await GMAuth.api("rpc/update_owned_facility",{method:"POST",body:JSON.stringify({p_facility_id:facility.id,p_name:choice})});
+        await refreshState();
+      }catch(error){
+        await GMUI.modal({code:"FACILITY / ERROR",title:"Update Failed",message:error.message,confirmText:"CLOSE"});
+      }
+    }));
+
+    facilityList.querySelectorAll(".scrap-owned-facility").forEach(button=>button.addEventListener("click",async()=>{
+      const facility=ownedFacilities.find(row=>row.id===button.dataset.id);
+      if(!facility) return;
+      const ok=await GMUI.confirmAction("Scrap "+(facility.name || "this facility")+"? This permanently removes the facility and does not refund its construction cost.",{
+        code:"FACILITY / SCRAP",title:"Scrap Facility",confirmText:"SCRAP FACILITY",danger:true
+      });
+      if(!ok) return;
+      try{
+        await GMAuth.api("rpc/scrap_owned_facility",{method:"POST",body:JSON.stringify({p_facility_id:facility.id})});
+        await refreshState();
+      }catch(error){
+        await GMUI.modal({code:"FACILITY / ERROR",title:"Scrap Failed",message:error.message,confirmText:"CLOSE"});
+      }
+    }));
 
     const body = $("transactionRows");
     if (!state.transactions.length) {
