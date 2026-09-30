@@ -640,8 +640,8 @@
 
   document.addEventListener("gm:player-state",event => {
     renderAll(event.detail).catch(error => {
-      const notice=$("suiteNotice");
-      if (notice) notice.textContent="EXTENDED SYSTEM ERROR // " + error.message;
+      const notice=$("suiteNotice") || $("marketState");
+      if (notice) setState(notice,"SYSTEM DISPLAY ERROR // " + error.message,"error");
     });
   });
 
