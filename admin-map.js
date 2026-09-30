@@ -119,22 +119,31 @@
     for(let i=0;i<300;i++)ctx.fillRect((i*911)%Math.max(1,rect.width),(i*577)%Math.max(1,rect.height),1.4,1.4);
   }
 
+  function systemVisual(economy){
+    if(economy?.is_capital) return {tier:"capital",fontBase:16,markerBase:8,minZoom:0};
+    const tier=String(economy?.development_tier||"colony").toLowerCase();
+    if(tier==="developed") return {tier,fontBase:13,markerBase:7,minZoom:.42};
+    if(tier==="system") return {tier,fontBase:11,markerBase:6,minZoom:.55};
+    return {tier:"colony",fontBase:9,markerBase:4.5,minZoom:.78};
+  }
+
   function drawSystemMarkers(){
     (data?.mapHexes||[]).filter(row=>Number(row.habitable_systems||0)>0 && row.player_visible!==false).forEach(row=>{
-      const p=worldToScreen(hexToPixel(Number(row.q),Number(row.r)));
       const economy=(data?.systemEconomies||[]).find(x=>x.location_ref===row.location_ref);
-      const isCapital=Boolean(economy?.is_capital);
-      const markerSize=Math.max(5,(isCapital?8:6)*camera.zoom);
+      const visual=systemVisual(economy);
+      if(camera.zoom<visual.minZoom) return;
+      const p=worldToScreen(hexToPixel(Number(row.q),Number(row.r)));
+      const markerSize=Math.max(4,visual.markerBase*camera.zoom);
       ctx.beginPath();ctx.arc(p.x,p.y,markerSize,0,Math.PI*2);
-      ctx.fillStyle=isCapital?"#d8a35d":"#dce9ed";ctx.fill();
-      ctx.strokeStyle=isCapital?"#ffe8be":"#45d7e8";ctx.lineWidth=Math.max(1,1.5*camera.zoom);ctx.stroke();
-      if(camera.zoom>=.55 && row.display_name){
-        const fontSize=Math.max(8,10*camera.zoom);
+      ctx.fillStyle=visual.tier==="capital"?"#d8a35d":"#dce9ed";ctx.fill();
+      ctx.strokeStyle=visual.tier==="capital"?"#ffe8be":"#45d7e8";ctx.lineWidth=Math.max(1,visual.tier==="capital"?1.5*camera.zoom:1);ctx.stroke();
+      if(row.display_name){
+        const fontSize=Math.max(7,visual.fontBase*camera.zoom);
         ctx.font="600 "+fontSize+"px Share Tech Mono, Consolas, monospace";
         ctx.textAlign="center";ctx.textBaseline="bottom";
         ctx.lineJoin="round";ctx.lineCap="round";ctx.miterLimit=2;
-        ctx.strokeStyle="#02080c";ctx.lineWidth=4;ctx.strokeText(row.display_name,p.x,p.y-markerSize-5);
-        ctx.fillStyle=isCapital?"#f1d7b0":"#dce9ed";ctx.fillText(row.display_name,p.x,p.y-markerSize-5);
+        ctx.strokeStyle="#02080c";ctx.lineWidth=Math.max(3,4*camera.zoom);ctx.strokeText(row.display_name,p.x,p.y-markerSize-5);
+        ctx.fillStyle=visual.tier==="capital"?"#f1d7b0":"#dce9ed";ctx.fillText(row.display_name,p.x,p.y-markerSize-5);
       }
     });
     ctx.textBaseline="alphabetic";
