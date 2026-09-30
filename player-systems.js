@@ -355,12 +355,25 @@
     const cards=[];
     stations.forEach(station => {
       const rows=groups.get(station.market_id) || [];
-      const market=state.markets?.find(row=>row.id===station.market_id);
+      const strategic=(state.tradeStationResources || []).filter(row=>row.market_id===station.market_id);
+      const resourceNames=new Map((state.resourceCatalog || []).map(row=>[row.code,row]));
       cards.push(`
         <article class="notice">
           <div class="split-actions"><div><strong style="color:var(--text)">${esc(station.station_name)}</strong><div class="section-code">GUILDED CONCORD TRADE STATION // ${esc(station.location_ref)}</div></div><span class="status-chip">EXCHANGE</span></div>
           <div class="resource-list" style="margin-top:10px">
-            ${rows.length ? rows.map(row => `
+            ${strategic.map(row => {
+              const resource=resourceNames.get(row.resource_code);
+              return `<div class="resource-row station-resource-row" data-market="${esc(row.market_id)}" data-resource="${esc(row.resource_code)}">
+                <div><strong>${esc(resource?.name || row.resource_code)}</strong><div class="section-code">${esc(String(resource?.category || "resource").toUpperCase())} // STOCK: ${row.stock==null?"UNLIMITED":esc(fmt(row.stock))}</div></div>
+                <div style="display:flex;gap:7px;align-items:center;justify-content:flex-end;flex-wrap:wrap">
+                  <span>BUY ${esc(fmt(row.buy_price))} A // SELL ${esc(fmt(row.sell_price))} A</span>
+                  <input class="station-resource-qty" type="number" min="0.01" step="0.01" value="1" style="width:82px">
+                  <button class="hud-button secondary station-resource-buy" type="button">BUY</button>
+                  <button class="hud-button secondary station-resource-sell" type="button">SELL</button>
+                </div>
+              </div>`;
+            }).join("")}
+            ${rows.map(row => `
               <div class="resource-row market-row" data-listing="${esc(row.id)}">
                 <div><strong>${esc(row.asset.name)}</strong><div class="section-code">${esc(row.asset.kind || "resource")} // STOCK: ${row.stock==null?"UNLIMITED":esc(fmt(row.stock))}</div></div>
                 <div style="display:flex;gap:7px;align-items:center;justify-content:flex-end;flex-wrap:wrap">
@@ -368,7 +381,8 @@
                   <input class="market-qty" type="number" min="0.0001" step="0.0001" value="1" style="width:92px">
                   <button class="hud-button secondary market-buy" type="button">BUY</button>
                 </div>
-              </div>`).join("") : '<div class="empty-state">NO CURRENT LISTINGS.</div>'}
+              </div>`).join("")}
+            ${!rows.length&&!strategic.length?'<div class="empty-state">NO CURRENT LISTINGS.</div>':""}
           </div>
         </article>`);
       groups.delete(station.market_id);
@@ -395,6 +409,19 @@
 
     root.innerHTML=cards.join("");
     $("marketEmpty").hidden=cards.length>0;
+
+    root.querySelectorAll(".station-resource-buy,.station-resource-sell").forEach(button => {
+      button.addEventListener("click",async()=>{
+        const row=button.closest(".station-resource-row");
+        const qty=Number(row.querySelector(".station-resource-qty").value||0);
+        const direction=button.classList.contains("station-resource-buy")?"buy":"sell";
+        try{
+          const result=await rpc("trade_station_resource",{p_market_id:row.dataset.market,p_resource_code:row.dataset.resource,p_quantity:qty,p_direction:direction});
+          setState($("marketState"),direction.toUpperCase()+" COMPLETE // "+fmt(result.value)+" AUREUM","success");
+          await refresh();
+        }catch(error){setState($("marketState"),"TRADE FAILED // "+error.message,"error")}
+      });
+    });
 
     root.querySelectorAll(".market-buy").forEach(button => {
       button.addEventListener("click", async () => {
