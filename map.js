@@ -36,7 +36,15 @@
   };
 
   const dirs = [[1,0],[1,-1],[0,-1],[-1,0],[-1,1],[0,1]];
-  const canonLocations = {"HEX_-2_-2":{name:"VIRETHON PRIMARIS",type:"IMPERIAL CAPITAL",faction:"GRADARI MIRERIS"}};
+  const canonLocations = {
+    "HEX_-2_-2":{name:"VIRETHON PRIMARIS",type:"IMPERIAL CAPITAL",tier:"developed",seat:"VIRETHON PRIMARIS",faction:"GRADARI MIRERIS"},
+    "HEX_-6_-2":{name:"NAEXUS ARC",type:"IMPERIAL SYSTEM",tier:"developed",seat:"NAEXUS ULTIM",faction:"GRADARI MIRERIS"},
+    "HEX_-5_2":{name:"SYRETHIAN REACH",type:"IMPERIAL SYSTEM",tier:"developed",seat:"SYRETH NULL",faction:"GRADARI MIRERIS"},
+    "HEX_-4_-3":{name:"VARN'CATH EXPANSE",type:"IMPERIAL SYSTEM",tier:"developed",seat:"KURN VARETHIS",faction:"GRADARI MIRERIS"},
+    "HEX_-3_3":{name:"ZENTHORI VANE",type:"IMPERIAL SYSTEM",tier:"developed",seat:"ZEVRAN HOLD",faction:"GRADARI MIRERIS"},
+    "HEX_0_-2":{name:"LORAK'S CHAIN",type:"IMPERIAL SYSTEM",tier:"developed",seat:"LORAK TERTIARY",faction:"GRADARI MIRERIS"},
+    "HEX_0_1":{name:"AURIS SOMNARIUM",type:"IMPERIAL SYSTEM",tier:"developed",seat:"AURIS NINE",faction:"GRADARI MIRERIS"}
+  };
 
   function refFor(q,r) {
     return "HEX_" + q + "_" + r;
@@ -1008,7 +1016,7 @@
     const name=canon?.name || territory?.display_name || mapHex.display_name || "Hex "+selectedHex.q+", "+selectedHex.r;
     const production=Number(territory?.production_modifier ?? 1);
     const system=(player.systemEconomies || []).find(row=>row.location_ref===selectedHex.ref);
-    const tier=String(system?.development_tier || "colony").toLowerCase();
+    const tier=String(system?.development_tier || canon?.tier || "colony").toLowerCase();
     const systemType=system?.is_capital || canon?.type==="IMPERIAL CAPITAL"
       ? "IMPERIAL CAPITAL SYSTEM"
       : tier==="developed" ? "IMPERIAL DEVELOPED SYSTEM"
