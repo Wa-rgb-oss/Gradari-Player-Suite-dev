@@ -1029,7 +1029,7 @@
     $("selectedFacilityEmpty").hidden=selectedFacilities.length>0;
     $("selectedFacilityList").innerHTML=selectedFacilities.map(row => {
       const type=facilityTypeById(row.facility_type_id);
-      return '<article class="notice map-list-row"><div><strong>'+esc(row.name || type?.name || "Holding")+'</strong><div class="section-code">'+esc(type?.name || "FACILITY")+'</div></div><span>'+esc(fmt(type?.upkeep_aureum_per_cycle || 0))+' A / CYCLE</span></article>';
+      return '<article class="notice map-list-row"><div><strong>'+esc(row.name || type?.name || "Holding")+'</strong><div class="section-code">'+esc(type?.name || "FACILITY")+'</div></div><span>'+esc(fmt(type?.upkeep_aureum_per_cycle || 0))+' A / DAY</span></article>';
     }).join("");
 
     const factionId=activeMembership()?.faction_id;
