@@ -22,6 +22,22 @@
   const fmt = value => Number(value || 0).toLocaleString(undefined,{maximumFractionDigits:2});
   const setState = (el,message,type="") => GMUI.setState(el,message,type);
 
+  function initPoliticsCommandPanel() {
+    const panel=document.querySelector(".politics-command-panel");
+    const tabs=[...document.querySelectorAll("[data-politics-tab]")];
+    const pages=[...document.querySelectorAll(".politics-command-page")];
+    tabs.forEach(tab=>tab.addEventListener("click",()=>{
+      tabs.forEach(item=>item.classList.toggle("active",item===tab));
+      pages.forEach(page=>page.classList.toggle("active",page.id===tab.dataset.politicsTab));
+      if (tab.dataset.politicsTab==="politics-senate") scheduleChamberDraw();
+    }));
+    $("politicsPanelCollapse")?.addEventListener("click",()=>{
+      panel?.classList.toggle("collapsed");
+      $("politicsPanelCollapse").textContent=panel?.classList.contains("collapsed") ? "›" : "‹";
+      setTimeout(scheduleChamberDraw,80);
+    });
+  }
+
   function factionById(id) {
     return player?.factions?.find(row => row.id === id) || null;
   }
@@ -779,6 +795,7 @@
     if (!session) return;
     try {
       player = await GMPlayerData.load(session);
+      initPoliticsCommandPanel();
       await loadPolitics();
       renderAll();
     } catch (error) {
