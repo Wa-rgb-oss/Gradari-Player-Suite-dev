@@ -254,6 +254,7 @@
       try{
         await GMAuth.api("rpc/update_owned_facility",{method:"POST",body:JSON.stringify({p_facility_id:facility.id,p_name:choice})});
         await refreshState();
+      await loadFriends();
       }catch(error){
         await GMUI.modal({code:"FACILITY / ERROR",title:"Update Failed",message:error.message,confirmText:"CLOSE"});
       }
@@ -486,19 +487,44 @@
     document.dispatchEvent(new CustomEvent("gm:player-state",{detail:state}));
   }
 
-  $("friendSearchButton")?.addEventListener("click", () => {
-    const query = $("friendSearchInput")?.value.trim();
-    const root = $("friendSearchResults");
-    const empty = $("friendSearchEmpty");
-    if (!query) {
-      root.innerHTML = "";
-      empty.textContent = "ENTER A USERNAME OR ACCOUNT NAME.";
-      empty.hidden = false;
-      return;
-    }
-    root.innerHTML = "";
-    empty.textContent = "PLAYER DISCOVERY IS READY FOR THE FRIENDS DATABASE CONNECTION.";
-    empty.hidden = false;
+  let friendData={requests:[],friendships:[],profiles:new Map()};
+
+  async function loadFriends(){
+    const uid=session.user.id;
+    const [requests,friendships,profiles]=await Promise.all([
+      GMAuth.api("friend_requests?or=(sender_user_id.eq."+uid+",receiver_user_id.eq."+uid+")&select=*&order=created_at.desc"),
+      GMAuth.api("friendships?or=(user_a.eq."+uid+",user_b.eq."+uid+")&select=*&order=created_at.desc"),
+      GMAuth.api("player_profiles?is_discoverable=eq.true&select=user_id,display_name&order=display_name.asc")
+    ]);
+    friendData={requests:requests||[],friendships:friendships||[],profiles:new Map((profiles||[]).map(p=>[p.user_id,p]))};
+    renderFriends();
+    document.dispatchEvent(new CustomEvent("gm:friends-updated"));
+  }
+
+  function renderFriends(){
+    const uid=session.user.id,root=$("friendList"),reqRoot=$("friendRequestList");
+    const ids=friendData.friendships.map(f=>f.user_a===uid?f.user_b:f.user_a);
+    $("friendListEmpty").hidden=ids.length>0;
+    root.innerHTML=ids.map(id=>{const p=friendData.profiles.get(id);return '<article class="notice friend-row"><div><strong>'+esc(p?.display_name||"PLAYER")+'</strong><div class="section-code">FRIEND</div></div><div class="form-actions"><button class="hud-button secondary friend-message" data-user="'+esc(id)+'" type="button">MESSAGE</button><button class="hud-button danger friend-remove" data-user="'+esc(id)+'" type="button">REMOVE</button></div></article>'}).join("");
+    const pending=friendData.requests.filter(r=>r.status==="pending");
+    $("friendRequestEmpty").hidden=pending.length>0;
+    reqRoot.innerHTML=pending.map(r=>{const incoming=r.receiver_user_id===uid,other=incoming?r.sender_user_id:r.receiver_user_id,p=friendData.profiles.get(other);return '<article class="notice friend-row"><div><strong>'+esc(p?.display_name||"PLAYER")+'</strong><div class="section-code">'+(incoming?"INCOMING REQUEST":"REQUEST SENT")+'</div></div><div class="form-actions">'+(incoming?'<button class="hud-button friend-accept" data-request="'+esc(r.id)+'" type="button">ACCEPT</button><button class="hud-button secondary friend-decline" data-request="'+esc(r.id)+'" type="button">DECLINE</button>':'')+'</div></article>'}).join("");
+    root.querySelectorAll(".friend-remove").forEach(b=>b.onclick=async()=>{if(!await GMUI.confirmAction("Remove this player from your friends?",{title:"Remove Friend",confirmText:"REMOVE",danger:true}))return;await GMAuth.api("rpc/remove_friend",{method:"POST",body:JSON.stringify({p_user_id:b.dataset.user})});await loadFriends()});
+    root.querySelectorAll(".friend-message").forEach(b=>b.onclick=()=>{const chat=$("gmGameChat");if(chat){chat.classList.remove("minimized");$("[data-chat-mode=\"direct\"]")?.click();const sel=$("gmChatFriend");sel.value=b.dataset.user;sel.dispatchEvent(new Event("change"));$("gmChatInput")?.focus()}});
+    reqRoot.querySelectorAll(".friend-accept,.friend-decline").forEach(b=>b.onclick=async()=>{await GMAuth.api("rpc/respond_friend_request",{method:"POST",body:JSON.stringify({p_request_id:b.dataset.request,p_accept:b.classList.contains("friend-accept")})});await loadFriends()});
+  }
+
+  $("friendSearchButton")?.addEventListener("click", async () => {
+    const query=$("friendSearchInput")?.value.trim(),root=$("friendSearchResults"),empty=$("friendSearchEmpty");
+    if(!query){root.innerHTML="";empty.textContent="ENTER A PROFILE NAME.";empty.hidden=false;return}
+    try{
+      const rows=await GMAuth.api("player_profiles?is_discoverable=eq.true&display_name=ilike."+encodeURIComponent("*"+query+"*")+"&select=user_id,display_name&limit=20");
+      const own=session.user.id,friendIds=new Set(friendData.friendships.flatMap(f=>[f.user_a,f.user_b]));
+      const found=(rows||[]).filter(p=>p.user_id!==own);
+      empty.hidden=found.length>0;empty.textContent="NO PLAYERS FOUND.";
+      root.innerHTML=found.map(p=>'<article class="notice friend-row"><div><strong>'+esc(p.display_name||"PLAYER")+'</strong><div class="section-code">PLAYER NETWORK</div></div><button class="hud-button secondary friend-add" data-user="'+esc(p.user_id)+'" type="button" '+(friendIds.has(p.user_id)?"disabled":"")+'>'+(friendIds.has(p.user_id)?"FRIENDS":"ADD FRIEND")+'</button></article>').join("");
+      root.querySelectorAll(".friend-add:not([disabled])").forEach(b=>b.onclick=async()=>{try{await GMAuth.api("rpc/send_friend_request",{method:"POST",body:JSON.stringify({p_user_id:b.dataset.user})});await loadFriends();b.textContent="REQUEST SENT";b.disabled=true}catch(err){empty.textContent=err.message;empty.hidden=false}});
+    }catch(err){empty.textContent="SEARCH FAILED // "+err.message;empty.hidden=false}
   });
 
   $("registerAgain")?.addEventListener("click", enableRegistrationAgain);
@@ -669,6 +695,7 @@
     conditionalFields();
     try {
       await refreshState();
+      await loadFriends();
     } catch (error) {
       $("suiteNotice").textContent = "PLAYER SUITE DATA ERROR // " + error.message;
     }
