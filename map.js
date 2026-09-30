@@ -192,7 +192,6 @@
     buildCircle();
     renderUi();
     draw();
-    ensureTravelAnimation();
     if (message && target) setState(target,message,"success");
   }
 
@@ -572,7 +571,7 @@
     ctx.moveTo(a.x,a.y);
     ctx.lineTo(b.x,b.y);
     ctx.setLineDash([3,8]);
-    ctx.lineDashOffset=-(performance.now()/70)%11;
+    ctx.lineDashOffset=0;
     ctx.strokeStyle="rgba(240,201,143,.9)";
     ctx.lineWidth=Math.max(1.5,2*camera.zoom);
     ctx.shadowColor="rgba(216,163,93,.45)";
@@ -1362,22 +1361,6 @@
   const observer=new ResizeObserver(() => resizeCanvas(false));
   observer.observe(canvas.parentElement);
 
-  let travelAnimationActive=false;
-  function animateTravelRoute(){
-    const char=livingCharacter();
-    const active=char && characterTravel.some(row=>row.character_id===char.id && row.status==="traveling");
-    if(!active){travelAnimationActive=false;return;}
-    draw();
-    requestAnimationFrame(animateTravelRoute);
-  }
-  function ensureTravelAnimation(){
-    if(travelAnimationActive) return;
-    const char=livingCharacter();
-    if(char && characterTravel.some(row=>row.character_id===char.id && row.status==="traveling")){
-      travelAnimationActive=true;
-      requestAnimationFrame(animateTravelRoute);
-    }
-  }
 
   (async () => {
     session=await GMUI.initProtected();
