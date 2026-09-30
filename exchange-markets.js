@@ -1,5 +1,6 @@
 (() => {
 let session=null,state=null;
+const stationUI=new Map();
 const $=id=>document.getElementById(id);
 const esc=v=>GMUI.esc(v);
 const fmt=v=>Number(v||0).toLocaleString(undefined,{maximumFractionDigits:2});
@@ -10,8 +11,14 @@ function render(){
   const cards=[];
   const names=new Map((state.resourceCatalog||[]).map(x=>[x.code,x]));
   (state.tradeStations||[]).forEach(station=>{
-    const resources=(state.tradeStationResources||[]).filter(x=>x.market_id===station.market_id);
-    cards.push(`<article class="notice"><div class="split-actions"><div><strong style="color:var(--text)">${esc(station.station_name)}</strong><div class="section-code">GUILDED CONCORD TRADE STATION // ${esc(station.location_ref)}</div></div><span class="status-chip">EXCHANGE</span></div><div class="resource-list" style="margin-top:10px">${resources.map(row=>{
+    const ui=stationUI.get(station.market_id)||{collapsed:false,sort:"name"};
+    stationUI.set(station.market_id,ui);
+    const resources=(state.tradeStationResources||[]).filter(x=>x.market_id===station.market_id).sort((a,b)=>{
+      if(ui.sort==="price-low") return Number(a.buy_price)-Number(b.buy_price);
+      if(ui.sort==="price-high") return Number(b.buy_price)-Number(a.buy_price);
+      return String(names.get(a.resource_code)?.name||a.resource_code).localeCompare(String(names.get(b.resource_code)?.name||b.resource_code));
+    });
+    cards.push(`<article class="notice exchange-station-card" data-station="${esc(station.market_id)}"><div class="split-actions exchange-station-head"><div><strong style="color:var(--text)">${esc(station.station_name)}</strong><div class="section-code">GUILDED CONCORD TRADE STATION // ${esc(station.location_ref)}</div></div><div class="exchange-station-tools"><label class="exchange-sort-label">SORT <select class="exchange-sort"><option value="name" ${ui.sort==="name"?"selected":""}>NAME</option><option value="price-low" ${ui.sort==="price-low"?"selected":""}>PRICE: LOW → HIGH</option><option value="price-high" ${ui.sort==="price-high"?"selected":""}>PRICE: HIGH → LOW</option></select></label><button class="hud-button secondary exchange-collapse" type="button" aria-expanded="${!ui.collapsed}">${ui.collapsed?"EXPAND":"COLLAPSE"}</button></div></div><div class="resource-list exchange-station-body" style="margin-top:10px" ${ui.collapsed?"hidden":""}>${resources.map(row=>{
       const resource=names.get(row.resource_code);
       const owned=Number((state.factionResources||[]).find(x=>x.faction_id===state.primaryMembership?.faction_id&&x.resource_code===row.resource_code)?.quantity||0);
       const avg=Number(row.market_value??((Number(row.buy_price)+Number(row.sell_price))/2));
@@ -21,6 +28,14 @@ function render(){
   });
   root.innerHTML=cards.join("");
   $("marketEmpty").hidden=cards.length>0;
+  root.querySelectorAll(".exchange-collapse").forEach(button=>button.addEventListener("click",()=>{
+    const card=button.closest(".exchange-station-card"),ui=stationUI.get(card.dataset.station);
+    ui.collapsed=!ui.collapsed; render();
+  }));
+  root.querySelectorAll(".exchange-sort").forEach(select=>select.addEventListener("change",()=>{
+    const card=select.closest(".exchange-station-card"),ui=stationUI.get(card.dataset.station);
+    ui.sort=select.value; render();
+  }));
   root.querySelectorAll(".station-resource-buy,.station-resource-sell").forEach(button=>button.addEventListener("click",async()=>{
     const row=button.closest(".station-resource-row"),qty=Number(row.querySelector(".station-resource-qty").value||0),direction=button.classList.contains("station-resource-buy")?"buy":"sell";
     try{
