@@ -14,7 +14,7 @@ do $$ begin
 exception when duplicate_object then null; end $$;
 do $$ begin
  create policy "admin trade station resources" on public.trade_station_resource_listings
- for all to authenticated using (private.is_admin()) with check (private.is_admin());
+ for all to authenticated using (public.is_admin()) with check (public.is_admin());
 exception when duplicate_object then null; end $$;
 
 create or replace function public.trade_station_resource(
