@@ -272,7 +272,7 @@
     const f=factionById(id);if(!f)return;
     const used=(data.territories||[]).some(t=>t.faction_id===id)||(data.facilities||[]).some(x=>x.owner_faction_id===id||x.controlling_faction_id===id)||(data.memberships||[]).some(x=>x.faction_id===id);
     if(used)return setState($("adminMapState"),"CANNOT DELETE "+f.name.toUpperCase()+" WHILE IT HAS TERRITORY, FACILITIES, OR MEMBERSHIPS.","error");
-    if(!confirm("Delete "+f.name+" permanently?"))return;
+    if(!await GMUI.confirmAction("Delete "+f.name+" permanently?",{code:"ADMIN / FACTION",title:"Delete Faction",confirmText:"DELETE",danger:true}))return;
     try{
       await GMAuth.api("factions?id=eq."+encodeURIComponent(id),{method:"DELETE",headers:{Prefer:"return=minimal"}});
       await window.GMAdminRefresh("FACTION DELETED");
@@ -333,7 +333,7 @@
 
   async function deleteBuilding(id=selectedBuildingId){
     const b=buildingById(id);if(!b)return;
-    if(!confirm("Delete "+(b.name||"this asset")+"? Construction cost will not be refunded."))return;
+    if(!await GMUI.confirmAction("Delete "+(b.name||"this asset")+"? Construction cost will not be refunded.",{code:"ADMIN / FACILITY",title:"Delete Facility",confirmText:"DELETE",danger:true}))return;
     try{
       await GMAuth.api("facilities?id=eq."+encodeURIComponent(id),{method:"DELETE",headers:{Prefer:"return=minimal"}});
       selectedBuildingId=null;await window.GMAdminRefresh("MAP ASSET DELETED");
@@ -366,7 +366,7 @@
   }
 
   async function clearClaims(){
-    if(!confirm("Clear every faction claim on the galaxy map? This preserves hex metadata, facilities, characters, and other game records."))return;
+    if(!await GMUI.confirmAction("Clear every faction claim on the galaxy map? This preserves hex metadata, facilities, characters, and other game records.",{code:"ADMIN / MAP",title:"Clear Faction Claims",confirmText:"CLEAR CLAIMS",danger:true}))return;
     try{
       await GMAuth.api("territories?faction_id=not.is.null",{method:"PATCH",headers:{Prefer:"return=minimal"},body:JSON.stringify({faction_id:null})});
       (data.territories||[]).forEach(row=>row.faction_id=null);
@@ -487,7 +487,7 @@
     try{
       const payload=JSON.parse(await file.text());
       if(!payload.hexes||!Array.isArray(payload.labels))throw new Error("This does not look like a Gradari map save.");
-      if(!confirm("Importing will replace current faction claims and map labels. Existing factions, facilities, characters, armies, and economy records will not be deleted. Continue?"))return;
+      if(!await GMUI.confirmAction("Importing will replace current faction claims and map labels. Existing factions, facilities, characters, armies, and economy records will not be deleted. Continue?",{code:"ADMIN / IMPORT",title:"Import Galaxy Map",confirmText:"IMPORT",danger:true}))return;
 
       const sourceFactions=Array.isArray(payload.factions)?payload.factions:[];
       const liveByName=new Map((data.factions||[]).map(f=>[String(f.name).trim().toLowerCase(),f]));
@@ -628,7 +628,7 @@
       '<div class="resource-row"><div><strong>'+esc(bp.name)+'</strong><div class="section-code">'+esc(String(bp.hull_type||"vessel").toUpperCase())+' // '+esc(bp.build_cycles)+' CYCLES // '+esc(fmt(bp.manpower_cost))+' MANPOWER</div></div><button class="hud-button danger admin-blueprint-delete" data-id="'+esc(bp.id)+'" type="button">REMOVE</button></div>'
     ).join("") : '<div class="empty-state map-mini-empty">NO SHIP BLUEPRINTS.</div>';
     document.querySelectorAll(".admin-blueprint-delete").forEach(button=>button.addEventListener("click",async()=>{
-      if(!confirm("Remove this ship blueprint?")) return;
+      if(!await GMUI.confirmAction("Remove this ship blueprint?",{code:"ADMIN / SHIPYARD",title:"Remove Blueprint",confirmText:"REMOVE",danger:true})) return;
       try{
         await GMAuth.api("ship_blueprints?id=eq."+encodeURIComponent(button.dataset.id),{method:"DELETE",headers:{Prefer:"return=minimal"}});
         await window.GMAdminRefresh("SHIP BLUEPRINT REMOVED");
@@ -668,7 +668,7 @@
   }
 
   async function runIndustryCycle(){
-    if(!confirm("Run one industrial production cycle now?")) return;
+    if(!await GMUI.confirmAction("Run one industrial production cycle now?",{code:"ADMIN / INDUSTRY",title:"Run Production",confirmText:"RUN CYCLE"})) return;
     try{
       setState($("adminMapState"),"RUNNING INDUSTRY CYCLE...");
       const result=await GMAuth.api("rpc/run_industry_cycle",{method:"POST",body:"{}"});
