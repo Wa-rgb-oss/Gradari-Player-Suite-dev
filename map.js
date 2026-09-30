@@ -412,26 +412,53 @@
     ctx.restore();
   }
 
+  function systemVisual(ref) {
+    const economy=(player?.systemEconomies||[]).find(row=>row.location_ref===ref);
+    const canon=canonLocations[ref];
+    const isCapital=Boolean(economy?.is_capital) || canon?.type==="IMPERIAL CAPITAL";
+    const tier=String(economy?.development_tier || canon?.tier || "colony").toLowerCase();
+    if(isCapital) return {tier:"capital",fontBase:16,markerBase:8,minZoom:0};
+    if(tier==="developed") return {tier,fontBase:13,markerBase:7,minZoom:.42};
+    if(tier==="system") return {tier,fontBase:11,markerBase:6,minZoom:.55};
+    return {tier:"colony",fontBase:9,markerBase:4.5,minZoom:.78};
+  }
+
   function drawSystems() {
     const refs=new Set([
       ...(mapHexes || []).filter(row=>Number(row.habitable_systems||0)>0).map(row=>row.ref),
       ...(player?.systemEconomies || []).map(row=>row.location_ref)
     ]);
     ctx.save();
+    ctx.textAlign="center";
+    ctx.textBaseline="bottom";
     refs.forEach(ref=>{
       const h=parseRef(ref);
       if(!h || !mapHexSet.has(ref)) return;
+      const visual=systemVisual(ref);
+      if(camera.zoom<visual.minZoom) return;
+      const hex=mapHexes.find(row=>row.ref===ref);
+      const canon=canonLocations[ref];
+      const name=hex?.display_name || canon?.name || null;
       const p=worldToScreen(hexToWorld(h.q,h.r));
-      const radius=Math.max(3.5,5*camera.zoom);
+      const radius=Math.max(3.5,visual.markerBase*camera.zoom);
       ctx.beginPath();
       ctx.arc(p.x,p.y,radius,0,Math.PI*2);
-      ctx.fillStyle="rgba(226,241,244,.92)";
+      ctx.fillStyle=visual.tier==="capital"?"rgba(216,163,93,.96)":"rgba(226,241,244,.92)";
       ctx.fill();
       ctx.beginPath();
       ctx.arc(p.x,p.y,radius+Math.max(2,3*camera.zoom),0,Math.PI*2);
-      ctx.strokeStyle="rgba(134,215,232,.48)";
-      ctx.lineWidth=1;
+      ctx.strokeStyle=visual.tier==="capital"?"rgba(255,232,190,.80)":"rgba(134,215,232,.48)";
+      ctx.lineWidth=Math.max(1,visual.tier==="capital"?1.5*camera.zoom:1);
       ctx.stroke();
+      if(name){
+        const fontSize=Math.max(7,visual.fontBase*camera.zoom);
+        ctx.font="600 "+fontSize+"px Share Tech Mono, Consolas, monospace";
+        ctx.strokeStyle="rgba(2,8,12,.95)";
+        ctx.lineWidth=Math.max(3,4*camera.zoom);
+        strokeMapText(name,p.x,p.y-radius-5);
+        ctx.fillStyle=visual.tier==="capital"?"rgb(241,215,176)":"rgba(226,241,244,.92)";
+        ctx.fillText(name,p.x,p.y-radius-5);
+      }
     });
     ctx.restore();
   }
@@ -684,7 +711,6 @@
     drawTerritories();
     drawMapLabels();
     drawSystems();
-    drawCanonLocations();
     drawModifiers();
     drawTradeStations();
     drawFacilities();
