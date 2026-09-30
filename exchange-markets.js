@@ -1,12 +1,36 @@
 (() => {
-let session=null;
-window.GMPlayerSuiteRefresh=async()=>{ if(!session) return; const state=await GMPlayerData.load(session); window.dispatchEvent(new CustomEvent("gm:player-state",{detail:state})); };
-async function init(){
-  session=await GMUI.initProtected();
-  if(!session)return;
-  const state=await GMPlayerData.load(session);
-  window.GMPlayerSuiteState=state;
-  window.dispatchEvent(new CustomEvent("gm:player-state",{detail:state}));
+let session=null,state=null;
+const $=id=>document.getElementById(id);
+const esc=v=>GMUI.esc(v);
+const fmt=v=>Number(v||0).toLocaleString(undefined,{maximumFractionDigits:2});
+const rpc=(name,args={})=>GMAuth.api("rpc/"+name,{method:"POST",body:JSON.stringify(args)});
+
+function render(){
+  const root=$("marketList");
+  const cards=[];
+  const names=new Map((state.resourceCatalog||[]).map(x=>[x.code,x]));
+  (state.tradeStations||[]).forEach(station=>{
+    const resources=(state.tradeStationResources||[]).filter(x=>x.market_id===station.market_id);
+    cards.push(`<article class="notice"><div class="split-actions"><div><strong style="color:var(--text)">${esc(station.station_name)}</strong><div class="section-code">GUILDED CONCORD TRADE STATION // ${esc(station.location_ref)}</div></div><span class="status-chip">EXCHANGE</span></div><div class="resource-list" style="margin-top:10px">${resources.map(row=>{
+      const resource=names.get(row.resource_code);
+      const owned=Number((state.factionResources||[]).find(x=>x.faction_id===state.primaryMembership?.faction_id&&x.resource_code===row.resource_code)?.quantity||0);
+      const avg=Number(row.market_value??((Number(row.buy_price)+Number(row.sell_price))/2));
+      const priceClass=Number(row.demand_index||1)>1.015?"market-price-high":Number(row.demand_index||1)<.985?"market-price-low":"market-price-neutral";
+      return `<div class="resource-row station-resource-row" data-market="${esc(row.market_id)}" data-resource="${esc(row.resource_code)}"><div><strong>${esc(resource?.name||row.resource_code)}</strong><div class="section-code">${esc(String(resource?.category||"resource").toUpperCase())} // MARKET STOCK: ${row.stock==null?"UNLIMITED":esc(fmt(row.stock))} // AVAILABLE TO SELL: ${esc(fmt(owned))}</div></div><div style="display:flex;gap:7px;align-items:center;justify-content:flex-end;flex-wrap:wrap"><span class="${priceClass}">AVG ${esc(fmt(avg))} A // BUY ${esc(fmt(row.buy_price))} A // SELL ${esc(fmt(row.sell_price))} A</span><input class="station-resource-qty" type="number" min="0.01" step="0.01" value="1" style="width:82px"><button class="hud-button secondary station-resource-buy" type="button">BUY</button><button class="hud-button secondary station-resource-sell" type="button">SELL</button></div></div>`;
+    }).join("")||'<div class="empty-state">NO CURRENT LISTINGS.</div>'}</div></article>`);
+  });
+  root.innerHTML=cards.join("");
+  $("marketEmpty").hidden=cards.length>0;
+  root.querySelectorAll(".station-resource-buy,.station-resource-sell").forEach(button=>button.addEventListener("click",async()=>{
+    const row=button.closest(".station-resource-row"),qty=Number(row.querySelector(".station-resource-qty").value||0),direction=button.classList.contains("station-resource-buy")?"buy":"sell";
+    try{
+      const result=await rpc("trade_station_resource",{p_market_id:row.dataset.market,p_resource_code:row.dataset.resource,p_quantity:qty,p_direction:direction});
+      GMUI.setState($("marketState"),direction.toUpperCase()+" COMPLETE // "+fmt(result.value)+" AUREUM","success");
+      await load();
+    }catch(error){GMUI.setState($("marketState"),"TRADE FAILED // "+error.message,"error")}
+  }));
 }
-init().catch(error=>{const el=document.getElementById("marketState"); if(el) GMUI.setState(el,"EXCHANGE LOAD FAILED // "+error.message,"error");});
+async function load(){state=await GMPlayerData.load(session);render();}
+async function init(){session=await GMUI.initProtected();if(!session)return;await load();}
+init().catch(error=>{const el=$("marketState");if(el)GMUI.setState(el,"EXCHANGE LOAD FAILED // "+error.message,"error");});
 })();
