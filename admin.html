@@ -45,8 +45,6 @@
         <button class="tab" data-tab-target="admin-factions" type="button">FACTIONS</button>
         <button class="tab" data-tab-target="admin-politics" type="button">POLITICS</button>
         <button class="tab" data-tab-target="admin-economy" type="button">ECONOMY</button>
-        <button class="tab" data-tab-target="admin-assets" type="button">ASSETS</button>
-        <button class="tab" data-tab-target="admin-markets" type="button">MARKETS</button>
         <button class="tab" data-tab-target="admin-events" type="button">EVENTS</button>
         <button class="tab" data-tab-target="admin-systems" type="button">SYSTEMS</button>
         <button class="tab" data-tab-target="admin-actions" type="button">ACTIONS</button>
@@ -285,79 +283,6 @@
         </div>
       </section>
 
-      <section class="panel" id="admin-assets" data-tab-panel>
-        <div class="content-grid">
-          <article class="hud-panel compact">
-            <div class="section-head"><div><div class="section-code">ADMIN / ASSETS</div><h2>Asset Catalog</h2></div><p>RESOURCES / ITEMS</p></div>
-            <div id="assetCatalogList" class="resource-list"></div>
-          </article>
-          <aside class="stack">
-            <article class="hud-panel compact">
-              <div class="section-code">ASSET / CREATE</div><h2 style="margin:5px 0 16px;text-transform:uppercase">New Asset Type</h2>
-              <form id="assetForm" class="form-shell">
-                <div class="form-grid"><label><span>Code</span><input name="code"></label><label><span>Name *</span><input name="name" required></label></div>
-                <div class="form-grid"><label><span>Kind</span><select name="kind"><option>resource</option><option>item</option><option>equipment</option><option>personnel</option><option>other</option></select></label><label><span>Unit</span><input name="unit" value="unit"></label></div>
-                <label><span>Description</span><textarea name="description"></textarea></label>
-                <button class="hud-button" type="submit">CREATE ASSET TYPE</button>
-                <div class="form-state" id="assetState"></div>
-              </form>
-            </article>
-            <article class="hud-panel compact">
-              <div class="section-code">ASSET / PLAYER ASSIGNMENT</div><h2 style="margin:5px 0 16px;text-transform:uppercase">Set Player Asset</h2>
-              <form id="playerAssetForm" class="form-shell">
-                <label><span>Player</span><select name="user_id" data-player-select required></select></label>
-                <label><span>Asset</span><select name="asset_id" data-asset-select required></select></label>
-                <label><span>Quantity</span><input name="quantity" type="number" min="0" step="0.0001" required></label>
-                <button class="hud-button" type="submit">SAVE PLAYER ASSET</button>
-                <div class="form-state" id="playerAssetState"></div>
-              </form>
-            </article>
-            <article class="hud-panel compact">
-              <div class="section-code">ASSET / FACTION ASSIGNMENT</div><h2 style="margin:5px 0 16px;text-transform:uppercase">Set Faction Asset</h2>
-              <form id="factionAssetForm" class="form-shell">
-                <label><span>Faction</span><select name="faction_id" data-faction-select required></select></label>
-                <label><span>Asset</span><select name="asset_id" data-asset-select required></select></label>
-                <label><span>Quantity</span><input name="quantity" type="number" min="0" step="0.0001" required></label>
-                <button class="hud-button" type="submit">SAVE FACTION ASSET</button>
-                <div class="form-state" id="factionAssetState"></div>
-              </form>
-            </article>
-          </aside>
-        </div>
-      </section>
-
-      <section class="panel" id="admin-markets" data-tab-panel>
-        <div class="content-grid">
-          <article class="hud-panel compact">
-            <div class="section-head"><div><div class="section-code">ADMIN / MARKETS</div><h2>Market Network</h2></div><p>NPC // FACTION</p></div>
-            <div id="adminMarketList" class="stack"></div>
-          </article>
-          <aside class="stack">
-            <article class="hud-panel compact">
-              <div class="section-code">MARKET / CREATE</div><h2 style="margin:5px 0 16px;text-transform:uppercase">New Market</h2>
-              <form id="marketCreateForm" class="form-shell">
-                <label><span>Name *</span><input name="name" required></label>
-                <div class="form-grid"><label><span>Type</span><select name="market_type"><option value="npc">NPC</option><option value="faction">Faction</option></select></label><label><span>Faction</span><select name="faction_id" data-faction-select><option value="">None</option></select></label></div>
-                <label><span>Location Ref</span><input name="location_ref" placeholder="Map hex/system reference"></label>
-                <label><span>Description</span><textarea name="description"></textarea></label>
-                <button class="hud-button" type="submit">CREATE MARKET</button>
-                <div class="form-state" id="marketCreateState"></div>
-              </form>
-            </article>
-            <article class="hud-panel compact">
-              <div class="section-code">MARKET / LISTING</div><h2 style="margin:5px 0 16px;text-transform:uppercase">Set Listing</h2>
-              <form id="marketListingForm" class="form-shell">
-                <label><span>Market</span><select name="market_id" id="adminMarketSelect" required></select></label>
-                <label><span>Asset</span><select name="asset_id" data-asset-select required></select></label>
-                <div class="form-grid"><label><span>Price / Unit</span><input name="price_per_unit" type="number" min="0.01" step="0.01" required></label><label><span>Stock</span><input name="stock" type="number" min="0" step="0.0001" placeholder="Blank = unlimited"></label></div>
-                <button class="hud-button" type="submit">SAVE LISTING</button>
-                <div class="form-state" id="marketListingState"></div>
-              </form>
-            </article>
-          </aside>
-        </div>
-      </section>
-
       <section class="panel" id="admin-events" data-tab-panel>
         <div class="content-grid">
           <article class="hud-panel compact">
@@ -437,24 +362,15 @@
                 <div class="form-state" id="gameConfigState"></div>
               </form>
             </section>
-            <section class="hud-panel compact">
-              <div class="section-head"><div><div class="section-code">ECONOMY / CYCLE</div><h2>Production Cycle</h2></div><p>UPKEEP // OUTPUT // TAX</p></div>
-              <p class="hero-copy" style="margin:0 0 18px">Economic cycles now run automatically when the canon clock crosses into a new Cycle. This manual control remains available for recovery or testing.</p>
-              <div id="economyAutomationList" class="resource-list" style="margin-bottom:16px"></div>
-              <form id="productionCycleForm" class="form-shell">
-                <label><span>Cycle Key *</span><input name="cycle_key" required placeholder="Example: A8746-C13-W1-D1"></label>
-                <button class="hud-button amber" type="submit">RUN PRODUCTION CYCLE</button>
-                <div class="form-state" id="productionCycleState"></div>
-              </form>
-            </section>
+            
             <section class="hud-panel compact">
               <div class="section-head"><div><div class="section-code">HOLDINGS / TYPES</div><h2>Facility Types</h2></div><p>COST // UPKEEP // OUTPUT</p></div>
               <div id="facilityTypeList" class="resource-list"></div>
               <form id="facilityTypeForm" class="form-shell" style="margin-top:18px">
                 <div class="form-grid"><label><span>Code</span><input name="code"></label><label><span>Name *</span><input name="name" required></label></div>
                 <div class="form-grid"><label><span>Category</span><input name="category" value="industry"></label><label><span>Output Asset</span><select name="output_asset_id" data-asset-select><option value="">None</option></select></label></div>
-                <div class="form-grid"><label><span>Build Cost</span><input name="build_cost_aureum" type="number" min="0" step="0.01" value="0"></label><label><span>Upkeep / Day</span><input name="upkeep_aureum_per_cycle" type="number" min="0" step="0.01" value="0"></label></div>
-                <label><span>Output / Cycle</span><input name="output_per_cycle" type="number" min="0" step="0.0001" value="0"></label>
+                <div class="form-grid"><label><span>Build Cost</span><input name="build_cost_aureum" type="number" min="0" step="0.01" value="0"></label><label><span>Upkeep / Gradari Day</span><input name="upkeep_aureum_per_day" type="number" min="0" step="0.01" value="0"></label></div>
+                
                 <label><span>Description</span><textarea name="description"></textarea></label>
                 <button class="hud-button" type="submit">CREATE FACILITY TYPE</button>
                 <div class="form-state" id="facilityTypeState"></div>
