@@ -10,6 +10,58 @@
     if (type) el.classList.add(type);
   }
 
+  function ensureModal() {
+    let root=document.getElementById("gmUiModal");
+    if(root) return root;
+    root=document.createElement("div");
+    root.id="gmUiModal";
+    root.className="gm-modal-backdrop";
+    root.hidden=true;
+    root.innerHTML='<section class="gm-modal" role="dialog" aria-modal="true" aria-labelledby="gmModalTitle">'+
+      '<div class="section-code" id="gmModalCode">SYSTEM / CONFIRMATION</div>'+
+      '<h2 id="gmModalTitle">Confirm Action</h2>'+
+      '<p id="gmModalMessage"></p>'+
+      '<label id="gmModalInputWrap" hidden><span id="gmModalInputLabel">Value</span><input id="gmModalInput" type="text"></label>'+
+      '<div class="gm-modal-actions"><button class="hud-button secondary" id="gmModalCancel" type="button">CANCEL</button><button class="hud-button amber" id="gmModalConfirm" type="button">CONFIRM</button></div>'+
+      '</section>';
+    document.body.appendChild(root);
+    return root;
+  }
+
+  function modal(options={}) {
+    const root=ensureModal();
+    const title=root.querySelector("#gmModalTitle"),message=root.querySelector("#gmModalMessage");
+    const code=root.querySelector("#gmModalCode"),inputWrap=root.querySelector("#gmModalInputWrap");
+    const input=root.querySelector("#gmModalInput"),inputLabel=root.querySelector("#gmModalInputLabel");
+    const cancel=root.querySelector("#gmModalCancel"),confirm=root.querySelector("#gmModalConfirm");
+    title.textContent=options.title || "Confirm Action";
+    message.textContent=options.message || "";
+    code.textContent=options.code || "SYSTEM / CONFIRMATION";
+    confirm.textContent=options.confirmText || "CONFIRM";
+    confirm.classList.toggle("danger",Boolean(options.danger));
+    confirm.classList.toggle("amber",!options.danger);
+    inputWrap.hidden=!options.input;
+    inputLabel.textContent=options.inputLabel || "Value";
+    input.value=options.defaultValue || "";
+    input.placeholder=options.placeholder || "";
+    root.hidden=false;
+    document.body.classList.add("gm-modal-open");
+    if(options.input) setTimeout(()=>input.focus(),0); else setTimeout(()=>confirm.focus(),0);
+    return new Promise(resolve=>{
+      const close=value=>{
+        root.hidden=true; document.body.classList.remove("gm-modal-open");
+        confirm.onclick=null; cancel.onclick=null; root.onclick=null; document.onkeydown=null; resolve(value);
+      };
+      confirm.onclick=()=>close(options.input ? input.value : true);
+      cancel.onclick=()=>close(options.input ? null : false);
+      root.onclick=e=>{if(e.target===root) close(options.input ? null : false);};
+      document.onkeydown=e=>{if(e.key==="Escape") close(options.input ? null : false); if(e.key==="Enter" && options.input) close(input.value);};
+    });
+  }
+
+  const confirmAction=(message,options={})=>modal({...options,message});
+  const promptAction=(message,defaultValue="",options={})=>modal({...options,message,input:true,defaultValue});
+
   function startClock() {
     const targets = document.querySelectorAll("[data-system-time]");
     if (!targets.length) return;
@@ -126,5 +178,5 @@
     return session;
   }
 
-  window.GMUI = { esc, setState, startClock, startWorldClock, initTabs, initProtected };
+  window.GMUI = { esc, setState, modal, confirmAction, promptAction, startClock, startWorldClock, initTabs, initProtected };
 })();
