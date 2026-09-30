@@ -486,14 +486,18 @@
       ctx.strokeStyle="#f1d7b0";
       ctx.lineWidth=Math.max(1,1.2*camera.zoom);
       ctx.stroke();
-      if(camera.zoom>=.72){
-        ctx.font=`600 ${Math.max(8,10*camera.zoom)}px "Share Tech Mono", Consolas, monospace`;
-        ctx.textBaseline="bottom";
+      // Trade stations share a hex with a system, so keep their map label compact.
+      // The full station name remains available in the selected-location panel.
+      if(camera.zoom>=.9){
+        const label="EXCHANGE";
+        const fontSize=Math.max(7,8*camera.zoom);
+        ctx.font=`600 ${fontSize}px "Share Tech Mono", Consolas, monospace`;
+        ctx.textBaseline="top";
         ctx.strokeStyle="rgba(2,8,12,.95)";
-        ctx.lineWidth=4;
-        strokeMapText(String(station.station_name||"GUILDED CONCORD").toUpperCase(),p.x,p.y-size-4);
+        ctx.lineWidth=Math.max(3,3.5*camera.zoom);
+        strokeMapText(label,p.x,p.y+size+5);
         ctx.fillStyle="#f1d7b0";
-        ctx.fillText(String(station.station_name||"GUILDED CONCORD").toUpperCase(),p.x,p.y-size-4);
+        ctx.fillText(label,p.x,p.y+size+5);
       }
     });
     ctx.restore();
