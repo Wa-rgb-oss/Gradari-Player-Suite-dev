@@ -176,37 +176,36 @@
         </section>
 
         <section class="panel" id="suite-faction" data-tab-panel>
-          <div class="faction-dashboard-grid">
-            <article class="hud-panel">
-              <div class="section-head"><div><div class="section-code">FACTION / MEMBERSHIP</div><h2 id="factionName">No Active Faction</h2></div><p id="factionCode">UNASSIGNED</p></div>
-              <p class="hero-copy" id="factionDescription" style="margin:0 0 20px">Your current faction membership, position, treasury access, and permissions are shown here.</p>
-              <div class="telemetry-stack">
-                <div class="telemetry-row"><span>Position</span><strong id="factionTitle">--</strong></div>
-                <div class="telemetry-row"><span>Rank</span><strong id="factionRank">--</strong></div>
-                <div class="telemetry-row"><span>Faction Treasury</span><strong id="factionTreasury">--</strong></div>
-                <div class="telemetry-row"><span>Leadership</span><strong id="factionLeadership">--</strong></div>
+          <div class="faction-command-shell">
+            <article class="hud-panel faction-command-hero">
+              <div class="section-head"><div><div class="section-code">FACTION / COMMAND</div><h2 id="factionName">No Active Faction</h2></div><p id="factionCode">UNASSIGNED</p></div>
+              <p class="hero-copy" id="factionDescription">Faction membership, authority, territory, resources and treasury.</p>
+              <div class="faction-command-metrics">
+                <div><span>Position</span><strong id="factionTitle">--</strong></div>
+                <div><span>Rank</span><strong id="factionRank">--</strong></div>
+                <div><span>Treasury</span><strong id="factionTreasury">--</strong></div>
+                <div><span>Leadership</span><strong id="factionLeadership">--</strong></div>
+                <div><span>Territory</span><strong id="factionTerritoryCount">--</strong></div>
+                <div><span>Systems</span><strong id="factionSystemCount">--</strong></div>
               </div>
               <div class="permission-list" id="permissionList"></div>
             </article>
-            <aside class="faction-side-stack">
-              <article class="hud-panel compact amber">
-                <div class="hud-kicker amber">FACTION ACCESS</div>
-                <p class="hero-copy" style="margin:0">Your available faction tools reflect your current position and permissions.</p>
-              </article>
+
+            <div class="faction-command-columns">
               <article class="hud-panel compact faction-resource-panel">
-                <div class="section-code">FACTION / RESOURCES</div><h2>Faction Resources</h2>
+                <div class="section-code">FACTION / STOCKPILE</div><h2>Strategic Resources</h2>
                 <div class="resource-list" id="factionAssetList"></div>
                 <div class="empty-state" id="factionAssetEmpty" hidden>NO VISIBLE FACTION RESOURCES.</div>
               </article>
-              <article class="hud-panel compact" id="factionSupportCompact">
-                <div class="section-code">FACTION / TREASURY</div><h2>Support Your Faction</h2>
+              <article class="hud-panel compact">
+                <div class="section-code">FACTION / TREASURY</div><h2>Support Faction</h2>
                 <form id="factionFundingForm" class="form-shell">
                   <label><span>Contribution Amount</span><input name="amount" type="number" min="0.01" step="0.01" required></label>
-                  <button class="hud-button" type="submit">TRANSFER TO FACTION</button>
+                  <button class="hud-button" type="submit">TRANSFER AUREUM</button>
                   <div class="form-state" id="factionFundingState"></div>
                 </form>
               </article>
-            </aside>
+            </div>
           </div>
           <div id="factionNoMembership" class="content-grid" style="margin-top:18px" hidden>
             <article class="hud-panel">
@@ -239,6 +238,7 @@
             </aside>
           </div>
 
+          
           <div id="factionMemberControls" style="margin-top:18px" hidden>
             <div class="section-code">TREASURY / RECENT ACTIVITY</div>
             <div id="factionLedger" class="stack"></div>
@@ -263,6 +263,7 @@
               </article>
             </aside>
           </div>
+
         </section>
 
         <section class="panel" id="suite-characters" data-tab-panel>
