@@ -621,12 +621,59 @@
     }catch(error){setState($("adminMapState"),"SYSTEM SAVE FAILED // "+error.message,"error")}
   }
 
+  function renderShipBlueprints(){
+    const root=$("adminShipBlueprintList");
+    if(!root) return;
+    root.innerHTML=(data?.shipBlueprints||[]).length ? data.shipBlueprints.map(bp=>
+      '<div class="resource-row"><div><strong>'+esc(bp.name)+'</strong><div class="section-code">'+esc(String(bp.hull_type||"vessel").toUpperCase())+' // '+esc(bp.build_cycles)+' CYCLES // '+esc(fmt(bp.manpower_cost))+' MANPOWER</div></div><button class="hud-button danger admin-blueprint-delete" data-id="'+esc(bp.id)+'" type="button">REMOVE</button></div>'
+    ).join("") : '<div class="empty-state map-mini-empty">NO SHIP BLUEPRINTS.</div>';
+    document.querySelectorAll(".admin-blueprint-delete").forEach(button=>button.addEventListener("click",async()=>{
+      if(!confirm("Remove this ship blueprint?")) return;
+      try{
+        await GMAuth.api("ship_blueprints?id=eq."+encodeURIComponent(button.dataset.id),{method:"DELETE",headers:{Prefer:"return=minimal"}});
+        await window.GMAdminRefresh("SHIP BLUEPRINT REMOVED");
+      }catch(error){setState($("adminMapState"),"BLUEPRINT DELETE FAILED // "+error.message,"error")}
+    }));
+  }
+
+  function parseResourceCosts(text){
+    const costs={};
+    String(text||"").split(",").map(x=>x.trim()).filter(Boolean).forEach(part=>{
+      const [code,raw]=part.split("=").map(x=>x.trim());
+      const qty=Number(raw);
+      if(code && Number.isFinite(qty) && qty>0) costs[code]=qty;
+    });
+    return costs;
+  }
+
+  async function saveShipBlueprint(){
+    const name=$("adminShipBlueprintName").value.trim();
+    if(!name) return setState($("adminMapState"),"SHIP CLASS NAME REQUIRED","error");
+    const code=name.toUpperCase().replace(/[^A-Z0-9]+/g,"_").replace(/^_|_$/g,"");
+    const row={
+      code,name,
+      hull_type:$("adminShipBlueprintHull").value.trim()||"vessel",
+      build_cycles:Math.max(1,Number($("adminShipBlueprintCycles").value||1)),
+      manpower_cost:Math.max(0,Number($("adminShipBlueprintManpower").value||0)),
+      strength:Math.max(1,Number($("adminShipBlueprintStrength").value||100)),
+      resource_costs:parseResourceCosts($("adminShipBlueprintCosts").value),
+      player_visible:true
+    };
+    try{
+      await GMAuth.api("ship_blueprints?on_conflict=code",{method:"POST",headers:{Prefer:"resolution=merge-duplicates,return=minimal"},body:JSON.stringify(row)});
+      $("adminShipBlueprintName").value="";
+      $("adminShipBlueprintCosts").value="";
+      await window.GMAdminRefresh("SHIP BLUEPRINT SAVED");
+    }catch(error){setState($("adminMapState"),"BLUEPRINT SAVE FAILED // "+error.message,"error")}
+  }
+
   async function runIndustryCycle(){
     if(!confirm("Run one industrial production cycle now?")) return;
     try{
       setState($("adminMapState"),"RUNNING INDUSTRY CYCLE...");
       const result=await GMAuth.api("rpc/run_industry_cycle",{method:"POST",body:"{}"});
-      await window.GMAdminRefresh("INDUSTRY CYCLE COMPLETE // "+Number(result?.processed||0)+" OPERATIONS");
+      const shipyards=await GMAuth.api("rpc/process_shipyard_orders",{method:"POST",body:"{}"});
+      await window.GMAdminRefresh("INDUSTRY CYCLE COMPLETE // "+Number(result?.processed||0)+" OPERATIONS // "+Number(shipyards?.completed||0)+" SHIPS COMPLETED");
     }catch(error){setState($("adminMapState"),"INDUSTRY CYCLE FAILED // "+error.message,"error")}
   }
 
@@ -655,7 +702,7 @@
 
   function renderAll(){
     if(!data)return;
-    buildMapHexes();renderFactionControls();renderBuildingControls();
+    buildMapHexes();renderFactionControls();renderBuildingControls();renderShipBlueprints();
     const stationMarket=$("adminTradeStationMarket");
     const stationCurrent=stationMarket.value;
     stationMarket.innerHTML='<option value="">Select market</option>'+(data.markets||[]).map(row=>'<option value="'+esc(row.id)+'">'+esc(row.name)+'</option>').join("");
@@ -697,6 +744,7 @@
   $("adminTradeStationMarket").addEventListener("change",renderTradeResourceEditor);
   $("adminTradeResourceSaveBtn").addEventListener("click",saveTradeResource);
   $("adminRunIndustryCycleBtn").addEventListener("click",runIndustryCycle);
+  $("adminShipBlueprintSaveBtn").addEventListener("click",saveShipBlueprint);
 
   canvas.addEventListener("pointerdown",event=>{
     if(event.pointerType==="mouse"&&event.button!==0)return;
