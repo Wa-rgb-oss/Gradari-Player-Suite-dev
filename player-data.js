@@ -13,7 +13,7 @@
       eventObjectives, eventParticipation, characterSuccessions,
       resourceCatalog, factionResources, systemEconomies, resourceDeposits,
       facilityConnections, factoryRecipes, factoryOrders, tradeStations, tradeStationResources,
-      shipBlueprints, ships, shipyardOrders
+      shipBlueprints, ships, shipyardOrders, territories
     ] = await Promise.all([
       GMAuth.api("player_profiles?user_id=eq." + uid + "&select=*&limit=1"),
       GMAuth.api("players_tab?user_id=eq." + uid + "&select=*&limit=1"),
@@ -53,7 +53,8 @@
       GMAuth.api("trade_station_resource_listings?select=*&order=resource_code.asc").catch(() => []),
       GMAuth.api("ship_blueprints?player_visible=eq.true&select=*&order=name.asc").catch(() => []),
       GMAuth.api("ships?select=*&order=created_at.desc").catch(() => []),
-      GMAuth.api("shipyard_orders?select=*&order=created_at.desc").catch(() => [])
+      GMAuth.api("shipyard_orders?select=*&order=created_at.desc").catch(() => []),
+      GMAuth.api("territories?select=location_ref,faction_id").catch(() => [])
     ]);
 
     const factionMap = new Map((factions || []).map(row => [row.id,row]));
@@ -131,7 +132,8 @@
       tradeStationResources: tradeStationResources || [],
       shipBlueprints: shipBlueprints || [],
       ships: ships || [],
-      shipyardOrders: shipyardOrders || []
+      shipyardOrders: shipyardOrders || [],
+      territories: territories || []
     };
   }
 
