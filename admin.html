@@ -672,7 +672,18 @@
               <input id="adminTradeStationName" placeholder="Guilded Concord Trade Station">
               <label>Exchange Market</label>
               <select id="adminTradeStationMarket"></select>
-              <button class="hud-button secondary" id="adminMapSaveSystemBtn" type="button">SAVE SYSTEM</button>
+              <div class="section-code" style="margin-top:14px">STATION RESOURCE LISTINGS</div>
+              <div id="adminTradeResourceList" class="stack admin-map-list"></div>
+              <label>Resource</label>
+              <select id="adminTradeResourceCode"></select>
+              <div class="form-grid">
+                <label><span>Buy Price</span><input id="adminTradeBuyPrice" type="number" min="0" step="0.01"></label>
+                <label><span>Sell Price</span><input id="adminTradeSellPrice" type="number" min="0" step="0.01"></label>
+              </div>
+              <label>Station Stock</label>
+              <input id="adminTradeStock" type="number" min="0" step="0.01" placeholder="Blank = unlimited">
+              <button class="hud-button secondary" id="adminTradeResourceSaveBtn" type="button">SAVE LISTING</button>
+              <button class="hud-button secondary" id="adminMapSaveSystemBtn" type="button" style="margin-top:10px">SAVE SYSTEM</button>
             </article>
 
             <article class="hud-panel compact admin-map-panel">
