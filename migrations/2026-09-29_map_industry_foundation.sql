@@ -132,15 +132,15 @@ do $$ begin
  create policy "authenticated read trade stations" on public.trade_station_markets for select to authenticated using (player_visible);
 exception when duplicate_object then null; end $$;
 
--- Admin writes remain governed by the existing private.is_admin() registry.
+-- Admin writes remain governed by the existing public.is_admin() registry.
 do $$ begin
- create policy "admin map deposits" on public.map_resource_deposits for all to authenticated using (private.is_admin()) with check (private.is_admin());
+ create policy "admin map deposits" on public.map_resource_deposits for all to authenticated using (public.is_admin()) with check (public.is_admin());
 exception when duplicate_object then null; end $$;
 do $$ begin
- create policy "admin system economies" on public.system_economies for all to authenticated using (private.is_admin()) with check (private.is_admin());
+ create policy "admin system economies" on public.system_economies for all to authenticated using (public.is_admin()) with check (public.is_admin());
 exception when duplicate_object then null; end $$;
 do $$ begin
- create policy "admin trade stations" on public.trade_station_markets for all to authenticated using (private.is_admin()) with check (private.is_admin());
+ create policy "admin trade stations" on public.trade_station_markets for all to authenticated using (public.is_admin()) with check (public.is_admin());
 exception when duplicate_object then null; end $$;
 
 -- Guardrails used by player construction. Existing facility placement RPCs should call this.
@@ -192,7 +192,7 @@ begin
   if v_ref_faction is null or v_ref_faction<>v_ext_faction then raise exception 'Facilities must share an owner.'; end if;
   if v_ref_code not like '%REFIN%' then raise exception 'Selected facility is not a Refinery.'; end if;
   if v_ext_code not like '%EXTRACT%' and v_ext_code not like '%MINE%' then raise exception 'Selected facility is not an Extractor.'; end if;
-  if not exists(select 1 from faction_memberships where user_id=auth.uid() and faction_id=v_ref_faction and status='active') and not private.is_admin() then
+  if not exists(select 1 from faction_memberships where user_id=auth.uid() and faction_id=v_ref_faction and status='active') and not public.is_admin() then
     raise exception 'Not authorized for this faction.';
   end if;
   select count(*) into v_count from facility_connections where refinery_facility_id=p_refinery_id;
