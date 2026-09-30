@@ -15,8 +15,8 @@ function render(){
       const resource=names.get(row.resource_code);
       const owned=Number((state.factionResources||[]).find(x=>x.faction_id===state.primaryMembership?.faction_id&&x.resource_code===row.resource_code)?.quantity||0);
       const avg=Number(row.market_value??((Number(row.buy_price)+Number(row.sell_price))/2));
-      const priceClass=Number(row.demand_index||1)>1.015?"market-price-high":Number(row.demand_index||1)<.985?"market-price-low":"market-price-neutral";
-      return `<div class="resource-row station-resource-row" data-market="${esc(row.market_id)}" data-resource="${esc(row.resource_code)}"><div><strong>${esc(resource?.name||row.resource_code)}</strong><div class="section-code">${esc(String(resource?.category||"resource").toUpperCase())} // MARKET STOCK: ${row.stock==null?"UNLIMITED":esc(fmt(row.stock))} // AVAILABLE TO SELL: ${esc(fmt(owned))}</div></div><div style="display:flex;gap:7px;align-items:center;justify-content:flex-end;flex-wrap:wrap"><span class="${priceClass}">AVG ${esc(fmt(avg))} A // BUY ${esc(fmt(row.buy_price))} A // SELL ${esc(fmt(row.sell_price))} A</span><input class="station-resource-qty" type="number" min="0.01" step="0.01" value="1" style="width:82px"><button class="hud-button secondary station-resource-buy" type="button">BUY</button><button class="hud-button secondary station-resource-sell" type="button">SELL</button></div></div>`;
+      const priceClass=value=>Number(value)>avg+.005?"market-price-high":Number(value)<avg-.005?"market-price-low":"market-price-neutral";
+      return `<div class="resource-row station-resource-row" data-market="${esc(row.market_id)}" data-resource="${esc(row.resource_code)}"><div><strong>${esc(resource?.name||row.resource_code)}</strong><div class="section-code">${esc(String(resource?.category||"resource").toUpperCase())} // MARKET STOCK: ${row.stock==null?"UNLIMITED":esc(fmt(row.stock))} // AVAILABLE TO SELL: ${esc(fmt(owned))}</div></div><div style="display:flex;gap:7px;align-items:center;justify-content:flex-end;flex-wrap:wrap"><span class="market-price-neutral">AVG ${esc(fmt(avg))} A</span><span class="${priceClass(row.buy_price)}">BUY ${esc(fmt(row.buy_price))} A</span><span class="${priceClass(row.sell_price)}">SELL ${esc(fmt(row.sell_price))} A</span><input class="station-resource-qty" type="number" min="0.01" step="0.01" value="1" style="width:82px"><button class="hud-button secondary station-resource-buy" type="button">BUY</button><button class="hud-button secondary station-resource-sell" type="button">SELL</button></div></div>`;
     }).join("")||'<div class="empty-state">NO CURRENT LISTINGS.</div>'}</div></article>`);
   });
   root.innerHTML=cards.join("");
@@ -36,7 +36,7 @@ async function load(){
     GMAuth.api("faction_memberships?user_id=eq."+uid+"&select=*&order=created_at.asc"),
     GMAuth.api("resource_catalog?player_visible=eq.true&select=*&order=category.asc,name.asc"),
     GMAuth.api("trade_station_markets?player_visible=eq.true&select=*&order=station_name.asc"),
-    GMAuth.api("trade_station_resource_listings?select=*&order=resource_code.asc")
+    (async()=>{try{await rpc("normalize_trade_station_market",{});}catch{} return GMAuth.api("trade_station_resource_listings?select=*&order=resource_code.asc");})()
   ]);
   const primaryMembership=(memberships||[]).find(row=>row.status==="active")||(memberships||[])[0]||null;
   let factionResources=[];
