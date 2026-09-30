@@ -204,7 +204,7 @@
 
     facilityCount.textContent=ownedFacilities.length+" FACILIT"+(ownedFacilities.length===1?"Y":"IES");
     if(ownedFacilities.length){
-      // Player-owned facilities currently debit Aureum upkeep each cycle. Resource production
+      // Player-owned facilities currently debit Aureum upkeep each in-game day. Resource production
       // remains a strategic output, so it is not falsely converted into Aureum profit here.
       const netAureum=-ownedFacilities
         .filter(row => String(row.status || "active").toLowerCase() !== "inactive")
@@ -212,7 +212,7 @@
       facilityNet.hidden=false;
       facilityNet.classList.toggle("positive",netAureum>0);
       facilityNet.classList.toggle("negative",netAureum<0);
-      facilityNet.textContent=(netAureum>=0?"+":"")+fmt(netAureum)+" AUREUM / CYCLE // FACILITY NET";
+      facilityNet.textContent=(netAureum>=0?"+":"")+fmt(netAureum)+" AUREUM / DAY // FACILITY NET";
 
       facilityEmpty.hidden=true;
       facilityList.innerHTML=ownedFacilities.map(row=>{
@@ -223,7 +223,7 @@
           '<div><strong>'+esc(row.name || type?.name || "Facility")+'</strong>'+
           '<div class="section-code">'+esc(type?.name || "FACILITY")+' // '+esc(row.location_ref || "LOCATION UNSET")+'</div></div>'+
           '<div class="economy-facility-meta"><span class="status-chip '+(status==="ACTIVE"?"":"muted")+'">'+esc(status)+'</span>'+
-          '<strong class="economy-facility-cost">'+(upkeep?'-'+esc(fmt(upkeep)):'0')+' AUREUM / CYCLE</strong></div>'+
+          '<strong class="economy-facility-cost">'+(upkeep?'-'+esc(fmt(upkeep)):'0')+' AUREUM / DAY</strong></div>'+
           '</article>';
       }).join("");
     }else{
