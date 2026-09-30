@@ -438,6 +438,27 @@
     });
   }
 
+  function resourceName(code) {
+    return (state.resourceCatalog || []).find(r => r.code === code)?.name || code.replaceAll("_"," ");
+  }
+
+  function renderProduction() {
+    const root=$("productionList"); if(!root) return;
+    const factories=(state.facilities||[]).filter(f => f.owner_user_id===session.user.id && String(f.facility_type?.code||f.facility_type?.name||"").toUpperCase().includes("FACTORY"));
+    $("productionEmpty").hidden=factories.length>0;
+    if(!factories.length){root.innerHTML="";return;}
+    const orders=new Map((state.factoryOrders||[]).map(o=>[o.facility_id,o]));
+    root.innerHTML=factories.map(f=>{
+      const o=orders.get(f.id), active=o?.status==="producing", done=active && new Date(o.completes_at)<=new Date();
+      const recipe=(state.factoryRecipes||[]).find(r=>r.code===o?.recipe_code);
+      if(active) return `<article class="notice production-factory" data-id="${esc(f.id)}"><div class="split-actions"><div><strong style="color:var(--text)">${esc(f.name||"Factory")}</strong><div class="section-code">${esc(f.location_ref||"UNPLACED")} // PRODUCTION LINE</div></div><span class="status-chip ${done?"":"amber"}">${done?"COMPLETE":"PRODUCING"}</span></div><div class="telemetry-stack" style="margin-top:10px"><div class="telemetry-row"><span>Output</span><strong>${esc(fmt(o.quantity))} × ${esc(recipe?.name||o.recipe_code)}</strong></div><div class="telemetry-row"><span>Completion</span><strong>${done?"READY TO COLLECT":esc(new Date(o.completes_at).toLocaleString())}</strong></div></div>${done?'<button class="hud-button collect-production" type="button">COLLECT PRODUCTION</button>':""}</article>`;
+      const options=(state.factoryRecipes||[]).map(r=>`<option value="${esc(r.code)}">${esc(r.name)} // ${esc(fmt(r.production_world_hours||4))} HRS EACH</option>`).join("");
+      return `<article class="notice production-factory" data-id="${esc(f.id)}"><div class="split-actions"><div><strong style="color:var(--text)">${esc(f.name||"Factory")}</strong><div class="section-code">${esc(f.location_ref||"UNPLACED")} // AVAILABLE</div></div></div><form class="production-form form-grid" style="margin-top:10px"><label><span>Production Line</span><select name="recipe_code">${options}</select></label><label><span>Quantity</span><input name="quantity" type="number" min="1" max="1000" step="1" value="1"></label><button class="hud-button" type="submit">BEGIN PRODUCTION</button></form></article>`;
+    }).join("");
+    root.querySelectorAll(".production-form").forEach(form=>form.addEventListener("submit",async e=>{e.preventDefault();const card=form.closest(".production-factory"),d=Object.fromEntries(new FormData(form));try{await rpc("queue_factory_production",{p_facility_id:card.dataset.id,p_recipe_code:d.recipe_code,p_quantity:Number(d.quantity)});await refresh("PRODUCTION STARTED",$("productionState"));}catch(error){setState($("productionState"),"PRODUCTION FAILED // "+error.message,"error");}}));
+    root.querySelectorAll(".collect-production").forEach(btn=>btn.addEventListener("click",async()=>{const card=btn.closest(".production-factory");try{await rpc("collect_factory_production",{p_facility_id:card.dataset.id});await refresh("PRODUCTION COLLECTED",$("productionState"));}catch(error){setState($("productionState"),"COLLECTION FAILED // "+error.message,"error");}}));
+  }
+
   function renderResourceStockpile() {
     const root = $("resourceStockpile");
     if (!root) return;
@@ -545,6 +566,7 @@
     renderMarkets();
     renderFactionMarketControls();
     renderFacilities();
+    renderProduction();
     renderResourceStockpile();
     await renderFactionSystems();
     await renderCharacterPresence();
