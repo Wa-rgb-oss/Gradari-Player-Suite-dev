@@ -126,11 +126,26 @@
             </div>
           </aside>
 
-          <section class="politics-stage" aria-label="Senate chamber">
-            <div class="senate-stage">
-              <div class="senate-stage-label">SENATE // LIVE REPRESENTATION</div>
-              <canvas id="senateCanvas" width="1000" height="760" aria-label="Semicircular Senate seat display"></canvas>
-              <div class="senate-stage-footer"><span>SEAT WEIGHT // ONE VOTE PER ASSIGNED SEAT</span><span id="senateStageStatus">120-SEAT CHAMBER</span></div>
+          <section class="politics-stage" aria-label="Imperial political display">
+            <div class="politics-stage-tabs">
+              <button class="politics-stage-tab active" type="button" data-stage-tab="senate-stage-panel">SENATE</button>
+              <button class="politics-stage-tab" type="button" data-stage-tab="offices-stage-panel">OFFICES</button>
+            </div>
+            <div class="politics-stage-panel active" id="senate-stage-panel">
+              <div class="senate-stage">
+                <div class="senate-stage-label">SENATE // LIVE REPRESENTATION</div>
+                <canvas id="senateCanvas" width="1000" height="760" aria-label="Semicircular Senate seat display"></canvas>
+                <div class="senate-stage-footer"><span>SEAT WEIGHT // ONE VOTE PER ASSIGNED SEAT</span><span id="senateStageStatus">120-SEAT CHAMBER</span></div>
+              </div>
+            </div>
+            <div class="politics-stage-panel" id="offices-stage-panel">
+              <div class="imperial-offices-board">
+                <div class="senate-stage-label">IMPERIAL OFFICES // OFFICE HOLDERS</div>
+                <div class="imperial-office-feature"><span>IMPERATORIAL SEAT</span><strong>PRAETORA EMPERIS</strong><p>Supreme authority of Gradari Mireris. Imperial Edicts may override planetary or dominion-level decisions.</p><b>OFFICE HOLDER // VACANT</b></div>
+                <div class="imperial-office-section"><div><span>PILEAN DIRECTORATE // EXECUTIVE</span><strong>PIlea Grand Director</strong><p>Supreme civil authority of the Empire; directs planetary and sector governance and answers directly to the Praetora Emperis.</p><b>OFFICE HOLDER // VACANT</b></div><div><span>PILEAN DIRECTORATE // EXECUTIVE</span><strong>Pilea Select Director</strong><p>Oversees and coordinates multiple planetary administrations, ensuring doctrinal compliance and policy uniformity.</p><b>OFFICE HOLDER // VACANT</b></div></div>
+                <div class="imperial-office-section"><div><span>PILEAN DIRECTORATE // PLANETARY</span><strong>Pilea Chief Administrator</strong><p>Governs major planetary hubs or capitals, including law, resource allocation, and inter-city coordination.</p><b>OFFICE HOLDER // VACANT</b></div><div><span>PILEAN DIRECTORATE // PLANETARY</span><strong>Pilea High Magistrate</strong><p>Governs primary metropolitan regions and maintains civic order and law enforcement across multiple cities.</p><b>OFFICE HOLDER // VACANT</b></div></div>
+                <div class="imperial-office-note">OFFICE SYSTEM FOUNDATION // HOLDER ASSIGNMENT AND OFFICE AUTHORITY TO FOLLOW</div>
+              </div>
             </div>
           </section>
         </section>
