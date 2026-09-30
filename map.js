@@ -364,6 +364,30 @@
     ctx.restore();
   }
 
+  function drawSystems() {
+    const refs=new Set([
+      ...(mapHexes || []).filter(row=>Number(row.habitable_systems||0)>0).map(row=>row.ref),
+      ...(player?.systemEconomies || []).map(row=>row.location_ref)
+    ]);
+    ctx.save();
+    refs.forEach(ref=>{
+      const h=parseRef(ref);
+      if(!h || !mapHexSet.has(ref)) return;
+      const p=worldToScreen(hexToWorld(h.q,h.r));
+      const radius=Math.max(3.5,5*camera.zoom);
+      ctx.beginPath();
+      ctx.arc(p.x,p.y,radius,0,Math.PI*2);
+      ctx.fillStyle="rgba(226,241,244,.92)";
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(p.x,p.y,radius+Math.max(2,3*camera.zoom),0,Math.PI*2);
+      ctx.strokeStyle="rgba(134,215,232,.48)";
+      ctx.lineWidth=1;
+      ctx.stroke();
+    });
+    ctx.restore();
+  }
+
   function drawTradeStations() {
     const stations=player?.tradeStations || [];
     if(!stations.length) return;
@@ -551,6 +575,7 @@
     drawBaseHexes();
     drawTerritories();
     drawMapLabels();
+    drawSystems();
     drawCanonLocations();
     drawModifiers();
     drawTradeStations();
@@ -854,7 +879,7 @@
     const resourceNames=new Map((player.resourceCatalog || []).map(row=>[row.code,row.name]));
     $("selectedResourceEmpty").hidden=deposits.length>0;
     $("selectedResourceList").innerHTML=deposits.map(row =>
-      '<article class="notice map-list-row"><strong>'+esc(resourceNames.get(row.resource_code)||row.resource_code)+'</strong><span>'+esc(fmt(row.richness))+'×</span></article>'
+      '<article class="notice map-list-row"><strong>'+esc(resourceNames.get(row.resource_code)||row.resource_code)+'</strong></article>'
     ).join("");
     $("selectedFacilityEmpty").hidden=selectedFacilities.length>0;
     $("selectedFacilityList").innerHTML=selectedFacilities.map(row => {
