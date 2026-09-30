@@ -2203,3 +2203,13 @@ dialog::backdrop{background:rgba(0,0,0,.72);backdrop-filter:blur(2px)}
 .facility-health-track{grid-column:1/-1;height:5px;border:1px solid rgba(134,215,232,.22);background:rgba(0,0,0,.28);overflow:hidden}
 .facility-health-track i{display:block;height:100%;background:currentColor;box-shadow:0 0 8px currentColor}
 .facility-health small{grid-column:1/-1}
+
+/* Faction command */
+.faction-command-shell{display:grid;gap:18px}
+.faction-command-hero .hero-copy{margin:0 0 18px;max-width:760px}
+.faction-command-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border-top:1px solid rgba(134,215,232,.16);border-left:1px solid rgba(134,215,232,.16)}
+.faction-command-metrics>div{padding:14px 16px;border-right:1px solid rgba(134,215,232,.16);border-bottom:1px solid rgba(134,215,232,.16);display:grid;gap:5px}
+.faction-command-metrics span{font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.faction-command-metrics strong{font-size:1rem;text-transform:uppercase}
+.faction-command-columns{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(280px,.5fr);gap:18px}
+@media(max-width:900px){.faction-command-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.faction-command-columns{grid-template-columns:1fr}}
