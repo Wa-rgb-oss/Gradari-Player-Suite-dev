@@ -70,7 +70,13 @@
                 <div class="telemetry-row"><span>Faction</span><strong id="selectedHexFaction">UNCLAIMED</strong></div>
                 <div class="telemetry-row"><span>Status</span><strong id="selectedHexStatus">--</strong></div>
                 <div class="telemetry-row"><span>Production</span><strong id="selectedHexProduction">--</strong></div>
+                <div class="telemetry-row"><span>Facilities</span><strong id="selectedHexSlots">0 / 8</strong></div>
+                <div class="telemetry-row"><span>Population</span><strong id="selectedHexPopulation">--</strong></div>
+                <div class="telemetry-row"><span>Manpower</span><strong id="selectedHexManpower">--</strong></div>
               </div>
+              <div class="section-code map-panel-divider">LOCAL RESOURCES</div>
+              <div id="selectedResourceList" class="stack"></div>
+              <div class="empty-state map-mini-empty" id="selectedResourceEmpty">NO KNOWN DEPOSITS.</div>
               <div class="section-code map-panel-divider">LOCATION EFFECTS</div>
               <div id="selectedModifierList" class="stack"></div>
               <div class="empty-state map-mini-empty" id="selectedModifierEmpty">NO ACTIVE LOCATION EFFECTS.</div>
@@ -79,6 +85,7 @@
               <h2>Facilities</h2>
               <div id="selectedFacilityList" class="stack"></div>
               <div class="empty-state map-mini-empty" id="selectedFacilityEmpty">NO VISIBLE HOLDINGS AT THIS LOCATION.</div>
+              <div id="selectedFacilityControls" class="stack" style="margin-top:12px"></div>
             </div>
               <div class="map-command-page" id="map-tab-character">
               <div class="section-code">CHARACTER / LOCATION</div>
@@ -119,7 +126,9 @@
               <div class="form-state" id="mapMilitaryState"></div>
             </div>
               <div class="map-command-page" id="map-tab-build">
-              <div class="hud-kicker amber">CONSTRUCT HOLDING</div>
+              <div class="hud-kicker amber">INDUSTRY</div>
+              <div class="telemetry-stack" id="mapResourceStockpile"></div>
+              <div class="hud-kicker amber" style="margin-top:18px">CONSTRUCT HOLDING</div>
               <form id="mapBuildForm" class="form-shell">
                 <label><span>Facility</span><select name="facility_type_id" id="mapFacilityType" required></select></label>
                 <label><span>Name</span><input name="name" maxlength="160" placeholder="Optional holding name"></label>
