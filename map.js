@@ -1007,7 +1007,13 @@
     const canon=canonLocations[selectedHex.ref];
     const name=canon?.name || territory?.display_name || mapHex.display_name || "Hex "+selectedHex.q+", "+selectedHex.r;
     const production=Number(territory?.production_modifier ?? 1);
-    const locationStatus=territory?.status || mapHex.status || "open";
+    const system=(player.systemEconomies || []).find(row=>row.location_ref===selectedHex.ref);
+    const tier=String(system?.development_tier || "colony").toLowerCase();
+    const systemType=system?.is_capital || canon?.type==="IMPERIAL CAPITAL"
+      ? "IMPERIAL CAPITAL SYSTEM"
+      : tier==="developed" ? "IMPERIAL DEVELOPED SYSTEM"
+      : tier==="system" ? "IMPERIAL SYSTEM"
+      : "IMPERIAL COLONY SYSTEM";
     const context=[
       mapHex.region_name ? String(mapHex.region_name).toUpperCase() : null,
       mapHex.terrain_type ? String(mapHex.terrain_type).toUpperCase() : null,
@@ -1019,10 +1025,9 @@
     $("selectedHexName").textContent=name;
     $("selectedHexRef").textContent=selectedHex.ref;
     $("selectedHexFaction").textContent=faction?.name || canon?.faction || "UNCLAIMED";
-    $("selectedHexStatus").textContent=canon?.type || String(locationStatus).toUpperCase();
+    $("selectedHexStatus").textContent=systemType;
     $("selectedHexProduction").textContent=Math.round(production*100)+"%";
 
-    const system=(player.systemEconomies || []).find(row=>row.location_ref===selectedHex.ref);
     const selectedFacilities=player.facilities.filter(row=>row.location_ref===selectedHex.ref);
     $("selectedHexSlots").textContent=selectedFacilities.length+" / "+Number(system?.slot_limit || 8);
     $("selectedHexPopulation").textContent=system ? fmt(system.population) : "--";
