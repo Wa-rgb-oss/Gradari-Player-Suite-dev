@@ -460,25 +460,19 @@
   }
 
   function renderResourceStockpile() {
-    const root = $("resourceStockpile");
-    if (!root) return;
-    const factionId = state.primaryMembership?.faction_id;
-    const catalog = new Map((state.resourceCatalog || []).map(row => [row.code,row]));
-    const rows = (state.factionResources || [])
-      .filter(row => !factionId || row.faction_id === factionId)
-      .map(row => ({...row,resource:catalog.get(row.resource_code)}))
-      .filter(row => Number(row.quantity || 0) > 0)
-      .sort((a,b) => {
-        const ac=String(a.resource?.category || "Other"), bc=String(b.resource?.category || "Other");
-        return ac.localeCompare(bc) || String(a.resource?.name || a.resource_code).localeCompare(String(b.resource?.name || b.resource_code));
-      });
-    $("resourceStockpileCount").textContent = rows.length + " RESOURCE" + (rows.length===1?"":"S");
-    $("resourceStockpileEmpty").hidden = rows.length > 0;
-    root.innerHTML = rows.map(row => `
-      <article class="resource-stockpile-item">
-        <div><span class="section-code">${esc(String(row.resource?.category || "RESOURCE").toUpperCase())}</span><strong>${esc(row.resource?.name || row.resource_code)}</strong></div>
-        <span class="resource-stockpile-qty">${esc(fmt(row.quantity))}</span>
-      </article>`).join("");
+    const root=$("resourceStockpile"); if(!root)return;
+    const catalog=new Map((state.resourceCatalog||[]).map(r=>[r.code,r]));
+    const rows=(state.playerResources||[]).map(r=>({...r,resource:catalog.get(r.resource_code)})).filter(r=>Number(r.quantity||0)>0).sort((a,b)=>String(a.resource?.category||"Other").localeCompare(String(b.resource?.category||"Other"))||String(a.resource?.name||a.resource_code).localeCompare(String(b.resource?.name||b.resource_code)));
+    $("resourceStockpileCount").textContent=rows.length+" RESOURCE"+(rows.length===1?"":"S");
+    $("resourceStockpileEmpty").hidden=rows.length>0;
+    root.innerHTML=rows.map(row=>`<article class="resource-stockpile-item"><div><span class="section-code">${esc(String(row.resource?.category||"RESOURCE").toUpperCase())}</span><strong>${esc(row.resource?.name||row.resource_code)}</strong></div><span class="resource-stockpile-qty">${esc(fmt(row.quantity))}</span></article>`).join("");
+    const box=$("resourceContribution");
+    if(!box)return;
+    box.hidden=!rows.length||!state.primaryMembership?.faction_id;
+    if(!box.hidden){
+      box.innerHTML=`<div class="section-code">FACTION CONTRIBUTION</div><div class="form-grid" style="margin-top:8px"><label><span>Resource</span><select id="contributeResource">${rows.map(r=>`<option value="${esc(r.resource_code)}">${esc(r.resource?.name||r.resource_code)} // ${esc(fmt(r.quantity))}</option>`).join("")}</select></label><label><span>Quantity</span><input id="contributeQuantity" type="number" min=".01" step=".01" value="1"></label></div><button id="contributeResourceButton" class="hud-button secondary" type="button">CONTRIBUTE TO FACTION</button><div id="contributeResourceState" class="form-state"></div>`;
+      $("contributeResourceButton").addEventListener("click",async()=>{try{await rpc("contribute_resource_to_faction",{p_resource_code:$("contributeResource").value,p_quantity:Number($("contributeQuantity").value)});await refresh("RESOURCES CONTRIBUTED TO FACTION",$("contributeResourceState"));}catch(error){setState($("contributeResourceState"),"TRANSFER FAILED // "+error.message,"error")}});
+    }
   }
 
   function renderFacilities() {
