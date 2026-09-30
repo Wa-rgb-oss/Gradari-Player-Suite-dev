@@ -12,7 +12,7 @@
       facilityTypes, facilities, markets, marketListings, events,
       eventObjectives, eventParticipation, characterSuccessions,
       resourceCatalog, playerResources, factionResources, systemEconomies, resourceDeposits,
-      facilityConnections, factoryRecipes, factoryOrders, tradeStations, tradeStationResources,
+      facilityConnections, facilityProductionClocks, factoryRecipes, factoryOrders, tradeStations, tradeStationResources,
       shipBlueprints, ships, shipyardOrders, territories
     ] = await Promise.all([
       GMAuth.api("player_profiles?user_id=eq." + uid + "&select=*&limit=1"),
@@ -48,6 +48,7 @@
       GMAuth.api("system_economies?select=*").catch(() => []),
       GMAuth.api("map_resource_deposits?select=*&order=location_ref.asc,resource_code.asc").catch(() => []),
       GMAuth.api("facility_connections?select=*").catch(() => []),
+      (async()=>{try{await GMAuth.api("rpc/process_passive_facility_production",{method:"POST",body:"{}"});}catch{} return GMAuth.api("facility_production_clocks?select=*").catch(()=>[]);})(),
       GMAuth.api("factory_recipes?player_visible=eq.true&select=*&order=name.asc").catch(() => []),
       GMAuth.api("factory_orders?select=*").catch(() => []),
       GMAuth.api("trade_station_markets?player_visible=eq.true&select=*").catch(() => []),
@@ -128,6 +129,7 @@
       systemEconomies: systemEconomies || [],
       resourceDeposits: resourceDeposits || [],
       facilityConnections: facilityConnections || [],
+      facilityProductionClocks: facilityProductionClocks || [],
       factoryRecipes: factoryRecipes || [],
       factoryOrders: factoryOrders || [],
       tradeStations: tradeStations || [],
