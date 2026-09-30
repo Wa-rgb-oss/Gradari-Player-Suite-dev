@@ -219,9 +219,12 @@
         const type=typeMap.get(row.facility_type_id);
         const upkeep=Number(type?.upkeep_aureum_per_cycle || 0);
         const status=String(row.status || "active").toUpperCase();
+        const health=Math.max(0,Math.min(100,Number(row.health ?? 100)));
+        const healthLabel=health>=75?"GOOD":health>=40?"DAMAGED":health>0?"CRITICAL":"OFFLINE";
         return '<article class="notice economy-facility-row">'+
           '<div><strong>'+esc(row.name || type?.name || "Facility")+'</strong>'+
-          '<div class="section-code">'+esc(type?.name || "FACILITY")+' // '+esc(row.location_ref || "LOCATION UNSET")+'</div></div>'+
+          '<div class="section-code">'+esc(type?.name || "FACILITY")+' // '+esc(row.location_ref || "LOCATION UNSET")+'</div>'+
+          '<div class="facility-health"><span>FACILITY HEALTH</span><strong>'+esc(fmt(health))+'% // '+healthLabel+'</strong><div class="facility-health-track"><i style="width:'+health+'%"></i></div><small>'+esc(fmt(health))+'% PRODUCTION EFFECTIVENESS</small></div></div>'+
           '<div class="economy-facility-meta"><span class="status-chip '+(status==="ACTIVE"?"":"muted")+'">'+esc(status)+'</span>'+
           '<strong class="economy-facility-cost">'+(upkeep?'-'+esc(fmt(upkeep)):'0')+' AUREUM / DAY</strong>'+
           '<div class="facility-edit-actions"><button class="hud-button secondary edit-owned-facility" type="button" data-id="'+esc(row.id)+'">EDIT</button><button class="hud-button danger scrap-owned-facility" type="button" data-id="'+esc(row.id)+'">SCRAP</button></div></div>'+
