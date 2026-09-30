@@ -502,7 +502,7 @@
           </div>
           <div class="telemetry-stack" style="margin-top:10px">
             <div class="telemetry-row"><span>Location</span><strong>${esc(row.location_ref || "UNPLACED")}</strong></div>
-            <div class="telemetry-row"><span>Upkeep / Cycle</span><strong>${esc(fmt(type?.upkeep_aureum_per_cycle || 0))} AUREUM</strong></div>
+            <div class="telemetry-row"><span>Upkeep / Day</span><strong>${esc(fmt(type?.upkeep_aureum_per_day ?? (Number(type?.upkeep_aureum_per_cycle || 0)/20)))} AUREUM</strong></div>
             <div class="telemetry-row"><span>Production Modifier</span><strong>${esc(fmt(Number(row.production_modifier || 1)*100))}%</strong></div>
           </div>
         </article>`;
