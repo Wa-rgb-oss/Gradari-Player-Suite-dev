@@ -1,0 +1,4 @@
+-- Friends and game chat foundation
+-- Applied to Gradari Mireris Supabase. Global messages expire after 10 minutes;
+-- direct messages persist and are limited to accepted friendships.
+-- See live migration friends_and_game_chat for table, RLS and RPC definitions.
