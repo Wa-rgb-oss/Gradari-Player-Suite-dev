@@ -323,11 +323,13 @@
 
   function facilitySymbol(type) {
     const code=String(type?.code || "").toUpperCase();
-    if (code.includes("MINE")) return "◆";
+    if (code.includes("MINE") || code.includes("EXTRACT")) return "◆";
+    if (code.includes("AGRI") || code.includes("FARM")) return "✦";
     if (code.includes("REFINERY")) return "⬢";
     if (code.includes("TRADING")) return "◎";
     if (code.includes("RESEARCH")) return "◇";
     if (code.includes("FACTORY")) return "▣";
+    if (code.includes("SHIP")) return "⊕";
     return "■";
   }
 
@@ -707,6 +709,42 @@
     ).join("") : '<div class="empty-state map-mini-empty">NO STORED RESOURCES.</div>';
   }
 
+  function renderProductionRates() {
+    const root=$("mapProductionRates");
+    if(!root) return;
+    const rates=new Map();
+    const add=(code,amount)=>rates.set(code,(rates.get(code)||0)+Number(amount||0));
+    const factionId=activeMembership()?.faction_id;
+    const owned=factionFacilities();
+    owned.forEach(facility=>{
+      const code=facilityCode(facilityTypeById(facility.facility_type_id));
+      const mod=Number(facility.production_modifier||1);
+      if(code.includes("EXTRACT")||code.includes("MINE")){
+        (player.resourceDeposits||[]).filter(d=>d.location_ref===facility.location_ref).forEach(d=>add(d.resource_code,Number(d.richness||1)*10*mod));
+      }else if(code.includes("FARM")||code.includes("AGRI")){
+        add("food",100*mod);
+      }else if(code.includes("REFIN")){
+        const links=(player.facilityConnections||[]).filter(x=>x.refinery_facility_id===facility.id).slice(0,3);
+        links.forEach(link=>{
+          const extractor=player.facilities.find(x=>x.id===link.extractor_facility_id);
+          if(!extractor) return;
+          (player.resourceDeposits||[]).filter(d=>d.location_ref===extractor.location_ref).forEach(d=>{
+            const out=d.resource_code==="gold_ore"?"refined_gold":d.resource_code==="vyr_ore"?"vyrsteel":d.resource_code==="aetherite"?"refined_aetherite":null;
+            if(out) add(out,Number(d.richness||1)*8*mod);
+          });
+        });
+      }else if(code.includes("FACTORY")){
+        const order=(player.factoryOrders||[]).find(x=>x.facility_id===facility.id);
+        const recipe=(player.factoryRecipes||[]).find(x=>x.code===order?.recipe_code);
+        if(recipe) add(recipe.output_resource_code,Number(recipe.output_quantity||1)*mod);
+      }
+    });
+    const names=new Map((player.resourceCatalog||[]).map(row=>[row.code,row.name]));
+    root.innerHTML=rates.size ? [...rates.entries()].map(([code,amount])=>
+      '<div class="telemetry-row"><span>'+esc(names.get(code)||code)+'</span><strong>+'+esc(fmt(amount))+'</strong></div>'
+    ).join("") : '<div class="empty-state map-mini-empty">NO ACTIVE PRODUCTION.</div>';
+  }
+
   function renderFacilityTypeSelect() {
     const select=$("mapFacilityType");
     const types=(player.facilityTypes || []).filter(row=>row.player_buildable && facilityUnlocked(row));
@@ -715,6 +753,7 @@
       : '<option value="">No facilities available</option>';
     updateBuildPreview();
     renderResourceStockpile();
+    renderProductionRates();
   }
 
   function updateBuildPreview() {
@@ -965,6 +1004,7 @@
     renderMilitaryPanel();
     renderSelection();
     renderResourceStockpile();
+    renderProductionRates();
   }
 
   function canvasPoint(event) {
