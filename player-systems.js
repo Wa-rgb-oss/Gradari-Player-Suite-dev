@@ -488,6 +488,10 @@
     root.innerHTML = rows.map(row => {
       const type = row.facility_type;
       const personal = row.owner_user_id === session.user.id;
+      const clock=(state.facilityProductionClocks||[]).find(x=>x.facility_id===row.id);
+      const order=(state.factoryOrders||[]).find(x=>x.facility_id===row.id&&x.status==="producing");
+      const nextAt=order?.completes_at||clock?.next_production_at||null;
+      const timerLabel=order?"PRODUCTION COMPLETE":"NEXT OUTPUT";
       return `
         <article class="notice">
           <div class="split-actions">
@@ -497,7 +501,7 @@
           <div class="telemetry-stack" style="margin-top:10px">
             <div class="telemetry-row"><span>Location</span><strong>${esc(row.location_ref || "UNPLACED")}</strong></div>
             <div class="telemetry-row"><span>Upkeep / Day</span><strong>${esc(fmt(type?.upkeep_aureum_per_day ?? (Number(type?.upkeep_aureum_per_cycle || 0)/20)))} AUREUM</strong></div>
-            <div class="telemetry-row"><span>Production Modifier</span><strong>${esc(fmt(Number(row.production_modifier || 1)*100))}%</strong></div>
+            <div class="telemetry-row"><span>Production Modifier</span><strong>${esc(fmt(Number(row.production_modifier || 1)*100))}%</strong></div>\n            ${nextAt?`<div class="telemetry-row facility-production-clock"><span>${timerLabel}</span><strong data-countdown="${esc(nextAt)}">--:--:--</strong></div>`:""}
           </div>
         </article>`;
     }).join("");
@@ -553,6 +557,17 @@
     });
   }
 
+  function updateProductionCountdowns(){
+    document.querySelectorAll("[data-countdown]").forEach(el=>{
+      const ms=new Date(el.dataset.countdown).getTime()-Date.now();
+      if(!Number.isFinite(ms)){el.textContent="--:--:--";return}
+      if(ms<=0){el.textContent="READY";return}
+      const sec=Math.ceil(ms/1000),h=Math.floor(sec/3600),m=Math.floor((sec%3600)/60),s=sec%60;
+      el.textContent=String(h).padStart(2,"0")+":"+String(m).padStart(2,"0")+":"+String(s).padStart(2,"0");
+    });
+  }
+  if(!window.__gmProductionCountdown){window.__gmProductionCountdown=setInterval(updateProductionCountdowns,1000)}
+
   async function renderAll(nextState) {
     state = nextState;
     if (!session) session = state.session;
@@ -560,6 +575,7 @@
     renderMarkets();
     renderFactionMarketControls();
     renderFacilities();
+    updateProductionCountdowns();
     renderProduction();
     renderResourceStockpile();
     await renderFactionSystems();
