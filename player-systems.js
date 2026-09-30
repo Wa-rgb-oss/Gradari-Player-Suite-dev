@@ -438,6 +438,28 @@
     });
   }
 
+  function renderResourceStockpile() {
+    const root = $("resourceStockpile");
+    if (!root) return;
+    const factionId = state.primaryMembership?.faction_id;
+    const catalog = new Map((state.resourceCatalog || []).map(row => [row.code,row]));
+    const rows = (state.factionResources || [])
+      .filter(row => !factionId || row.faction_id === factionId)
+      .map(row => ({...row,resource:catalog.get(row.resource_code)}))
+      .filter(row => Number(row.quantity || 0) > 0)
+      .sort((a,b) => {
+        const ac=String(a.resource?.category || "Other"), bc=String(b.resource?.category || "Other");
+        return ac.localeCompare(bc) || String(a.resource?.name || a.resource_code).localeCompare(String(b.resource?.name || b.resource_code));
+      });
+    $("resourceStockpileCount").textContent = rows.length + " RESOURCE" + (rows.length===1?"":"S");
+    $("resourceStockpileEmpty").hidden = rows.length > 0;
+    root.innerHTML = rows.map(row => `
+      <article class="resource-stockpile-item">
+        <div><span class="section-code">${esc(String(row.resource?.category || "RESOURCE").toUpperCase())}</span><strong>${esc(row.resource?.name || row.resource_code)}</strong></div>
+        <span class="resource-stockpile-qty">${esc(fmt(row.quantity))}</span>
+      </article>`).join("");
+  }
+
   function renderFacilities() {
     const root = $("facilityList");
     if (!root) return;
@@ -523,6 +545,7 @@
     renderMarkets();
     renderFactionMarketControls();
     renderFacilities();
+    renderResourceStockpile();
     await renderFactionSystems();
     await renderCharacterPresence();
   }
