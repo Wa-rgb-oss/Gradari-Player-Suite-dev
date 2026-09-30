@@ -2244,3 +2244,8 @@ dialog::backdrop{background:rgba(0,0,0,.72);backdrop-filter:blur(2px)}
 .game-chat.minimized{height:42px}.game-chat.minimized .game-chat-tabs,.game-chat.minimized #gmChatFriend,.game-chat.minimized .game-chat-log,.game-chat.minimized .game-chat-form{display:none}
 .friend-row{display:flex;justify-content:space-between;align-items:center;gap:12px}.friend-row .form-actions{margin:0;flex-wrap:nowrap}
 @media(max-width:700px){.game-chat{right:10px;bottom:10px;width:min(330px,calc(100vw - 20px));height:280px}}
+
+/* Guilded Concord market pricing */
+.market-price-high{color:#ff6969;font-weight:700}
+.market-price-low{color:#59df8a;font-weight:700}
+.market-price-neutral{color:var(--text);font-weight:700}
