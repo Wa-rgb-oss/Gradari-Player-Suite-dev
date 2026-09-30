@@ -53,7 +53,8 @@
     facilityConnections: [],
     factoryRecipes: [],
     factoryOrders: [],
-    tradeStations: []
+    tradeStations: [],
+    tradeStationResources: []
   };
 
   const $ = id => document.getElementById(id);
@@ -379,7 +380,8 @@
       GMAuth.api("facility_connections?select=*").catch(()=>[]),
       GMAuth.api("factory_recipes?select=*&order=name.asc").catch(()=>[]),
       GMAuth.api("factory_orders?select=*").catch(()=>[]),
-      GMAuth.api("trade_station_markets?select=*").catch(()=>[])
+      GMAuth.api("trade_station_markets?select=*").catch(()=>[]),
+      GMAuth.api("trade_station_resource_listings?select=*&order=resource_code.asc").catch(()=>[])
     ]);
     [
       data.profiles,data.registrations,data.wallets,data.factions,data.memberships,
@@ -396,7 +398,7 @@
       data.electionVotes,data.characterSuccessions,
       data.mapHexes,data.mapLabels,
       data.resourceCatalog,data.factionResources,data.systemEconomies,data.resourceDeposits,
-      data.facilityConnections,data.factoryRecipes,data.factoryOrders,data.tradeStations
+      data.facilityConnections,data.factoryRecipes,data.factoryOrders,data.tradeStations,data.tradeStationResources
     ] = results;
   }
 
