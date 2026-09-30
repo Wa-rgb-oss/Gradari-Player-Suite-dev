@@ -750,6 +750,18 @@
     }catch(error){setState($("adminMapState"),"INDUSTRY CYCLE FAILED // "+error.message,"error")}
   }
 
+  function initMapToolTabs(){
+    const buttons=[...document.querySelectorAll("[data-admin-map-tool]")];
+    const panels=[...document.querySelectorAll("[data-admin-map-tool-panel]")];
+    buttons.forEach(button=>button.addEventListener("click",()=>{
+      const target=button.dataset.adminMapTool;
+      buttons.forEach(b=>b.classList.toggle("active",b===button));
+      panels.forEach(panel=>{const active=panel.dataset.adminMapToolPanel===target;panel.hidden=!active;panel.classList.toggle("active",active)});
+      if(target==="system" && selectedSystemRef) loadSystemFields(selectedSystemRef);
+      if(target==="industry") renderBuildingControls();
+    }));
+  }
+
   function handleCanvasClick(mx,my){
     if(mode==="label"){placeLabel(mx,my);return}
     if(mode==="select"){
@@ -869,5 +881,6 @@
   new ResizeObserver(()=>resizeCanvas(false)).observe(canvas.parentElement);
   document.querySelector('[data-tab-target="admin-map"]')?.addEventListener("click",()=>setTimeout(()=>resizeCanvas(firstVisibleResize),30));
 
+  initMapToolTabs();
   setMode("select");
 })();
