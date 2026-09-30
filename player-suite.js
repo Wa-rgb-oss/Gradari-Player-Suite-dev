@@ -194,6 +194,45 @@
   function renderEconomy() {
     $("economyBalance").textContent = fmt(state.wallet?.balance);
     $("economyCurrency").textContent = String(state.wallet?.currency || "Aureum").toUpperCase();
+
+    const ownedFacilities=(state.facilities || []).filter(row => row.owner_user_id === session.user.id);
+    const facilityNet=$("economyFacilityNet");
+    const facilityList=$("ownedFacilityList");
+    const facilityEmpty=$("ownedFacilityEmpty");
+    const facilityCount=$("ownedFacilityCount");
+    const typeMap=new Map((state.facilityTypes || []).map(row => [row.id,row]));
+
+    facilityCount.textContent=ownedFacilities.length+" FACILIT"+(ownedFacilities.length===1?"Y":"IES");
+    if(ownedFacilities.length){
+      // Player-owned facilities currently debit Aureum upkeep each cycle. Resource production
+      // remains a strategic output, so it is not falsely converted into Aureum profit here.
+      const netAureum=-ownedFacilities
+        .filter(row => String(row.status || "active").toLowerCase() !== "inactive")
+        .reduce((sum,row) => sum + Number(typeMap.get(row.facility_type_id)?.upkeep_aureum_per_cycle || 0),0);
+      facilityNet.hidden=false;
+      facilityNet.classList.toggle("positive",netAureum>0);
+      facilityNet.classList.toggle("negative",netAureum<0);
+      facilityNet.textContent=(netAureum>=0?"+":"")+fmt(netAureum)+" AUREUM / CYCLE // FACILITY NET";
+
+      facilityEmpty.hidden=true;
+      facilityList.innerHTML=ownedFacilities.map(row=>{
+        const type=typeMap.get(row.facility_type_id);
+        const upkeep=Number(type?.upkeep_aureum_per_cycle || 0);
+        const status=String(row.status || "active").toUpperCase();
+        return '<article class="notice economy-facility-row">'+
+          '<div><strong>'+esc(row.name || type?.name || "Facility")+'</strong>'+
+          '<div class="section-code">'+esc(type?.name || "FACILITY")+' // '+esc(row.location_ref || "LOCATION UNSET")+'</div></div>'+
+          '<div class="economy-facility-meta"><span class="status-chip '+(status==="ACTIVE"?"":"muted")+'">'+esc(status)+'</span>'+
+          '<strong class="economy-facility-cost">'+(upkeep?'-'+esc(fmt(upkeep)):'0')+' AUREUM / CYCLE</strong></div>'+
+          '</article>';
+      }).join("");
+    }else{
+      facilityNet.hidden=true;
+      facilityNet.textContent="";
+      facilityList.innerHTML="";
+      facilityEmpty.hidden=false;
+    }
+
     const body = $("transactionRows");
     if (!state.transactions.length) {
       body.innerHTML = "";
