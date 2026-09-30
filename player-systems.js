@@ -344,23 +344,41 @@
     const root = $("marketList");
     if (!root) return;
     const listings = (state.marketListings || []).filter(x => x.market && x.asset);
-    if (!listings.length) {
-      root.innerHTML = "";
-      $("marketEmpty").hidden = false;
-      return;
-    }
-    $("marketEmpty").hidden = true;
+    const stations = state.tradeStations || [];
+    const stationByMarket = new Map(stations.map(row=>[row.market_id,row]));
     const groups = new Map();
     listings.forEach(row => {
       if (!groups.has(row.market_id)) groups.set(row.market_id,[]);
       groups.get(row.market_id).push(row);
     });
 
-    root.innerHTML = [...groups.entries()].map(([marketId,rows]) => {
-      const market = rows[0].market;
-      return `
+    const cards=[];
+    stations.forEach(station => {
+      const rows=groups.get(station.market_id) || [];
+      const market=state.markets?.find(row=>row.id===station.market_id);
+      cards.push(`
         <article class="notice">
-          <div class="split-actions"><div><strong style="color:var(--text)">${esc(market.name)}</strong><div class="section-code">${esc(String(market.market_type).toUpperCase())} MARKET // ${esc(market.location_ref || "NETWORK ACCESS")}</div></div><span class="status-chip">${esc(market.status)}</span></div>
+          <div class="split-actions"><div><strong style="color:var(--text)">${esc(station.station_name)}</strong><div class="section-code">GUILDED CONCORD TRADE STATION // ${esc(station.location_ref)}</div></div><span class="status-chip">EXCHANGE</span></div>
+          <div class="resource-list" style="margin-top:10px">
+            ${rows.length ? rows.map(row => `
+              <div class="resource-row market-row" data-listing="${esc(row.id)}">
+                <div><strong>${esc(row.asset.name)}</strong><div class="section-code">${esc(row.asset.kind || "resource")} // STOCK: ${row.stock==null?"UNLIMITED":esc(fmt(row.stock))}</div></div>
+                <div style="display:flex;gap:7px;align-items:center;justify-content:flex-end;flex-wrap:wrap">
+                  <span>${esc(fmt(row.price_per_unit))} A / ${esc(row.asset.unit || "unit")}</span>
+                  <input class="market-qty" type="number" min="0.0001" step="0.0001" value="1" style="width:92px">
+                  <button class="hud-button secondary market-buy" type="button">BUY</button>
+                </div>
+              </div>`).join("") : '<div class="empty-state">NO CURRENT LISTINGS.</div>'}
+          </div>
+        </article>`);
+      groups.delete(station.market_id);
+    });
+
+    groups.forEach(rows => {
+      const market=rows[0].market;
+      cards.push(`
+        <article class="notice">
+          <div class="split-actions"><div><strong style="color:var(--text)">${esc(market.name)}</strong><div class="section-code">${esc(String(market.market_type).toUpperCase())} MARKET // ${esc(market.location_ref || "NETWORK ACCESS")}</div></div></div>
           <div class="resource-list" style="margin-top:10px">
             ${rows.map(row => `
               <div class="resource-row market-row" data-listing="${esc(row.id)}">
@@ -372,8 +390,11 @@
                 </div>
               </div>`).join("")}
           </div>
-        </article>`;
-    }).join("");
+        </article>`);
+    });
+
+    root.innerHTML=cards.join("");
+    $("marketEmpty").hidden=cards.length>0;
 
     root.querySelectorAll(".market-buy").forEach(button => {
       button.addEventListener("click", async () => {
