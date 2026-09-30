@@ -756,6 +756,24 @@
             </article>
 
             <article class="hud-panel compact admin-map-panel">
+              <div class="hud-kicker amber">SHIP BLUEPRINTS</div>
+              <div id="adminShipBlueprintList" class="stack admin-map-list"></div>
+              <label>Class Name</label>
+              <input id="adminShipBlueprintName" placeholder="Ship class">
+              <label>Hull Type</label>
+              <input id="adminShipBlueprintHull" placeholder="vessel">
+              <div class="form-grid">
+                <label><span>Build Cycles</span><input id="adminShipBlueprintCycles" type="number" min="1" value="1"></label>
+                <label><span>Manpower</span><input id="adminShipBlueprintManpower" type="number" min="0" value="0"></label>
+              </div>
+              <label>Strength</label>
+              <input id="adminShipBlueprintStrength" type="number" min="1" value="100">
+              <label>Resource Costs</label>
+              <textarea id="adminShipBlueprintCosts" placeholder="vyrsteel=10, electronics=5, ship_components=4"></textarea>
+              <button class="hud-button secondary" id="adminShipBlueprintSaveBtn" type="button">ADD BLUEPRINT</button>
+            </article>
+
+            <article class="hud-panel compact admin-map-panel">
               <label>Constructed Assets</label>
               <div id="adminMapBuildingList" class="stack admin-map-list"></div>
             </article>
