@@ -120,6 +120,35 @@
     return "A"+aevum+" C"+cycle+" W"+week+" D"+day+" H"+String(hour).padStart(2,"0");
   }
 
+  function worldSpeed() {
+    const speed=Number(worldClock?.speed || 5);
+    return speed>0 ? speed : 5;
+  }
+
+  function realDurationLabel(worldHours) {
+    const realHours=Math.max(0,Number(worldHours||0)/worldSpeed());
+    const totalMinutes=Math.round(realHours*60);
+    if(totalMinutes<60) return totalMinutes+" MIN REAL";
+    const days=Math.floor(totalMinutes/1440);
+    const hours=Math.floor((totalMinutes%1440)/60);
+    const minutes=totalMinutes%60;
+    return [days?days+"D":"",hours?hours+"H":"",minutes?minutes+"M":""].filter(Boolean).join(" ")+" REAL";
+  }
+
+  function realArrivalLabel(arriveWorldHour) {
+    const remaining=Math.max(0,Number(arriveWorldHour||0)-currentWorldHour());
+    const when=new Date(Date.now()+(remaining/worldSpeed())*3600000);
+    return when.toLocaleString(undefined,{month:"short",day:"numeric",hour:"numeric",minute:"2-digit"});
+  }
+
+  function movementTimeLabel(worldHours) {
+    return fmt(worldHours)+" WORLD HRS ("+realDurationLabel(worldHours)+")";
+  }
+
+  function arrivalTimeLabel(worldHour) {
+    return worldArrivalLabel(worldHour)+" ("+realArrivalLabel(worldHour)+")";
+  }
+
   function activeModifiersFor(ref) {
     const now = Date.now();
     const worldNow=currentWorldHour();
@@ -163,6 +192,7 @@
     buildCircle();
     renderUi();
     draw();
+    ensureTravelAnimation();
     if (message && target) setState(target,message,"success");
   }
 
@@ -528,6 +558,36 @@
     ctx.restore();
   }
 
+  function drawCharacterTravelRoute() {
+    if(!layers.character) return;
+    const char=livingCharacter();
+    const travel=char ? characterTravel.find(row=>row.character_id===char.id && row.status==="traveling") : null;
+    if(!travel) return;
+    const from=parseRef(travel.from_ref), to=parseRef(travel.to_ref);
+    if(!from || !to) return;
+    const a=worldToScreen(hexToWorld(from.q,from.r));
+    const b=worldToScreen(hexToWorld(to.q,to.r));
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(a.x,a.y);
+    ctx.lineTo(b.x,b.y);
+    ctx.setLineDash([3,8]);
+    ctx.lineDashOffset=-(performance.now()/70)%11;
+    ctx.strokeStyle="rgba(240,201,143,.9)";
+    ctx.lineWidth=Math.max(1.5,2*camera.zoom);
+    ctx.shadowColor="rgba(216,163,93,.45)";
+    ctx.shadowBlur=5;
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.shadowBlur=0;
+    ctx.beginPath();
+    ctx.arc(b.x,b.y,Math.max(4,5*camera.zoom),0,Math.PI*2);
+    ctx.strokeStyle="#d8a35d";
+    ctx.lineWidth=1.5;
+    ctx.stroke();
+    ctx.restore();
+  }
+
   function drawCharacter() {
     if (!layers.character) return;
     const char=livingCharacter();
@@ -614,6 +674,7 @@
     drawFacilities();
     drawShips();
     drawArmies();
+    drawCharacterTravelRoute();
     drawCharacter();
     drawSelection();
 
@@ -703,7 +764,7 @@
     $("mapCharacterStatus").textContent="ALIVE";
     const travel=characterTravel.find(row=>row.character_id===char.id && row.status==="traveling");
     $("mapCharacterLocation").textContent=char.location_name || char.location_ref || "UNPLACED";
-    $("mapCharacterMovement").textContent=travel ? "TRAVELING // "+worldArrivalLabel(travel.arrive_world_hour) : "STATIONARY";
+    $("mapCharacterMovement").textContent=travel ? "TRAVELING // ETA "+arrivalTimeLabel(travel.arrive_world_hour) : "STATIONARY";
     $("mapCharacterFaction").textContent=factionById(char.faction_id)?.name || activeMembership()?.faction?.name || "NO FACTION";
 
     $("setInitialLocationBtn").hidden=Boolean(char.location_ref) || !selectedHex;
@@ -839,8 +900,8 @@
     }
 
     $("mapTravelDistance").textContent=selectedHex && char?.location_ref ? distance+" HEX"+(distance===1?"":"ES") : "--";
-    $("mapTravelHours").textContent=distance ? fmt(hours)+" WORLD HRS" : "--";
-    $("mapTravelArrival").textContent=distance ? worldArrivalLabel(arrival) : "--";
+    $("mapTravelHours").textContent=distance ? movementTimeLabel(hours) : "--";
+    $("mapTravelArrival").textContent=distance ? arrivalTimeLabel(arrival) : "--";
 
     const button=$("mapTravelBtn");
     button.disabled=Boolean(travel) || !char?.location_ref || !selectedHex || distance<1;
@@ -874,6 +935,20 @@
     $("mapArmyStrength").textContent=army ? fmt(army.strength)+" / "+fmt(army.max_strength) : "--";
     $("mapArmyLocation").textContent=army?.location_ref || "--";
     $("mapArmyStatus").textContent=army ? (army.movement_status==="moving"?"MOVING":"STATIONARY") : "--";
+    const activeMove=army ? armyMovements.find(row=>row.army_id===army.id && row.status==="moving") : null;
+    if(activeMove){
+      const total=Math.max(0,Number(activeMove.arrive_world_hour)-Number(activeMove.depart_world_hour));
+      $("mapArmyTravelTime").textContent=movementTimeLabel(total);
+      $("mapArmyTravelArrival").textContent=arrivalTimeLabel(activeMove.arrive_world_hour);
+    }else if(army && selectedHex && army.location_ref!==selectedHex.ref){
+      const distance=hexDistance(army.location_ref,selectedHex.ref);
+      const hours=distance*Number(player?.config?.army_travel_hours_per_hex || 12);
+      $("mapArmyTravelTime").textContent=movementTimeLabel(hours);
+      $("mapArmyTravelArrival").textContent=arrivalTimeLabel(currentWorldHour()+hours);
+    }else{
+      $("mapArmyTravelTime").textContent="--";
+      $("mapArmyTravelArrival").textContent="--";
+    }
 
     const hasSelection=Boolean(selectedHex);
     const atTarget=army && selectedHex && army.location_ref===selectedHex.ref && army.movement_status==="stationary";
@@ -1197,7 +1272,7 @@
         method:"POST",
         body:JSON.stringify({p_character_id:char.id,p_to_ref:selectedHex.ref})
       });
-      await refreshAll("TRAVELING // "+fmt(result.travel_hours)+" WORLD HOURS",$("mapTravelState"));
+      await refreshAll("TRAVELING // "+movementTimeLabel(result.travel_hours)+" // ETA "+arrivalTimeLabel(result.arrive_world_hour),$("mapTravelState"));
     }catch(error){
       setState($("mapTravelState"),"TRAVEL FAILED // "+error.message,"error");
     }
@@ -1214,7 +1289,7 @@
         method:"POST",
         body:JSON.stringify({p_army_id:armyId,p_to_ref:selectedHex.ref})
       });
-      await refreshAll("ARMY MOVING // "+fmt(result.travel_hours)+" WORLD HOURS",$("mapMilitaryState"));
+      await refreshAll("ARMY MOVING // "+movementTimeLabel(result.travel_hours)+" // ETA "+arrivalTimeLabel(result.arrive_world_hour),$("mapMilitaryState"));
     }catch(error){
       setState($("mapMilitaryState"),"ARMY MOVEMENT FAILED // "+error.message,"error");
     }
@@ -1234,7 +1309,7 @@
           p_operation_type:type
         })
       });
-      await refreshAll(type.toUpperCase()+" ACTIVE // RESOLUTION AT "+worldArrivalLabel(result.resolve_world_hour),$("mapMilitaryState"));
+      await refreshAll(type.toUpperCase()+" ACTIVE // RESOLUTION AT "+arrivalTimeLabel(result.resolve_world_hour),$("mapMilitaryState"));
     }catch(error){
       setState($("mapMilitaryState"),type.toUpperCase()+" FAILED // "+error.message,"error");
     }
@@ -1286,6 +1361,23 @@
 
   const observer=new ResizeObserver(() => resizeCanvas(false));
   observer.observe(canvas.parentElement);
+
+  let travelAnimationActive=false;
+  function animateTravelRoute(){
+    const char=livingCharacter();
+    const active=char && characterTravel.some(row=>row.character_id===char.id && row.status==="traveling");
+    if(!active){travelAnimationActive=false;return;}
+    draw();
+    requestAnimationFrame(animateTravelRoute);
+  }
+  function ensureTravelAnimation(){
+    if(travelAnimationActive) return;
+    const char=livingCharacter();
+    if(char && characterTravel.some(row=>row.character_id===char.id && row.status==="traveling")){
+      travelAnimationActive=true;
+      requestAnimationFrame(animateTravelRoute);
+    }
+  }
 
   (async () => {
     session=await GMUI.initProtected();
