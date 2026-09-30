@@ -655,6 +655,21 @@
             </article>
 
             <article class="hud-panel compact admin-map-panel">
+              <div class="section-code">SYSTEM / ECONOMY</div>
+              <h2 id="adminMapSystemRef" style="margin:5px 0 14px;text-transform:uppercase">Select a Hex</h2>
+              <label>Population</label>
+              <input id="adminMapPopulation" type="number" min="0" step="1" value="0">
+              <label>Manpower</label>
+              <input id="adminMapManpower" type="number" min="0" step="1" value="0">
+              <div class="telemetry-row"><span>Facility Slots</span><strong>8 MAX</strong></div>
+              <label class="checkbox-line"><input id="adminResEnergy" type="checkbox"><span>Energy</span></label>
+              <label class="checkbox-line"><input id="adminResGold" type="checkbox"><span>Gold Ore</span></label>
+              <label class="checkbox-line"><input id="adminResAetherite" type="checkbox"><span>Aetherite</span></label>
+              <label class="checkbox-line"><input id="adminResVyr" type="checkbox"><span>Vyr Ore</span></label>
+              <button class="hud-button secondary" id="adminMapSaveSystemBtn" type="button">SAVE SYSTEM</button>
+            </article>
+
+            <article class="hud-panel compact admin-map-panel">
               <label>Map Save Manager</label>
               <div class="button-grid">
                 <button class="hud-button secondary" id="adminMapExportBtn" type="button">EXPORT MAP</button>
