@@ -2172,3 +2172,14 @@ dialog::backdrop{background:rgba(0,0,0,.72);backdrop-filter:blur(2px)}
  .map-panel-collapsed .map-command-panel{width:44px}
  .map-workspace-unified .map-canvas-shell{min-height:70vh}
 }
+
+
+/* Player economy & facilities */
+.economy-facility-net{margin-top:14px;font-family:"Share Tech Mono",Consolas,monospace;font-size:1rem;letter-spacing:.06em}
+.economy-facility-net.positive{color:var(--success,#79d6a5)}
+.economy-facility-net.negative{color:var(--danger,#ef7d7d)}
+.economy-owned-facilities{margin-top:18px;margin-bottom:18px}
+.economy-facility-row{display:flex;align-items:center;justify-content:space-between;gap:18px}
+.economy-facility-meta{display:flex;align-items:center;gap:12px;text-align:right}
+.economy-facility-cost{font-family:"Share Tech Mono",Consolas,monospace;font-size:.78rem;white-space:nowrap}
+@media(max-width:720px){.economy-facility-row,.economy-facility-meta{align-items:flex-start;flex-direction:column}.economy-facility-meta{gap:7px;text-align:left}}
