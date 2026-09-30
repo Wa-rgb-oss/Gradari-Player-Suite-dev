@@ -288,6 +288,8 @@
         <div class="section-head"><div><div class="section-code">ADMIN / OPERATIONS</div><h2>Day-to-Day GM Tools</h2></div><p>LIVE GAME STATE</p></div>
         <div class="content-grid">
           <article class="stack">
+            <section class="hud-panel compact"><div class="section-code">PLAYER INVENTORY</div><h2>Personal Resources</h2>
+              <form id="gmPlayerResourceForm" class="form-shell"><label><span>Player</span><select name="user_id" data-player-select required></select></label><label><span>Resource</span><select name="resource_code" id="gmPlayerResourceCode" required></select></label><div class="form-grid"><label><span>Action</span><select name="mode"><option value="add">Grant</option><option value="remove">Remove</option><option value="set">Set Exact</option></select></label><label><span>Quantity</span><input name="amount" type="number" min="0" step=".01" required></label></div><button class="hud-button amber" type="submit">APPLY PLAYER RESOURCE</button><div id="gmPlayerResourceState" class="form-state"></div></form><div id="gmPlayerStockpileList" class="resource-list" style="margin-top:14px"></div></section>
             <section class="hud-panel compact"><div class="section-code">RESOURCES</div><h2>Faction Stockpile</h2>
               <form id="gmResourceForm" class="form-shell">
                 <label><span>Faction</span><select name="faction_id" data-faction-select required></select></label>
