@@ -45,7 +45,15 @@
     electionVotes: [],
     characterSuccessions: [],
     mapHexes: [],
-    mapLabels: []
+    mapLabels: [],
+    resourceCatalog: [],
+    factionResources: [],
+    systemEconomies: [],
+    resourceDeposits: [],
+    facilityConnections: [],
+    factoryRecipes: [],
+    factoryOrders: [],
+    tradeStations: []
   };
 
   const $ = id => document.getElementById(id);
@@ -363,7 +371,15 @@
       GMAuth.api("election_votes?select=*&order=created_at.asc"),
       GMAuth.api("character_successions?select=*&order=created_at.desc"),
       GMAuth.api("map_hexes?select=*&order=q.asc,r.asc"),
-      GMAuth.api("map_labels?select=*&order=created_at.asc")
+      GMAuth.api("map_labels?select=*&order=created_at.asc"),
+      GMAuth.api("resource_catalog?select=*&order=category.asc,name.asc").catch(()=>[]),
+      GMAuth.api("faction_resources?select=*").catch(()=>[]),
+      GMAuth.api("system_economies?select=*").catch(()=>[]),
+      GMAuth.api("map_resource_deposits?select=*&order=location_ref.asc,resource_code.asc").catch(()=>[]),
+      GMAuth.api("facility_connections?select=*").catch(()=>[]),
+      GMAuth.api("factory_recipes?select=*&order=name.asc").catch(()=>[]),
+      GMAuth.api("factory_orders?select=*").catch(()=>[]),
+      GMAuth.api("trade_station_markets?select=*").catch(()=>[])
     ]);
     [
       data.profiles,data.registrations,data.wallets,data.factions,data.memberships,
@@ -378,7 +394,9 @@
       data.economyCycleRuns,data.politicalActionTypes,data.senateSeatHistory,
       data.imperialOffices,data.politicalElections,data.electionCandidates,
       data.electionVotes,data.characterSuccessions,
-      data.mapHexes,data.mapLabels
+      data.mapHexes,data.mapLabels,
+      data.resourceCatalog,data.factionResources,data.systemEconomies,data.resourceDeposits,
+      data.facilityConnections,data.factoryRecipes,data.factoryOrders,data.tradeStations
     ] = results;
   }
 
