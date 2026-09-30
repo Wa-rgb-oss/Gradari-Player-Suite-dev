@@ -189,11 +189,11 @@
 
     root.querySelectorAll(".mark-character-deceased").forEach(button => {
       button.addEventListener("click", async () => {
-        const cause = prompt("Cause of death / record label (optional):", "");
+        const cause = await GMUI.promptAction("Enter a cause of death or record label. This field is optional.","",{code:"CHARACTER / RECORD",title:"Cause of Death",inputLabel:"Cause / Label",confirmText:"CONTINUE"});
         if (cause === null) return;
-        const notes = prompt("Death record notes (optional):", "");
+        const notes = await GMUI.promptAction("Add any notes to the death record. This field is optional.","",{code:"CHARACTER / RECORD",title:"Death Record Notes",inputLabel:"Notes",confirmText:"CONTINUE"});
         if (notes === null) return;
-        if (!confirm("Mark this character as deceased? This removes them from active play.")) return;
+        if (!await GMUI.confirmAction("Mark this character as deceased? This removes them from active play.",{code:"CHARACTER / RECORD",title:"Mark Deceased",confirmText:"MARK DECEASED",danger:true})) return;
 
         try {
           await GMAuth.api("rpc/mark_character_deceased", {
