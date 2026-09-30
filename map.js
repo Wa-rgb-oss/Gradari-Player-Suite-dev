@@ -1095,7 +1095,7 @@
       const order=(player.factoryOrders||[]).find(x=>x.facility_id===row.id&&x.status==="producing");
       const nextAt=order?.completes_at||clock?.next_production_at;
       const timer=nextAt?'<div class="section-code">'+(order?'PRODUCTION':'NEXT OUTPUT')+' // <span data-map-countdown="'+esc(nextAt)+'">--:--:--</span></div>':'';
-      return '<article class="notice map-list-row"><div><strong>'+esc(row.name || type?.name || "Holding")+'</strong><div class="section-code">'+esc(type?.name || "FACILITY")+'</div>'+timer+'</div><span>'+esc(fmt(type?.upkeep_aureum_per_day ?? (Number(type?.upkeep_aureum_per_cycle||0)/20)))+' A / DAY</span></article>';
+      return '<article class="notice map-list-row"><div><strong>'+esc(row.name || type?.name || "Holding")+'</strong><div class="section-code">'+esc(type?.name || "FACILITY")+'</div>'+timer+'</div><span>'+esc(fmt(type?.upkeep_aureum_per_day ?? Number(type?.upkeep_aureum_per_cycle||0)))+' A / DAY</span></article>';
     }).join("");
     updateMapProductionCountdowns();
 
