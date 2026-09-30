@@ -657,11 +657,31 @@
             <article class="hud-panel compact admin-map-panel">
               <div class="section-code">SYSTEM / ECONOMY</div>
               <h2 id="adminMapSystemRef" style="margin:5px 0 14px;text-transform:uppercase">Select a Hex</h2>
-              <label>Population</label>
-              <input id="adminMapPopulation" type="number" min="0" step="1" value="0">
-              <label>Manpower</label>
-              <input id="adminMapManpower" type="number" min="0" step="1" value="0">
-              <div class="telemetry-row"><span>Facility Slots</span><strong>8 MAX</strong></div>
+              <label>System / Map Name</label>
+              <input id="adminMapSystemName" placeholder="System name">
+              <div class="form-grid">
+                <label><span>Region</span><input id="adminMapSystemRegion" placeholder="CORE CONSTELLIUM"></label>
+                <label><span>Space / Terrain Type</span><input id="adminMapSystemTerrain" placeholder="Optional"></label>
+              </div>
+              <div class="form-grid">
+                <label><span>System Development</span><select id="adminMapDevelopmentTier"><option value="colony">Imperial Colony System</option><option value="system">Imperial System</option><option value="developed">Imperial Developed System</option></select></label>
+                <label><span>Development Level</span><input id="adminMapDevelopmentLevel" type="number" min="1" step="1" value="1"></label>
+              </div>
+              <label class="checkbox-line"><input id="adminMapIsCapital" type="checkbox"><span>Imperial Capital designation</span></label>
+              <div class="form-grid">
+                <label><span>Population</span><input id="adminMapPopulation" type="number" min="0" step="1" value="0"></label>
+                <label><span>Manpower</span><input id="adminMapManpower" type="number" min="0" step="1" value="0"></label>
+              </div>
+              <div class="form-grid">
+                <label><span>Food</span><input id="adminMapFood" type="number" min="0" step="0.01" value="0"></label>
+                <label><span>Facility Slots</span><input id="adminMapSlotLimit" type="number" min="0" step="1" value="4"></label>
+              </div>
+              <label>System Status</label>
+              <input id="adminMapSystemStatus" value="open">
+              <label>System Notes</label>
+              <textarea id="adminMapSystemNotes" placeholder="Canon notes, strategic role, development notes..."></textarea>
+              <label class="checkbox-line"><input id="adminMapSystemVisible" type="checkbox" checked><span>Visible on player map</span></label>
+              <div class="section-code" style="margin-top:14px">RESOURCE DEPOSITS</div>
               <label class="checkbox-line"><input id="adminResEnergy" type="checkbox"><span>Energy</span></label>
               <label class="checkbox-line"><input id="adminResGold" type="checkbox"><span>Gold Ore</span></label>
               <label class="checkbox-line"><input id="adminResAetherite" type="checkbox"><span>Aetherite</span></label>
