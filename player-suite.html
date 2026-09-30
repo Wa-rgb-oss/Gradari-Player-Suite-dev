@@ -44,7 +44,7 @@
 
         <div class="tabs" data-tabs>
           <button class="tab active" type="button" data-tab-target="suite-account">ACCOUNT</button>
-          <button class="tab" type="button" data-tab-target="suite-economy">ECONOMY</button>
+          <button class="tab" type="button" data-tab-target="suite-economy">ECONOMY &amp; FACILITIES</button>
           <button class="tab" type="button" data-tab-target="suite-markets">MARKETS</button>
           <button class="tab" type="button" data-tab-target="suite-faction">FACTION</button>
           <button class="tab" type="button" data-tab-target="suite-characters">CHARACTER & INVENTORY</button>
@@ -124,6 +124,7 @@
               <h2 style="margin:0;text-transform:uppercase">Personal Bank Account</h2>
               <div class="metric-value" id="economyBalance" style="font-size:3.5rem;margin-top:26px">--</div>
               <div class="metric-detail" id="economyCurrency">AUREUM</div>
+              <div id="economyFacilityNet" class="economy-facility-net" hidden></div>
               <p class="hero-copy">This balance belongs to your account. Transactions are created through purchases, rewards, transfers, economic activity, and resolved game events.</p>
             </article>
             <aside class="hud-panel compact">
@@ -137,6 +138,15 @@
               </form>
             </aside>
           </div>
+          <article class="hud-panel compact economy-owned-facilities">
+            <div class="section-head">
+              <div><div class="section-code">ECONOMY / FACILITIES</div><h2>Owned Facilities</h2></div>
+              <p id="ownedFacilityCount">0 FACILITIES</p>
+            </div>
+            <div id="ownedFacilityList" class="stack"></div>
+            <div class="empty-state" id="ownedFacilityEmpty" hidden>YOU DO NOT CURRENTLY OWN ANY FACILITIES.</div>
+          </article>
+
           <article class="hud-panel compact">
             <div class="section-head"><div><div class="section-code">ECONOMY / LEDGER</div><h2>Transaction History</h2></div></div>
             <div class="table-wrap"><table class="data-table"><thead><tr><th>Date</th><th>Type</th><th>Description</th><th>Amount</th><th>Balance</th></tr></thead><tbody id="transactionRows"></tbody></table></div>
