@@ -21,6 +21,7 @@
   let cameraStart={x:0,y:0};
   let selectedLabelId=null;
   let selectedBuildingId=null;
+  let selectedSystemRef=null;
   let firstVisibleResize=true;
 
   const dirs=[[1,0],[1,-1],[0,-1],[-1,0],[-1,1],[0,1]];
@@ -531,11 +532,50 @@
     finally{$("adminMapImportFile").value=""}
   }
 
+  function loadSystemFields(ref){
+    selectedSystemRef=ref;
+    const system=(data?.systemEconomies||[]).find(row=>row.location_ref===ref);
+    const deposits=(data?.resourceDeposits||[]).filter(row=>row.location_ref===ref);
+    const has=code=>deposits.some(row=>row.resource_code===code);
+    $("adminMapSystemRef").textContent=ref;
+    $("adminMapPopulation").value=Number(system?.population||0);
+    $("adminMapManpower").value=Number(system?.manpower||0);
+    $("adminResEnergy").checked=has("energy");
+    $("adminResGold").checked=has("gold_ore");
+    $("adminResAetherite").checked=has("aetherite");
+    $("adminResVyr").checked=has("vyr_ore");
+  }
+
+  async function saveSystem(){
+    if(!selectedSystemRef)return setState($("adminMapState"),"SELECT A HEX FIRST","error");
+    const economy={location_ref:selectedSystemRef,population:Number($("adminMapPopulation").value)||0,manpower:Number($("adminMapManpower").value)||0,slot_limit:8};
+    const wanted=[
+      ["energy",$("adminResEnergy").checked],
+      ["gold_ore",$("adminResGold").checked],
+      ["aetherite",$("adminResAetherite").checked],
+      ["vyr_ore",$("adminResVyr").checked]
+    ];
+    try{
+      await GMAuth.api("system_economies?on_conflict=location_ref",{method:"POST",headers:{Prefer:"resolution=merge-duplicates,return=minimal"},body:JSON.stringify(economy)});
+      await GMAuth.api("map_resource_deposits?location_ref=eq."+encodeURIComponent(selectedSystemRef),{method:"DELETE",headers:{Prefer:"return=minimal"}});
+      const rows=wanted.filter(([,enabled])=>enabled).map(([resource_code])=>({location_ref:selectedSystemRef,resource_code,richness:1}));
+      if(rows.length)await GMAuth.api("map_resource_deposits",{method:"POST",headers:{Prefer:"return=minimal"},body:JSON.stringify(rows)});
+      await window.GMAdminRefresh("SYSTEM ECONOMY SAVED");
+      loadSystemFields(selectedSystemRef);
+    }catch(error){setState($("adminMapState"),"SYSTEM SAVE FAILED // "+error.message,"error")}
+  }
+
   function handleCanvasClick(mx,my){
     if(mode==="label"){placeLabel(mx,my);return}
     if(mode==="select"){
       const l=getLabelAt(mx,my);
-      selectedLabelId=l?.id||null;if(l)loadSelectedLabelFields();else $("adminMapEditLabelText").value="";
+      selectedLabelId=l?.id||null;
+      if(l) loadSelectedLabelFields();
+      else {
+        $("adminMapEditLabelText").value="";
+        const h=pixelToHex(mx,my),ref=refFor(h.q,h.r);
+        if(mapHexSet.has(ref)) loadSystemFields(ref);
+      }
       draw();return;
     }
     if(mode==="selectBuilding"){
@@ -584,6 +624,7 @@
   $("adminMapExportBtn").addEventListener("click",exportMap);
   $("adminMapImportBtn").addEventListener("click",()=>$("adminMapImportFile").click());
   $("adminMapImportFile").addEventListener("change",event=>importMap(event.target.files?.[0]));
+  $("adminMapSaveSystemBtn").addEventListener("click",saveSystem);
 
   canvas.addEventListener("pointerdown",event=>{
     if(event.pointerType==="mouse"&&event.button!==0)return;
