@@ -1076,7 +1076,9 @@
       });
       if(!candidates.length) return setState($("mapBuildState"),"NO UNCONNECTED EXTRACTORS AVAILABLE","error");
       const menu=candidates.map((row,i)=>(i+1)+". "+(row.name||facilityTypeById(row.facility_type_id)?.name||"Extractor")+" // "+row.location_ref).join("\n");
-      const choice=Number(prompt("Connect which extractor?\n"+menu,"1"))-1;
+      const picked=await GMUI.promptAction("Connect which extractor?\n"+menu,"1",{code:"INDUSTRY / REFINERY",title:"Connect Extractor",inputLabel:"Extractor Number",confirmText:"CONNECT"});
+      if(picked===null) return;
+      const choice=Number(picked)-1;
       if(!Number.isInteger(choice)||!candidates[choice]) return;
       try{
         await GMAuth.api("rpc/connect_refinery_extractor",{method:"POST",body:JSON.stringify({p_refinery_id:refineryId,p_extractor_id:candidates[choice].id})});
@@ -1244,7 +1246,7 @@
   $("setInitialLocationBtn").addEventListener("click",async () => {
     const char=livingCharacter();
     if (!char || !selectedHex) return;
-    if (!confirm("Set "+selectedHex.ref+" as "+char.name+"'s initial location? Future movement will use the travel system rather than instant relocation.")) return;
+    if (!await GMUI.confirmAction("Set "+selectedHex.ref+" as "+char.name+"'s initial location? Future movement will use the travel system rather than instant relocation.",{code:"CHARACTER / LOCATION",title:"Set Initial Location",confirmText:"SET LOCATION"})) return;
 
     try {
       setState($("mapCharacterState"),"ESTABLISHING CHARACTER LOCATION...");
@@ -1264,7 +1266,7 @@
   $("mapTravelBtn").addEventListener("click",async () => {
     const char=livingCharacter();
     if(!char || !selectedHex) return;
-    if(!confirm("Begin travel to "+selectedHex.ref+"? Travel time follows the live world clock.")) return;
+    if(!await GMUI.confirmAction("Begin travel to "+selectedHex.ref+"? Travel time follows the live world clock.",{code:"CHARACTER / TRAVEL",title:"Begin Travel",confirmText:"BEGIN TRAVEL"})) return;
     try{
       setState($("mapTravelState"),"TRAVEL ORDER TRANSMITTED...");
       const result=await GMAuth.api("rpc/begin_character_travel",{
@@ -1297,7 +1299,7 @@
   async function launchOperation(type){
     const armyId=$("mapArmySelect").value;
     if(!armyId || !selectedHex) return;
-    if(!confirm("Launch "+type.toUpperCase()+" operation at "+selectedHex.ref+"?")) return;
+    if(!await GMUI.confirmAction("Launch "+type.toUpperCase()+" operation at "+selectedHex.ref+"?",{code:"MILITARY / OPERATION",title:"Confirm Operation",confirmText:"LAUNCH OPERATION",danger:true})) return;
     try{
       setState($("mapMilitaryState"),type.toUpperCase()+" OPERATION STARTING...");
       const result=await GMAuth.api("rpc/launch_military_operation",{
