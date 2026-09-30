@@ -30,7 +30,7 @@ begin
   if v_used>=v_slots then raise exception 'This system has no available facility slots.'; end if;
 
   -- Admin world-building may place facilities in any order.
-  if private.is_admin() then return new; end if;
+  if public.is_admin() then return new; end if;
 
   if v_faction is null or not exists(
     select 1 from faction_memberships
@@ -80,7 +80,7 @@ begin
 
   if v_code not like '%FACTORY%' then raise exception 'Selected facility is not a Factory.'; end if;
   if not exists(select 1 from factory_recipes where code=p_recipe_code and player_visible) then raise exception 'Unknown production line.'; end if;
-  if not private.is_admin() and not exists(
+  if not public.is_admin() and not exists(
     select 1 from faction_memberships where user_id=auth.uid() and faction_id=v_faction and status='active'
   ) then raise exception 'Not authorized for this factory.'; end if;
 
@@ -94,7 +94,7 @@ returns void language plpgsql security definer set search_path=public as $$
 declare v_faction uuid;
 begin
   select coalesce(owner_faction_id,controlling_faction_id) into v_faction from facilities where id=p_refinery_id;
-  if not private.is_admin() and not exists(
+  if not public.is_admin() and not exists(
     select 1 from faction_memberships where user_id=auth.uid() and faction_id=v_faction and status='active'
   ) then raise exception 'Not authorized for this refinery.'; end if;
   delete from facility_connections where refinery_facility_id=p_refinery_id and extractor_facility_id=p_extractor_id;
@@ -115,7 +115,7 @@ declare
   amount numeric;
   produced integer:=0;
 begin
-  if not private.is_admin() then raise exception 'Admin access required.'; end if;
+  if not public.is_admin() then raise exception 'Admin access required.'; end if;
 
   -- Extraction and agriculture.
   for f in
