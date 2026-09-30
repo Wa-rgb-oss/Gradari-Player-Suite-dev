@@ -614,13 +614,45 @@
     $("setInitialLocationBtn").hidden=Boolean(char.location_ref) || !selectedHex;
   }
 
+  function facilityCode(type) {
+    return String(type?.code || type?.name || "").toUpperCase();
+  }
+
+  function factionFacilities() {
+    const factionId=activeMembership()?.faction_id;
+    return factionId ? (player.facilities || []).filter(row => row.owner_faction_id===factionId || row.controlling_faction_id===factionId) : [];
+  }
+
+  function hasFacilityKind(kind) {
+    return factionFacilities().some(row => facilityCode(facilityTypeById(row.facility_type_id)).includes(kind));
+  }
+
+  function facilityUnlocked(type) {
+    const code=facilityCode(type);
+    if (code.includes("REFIN")) return hasFacilityKind("EXTRACT") || hasFacilityKind("MINE");
+    if (code.includes("FACTORY") || code.includes("SHIP")) return hasFacilityKind("REFIN");
+    return true;
+  }
+
+  function renderResourceStockpile() {
+    const root=$("mapResourceStockpile");
+    if(!root) return;
+    const factionId=activeMembership()?.faction_id;
+    const rows=(player.factionResources || []).filter(row=>row.faction_id===factionId && Number(row.quantity)!==0);
+    const names=new Map((player.resourceCatalog || []).map(row=>[row.code,row.name]));
+    root.innerHTML=rows.length ? rows.map(row =>
+      '<div class="telemetry-row"><span>'+esc(names.get(row.resource_code)||row.resource_code)+'</span><strong>'+esc(fmt(row.quantity))+'</strong></div>'
+    ).join("") : '<div class="empty-state map-mini-empty">NO STORED RESOURCES.</div>';
+  }
+
   function renderFacilityTypeSelect() {
     const select=$("mapFacilityType");
-    const types=(player.facilityTypes || []).filter(row=>row.player_buildable);
+    const types=(player.facilityTypes || []).filter(row=>row.player_buildable && facilityUnlocked(row));
     select.innerHTML=types.length
       ? types.map(row=>'<option value="'+esc(row.id)+'">'+esc(row.name)+'</option>').join("")
       : '<option value="">No facilities available</option>';
     updateBuildPreview();
+    renderResourceStockpile();
   }
 
   function updateBuildPreview() {
@@ -644,7 +676,18 @@
     if (!territory?.faction_id) return {ok:false,message:"THIS HEX IS NOT CURRENTLY CONTROLLED BY YOUR FACTION."};
     if (territory.faction_id!==membership.faction_id) return {ok:false,message:"THIS HEX IS CONTROLLED BY ANOTHER FACTION."};
 
-    if (!(player.facilityTypes || []).some(row=>row.player_buildable)) {
+    const system=(player.systemEconomies || []).find(row=>row.location_ref===selectedHex.ref);
+    const slotLimit=Number(system?.slot_limit || 8);
+    const used=(player.facilities || []).filter(row=>row.location_ref===selectedHex.ref).length;
+    if (used>=slotLimit) return {ok:false,message:"NO FACILITY SLOTS AVAILABLE IN THIS SYSTEM."};
+
+    const type=facilityTypeById($("mapFacilityType")?.value);
+    if (type && !facilityUnlocked(type)) return {ok:false,message:"FACILITY REQUIREMENTS NOT MET."};
+    const code=facilityCode(type);
+    if ((code.includes("EXTRACT") || code.includes("MINE")) && !(player.resourceDeposits || []).some(row=>row.location_ref===selectedHex.ref)) {
+      return {ok:false,message:"NO EXTRACTABLE RESOURCE DEPOSIT AT THIS LOCATION."};
+    }
+    if (!(player.facilityTypes || []).some(row=>row.player_buildable && facilityUnlocked(row))) {
       return {ok:false,message:"NO PLAYER-BUILDABLE FACILITIES ARE AVAILABLE."};
     }
     return {ok:true,message:""};
@@ -728,6 +771,12 @@
       $("selectedHexFaction").textContent="UNCLAIMED";
       $("selectedHexStatus").textContent="--";
       $("selectedHexProduction").textContent="--";
+      $("selectedHexSlots").textContent="0 / 8";
+      $("selectedHexPopulation").textContent="--";
+      $("selectedHexManpower").textContent="--";
+      $("selectedResourceList").innerHTML="";
+      $("selectedResourceEmpty").hidden=false;
+      $("selectedFacilityControls").innerHTML="";
       $("selectedFacilityList").innerHTML="";
       $("selectedFacilityEmpty").hidden=false;
       $("selectedModifierList").innerHTML="";
@@ -758,12 +807,46 @@
     $("selectedHexStatus").textContent=canon?.type || String(locationStatus).toUpperCase();
     $("selectedHexProduction").textContent=Math.round(production*100)+"%";
 
+    const system=(player.systemEconomies || []).find(row=>row.location_ref===selectedHex.ref);
     const selectedFacilities=player.facilities.filter(row=>row.location_ref===selectedHex.ref);
+    $("selectedHexSlots").textContent=selectedFacilities.length+" / "+Number(system?.slot_limit || 8);
+    $("selectedHexPopulation").textContent=system ? fmt(system.population) : "--";
+    $("selectedHexManpower").textContent=system ? fmt(system.manpower) : "--";
+
+    const deposits=(player.resourceDeposits || []).filter(row=>row.location_ref===selectedHex.ref);
+    const resourceNames=new Map((player.resourceCatalog || []).map(row=>[row.code,row.name]));
+    $("selectedResourceEmpty").hidden=deposits.length>0;
+    $("selectedResourceList").innerHTML=deposits.map(row =>
+      '<article class="notice map-list-row"><strong>'+esc(resourceNames.get(row.resource_code)||row.resource_code)+'</strong><span>'+esc(fmt(row.richness))+'×</span></article>'
+    ).join("");
     $("selectedFacilityEmpty").hidden=selectedFacilities.length>0;
     $("selectedFacilityList").innerHTML=selectedFacilities.map(row => {
       const type=facilityTypeById(row.facility_type_id);
-      return '<article class="notice map-list-row"><div><strong>'+esc(row.name || type?.name || "Holding")+'</strong><div class="section-code">'+esc(type?.name || "FACILITY")+' // '+esc(String(row.status || "active").toUpperCase())+'</div></div><span>'+esc(fmt(type?.upkeep_aureum_per_cycle || 0))+' A / CYCLE</span></article>';
+      return '<article class="notice map-list-row"><div><strong>'+esc(row.name || type?.name || "Holding")+'</strong><div class="section-code">'+esc(type?.name || "FACILITY")+'</div></div><span>'+esc(fmt(type?.upkeep_aureum_per_cycle || 0))+' A / CYCLE</span></article>';
     }).join("");
+
+    const factionId=activeMembership()?.faction_id;
+    const ownedRefineries=selectedFacilities.filter(row => (row.owner_faction_id===factionId || row.controlling_faction_id===factionId) && facilityCode(facilityTypeById(row.facility_type_id)).includes("REFIN"));
+    $("selectedFacilityControls").innerHTML=ownedRefineries.map(refinery => {
+      const links=(player.facilityConnections || []).filter(link=>link.refinery_facility_id===refinery.id);
+      return '<article class="notice"><strong>'+esc(refinery.name || "Refinery")+'</strong><div class="section-code">'+links.length+' / 3 EXTRACTOR CONNECTIONS</div><button class="hud-button secondary refinery-connect-btn" type="button" data-refinery="'+esc(refinery.id)+'">CONNECT EXTRACTOR</button></article>';
+    }).join("");
+    document.querySelectorAll(".refinery-connect-btn").forEach(button=>button.addEventListener("click",async()=>{
+      const refineryId=button.dataset.refinery;
+      const linked=new Set((player.facilityConnections||[]).filter(x=>x.refinery_facility_id===refineryId).map(x=>x.extractor_facility_id));
+      const candidates=factionFacilities().filter(row=>{
+        const code=facilityCode(facilityTypeById(row.facility_type_id));
+        return (code.includes("EXTRACT")||code.includes("MINE"))&&!linked.has(row.id);
+      });
+      if(!candidates.length) return setState($("mapBuildState"),"NO UNCONNECTED EXTRACTORS AVAILABLE","error");
+      const menu=candidates.map((row,i)=>(i+1)+". "+(row.name||facilityTypeById(row.facility_type_id)?.name||"Extractor")+" // "+row.location_ref).join("\n");
+      const choice=Number(prompt("Connect which extractor?\n"+menu,"1"))-1;
+      if(!Number.isInteger(choice)||!candidates[choice]) return;
+      try{
+        await GMAuth.api("rpc/connect_refinery_extractor",{method:"POST",body:JSON.stringify({p_refinery_id:refineryId,p_extractor_id:candidates[choice].id})});
+        await refreshAll("EXTRACTOR CONNECTED",$("mapBuildState"));
+      }catch(error){setState($("mapBuildState"),"CONNECTION FAILED // "+error.message,"error")}
+    }));
 
     const selectedModifiers=activeModifiersFor(selectedHex.ref);
     $("selectedModifierEmpty").hidden=selectedModifiers.length>0;
@@ -783,6 +866,7 @@
     renderTravelPanel();
     renderMilitaryPanel();
     renderSelection();
+    renderResourceStockpile();
   }
 
   function canvasPoint(event) {
