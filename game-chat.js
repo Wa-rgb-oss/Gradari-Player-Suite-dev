@@ -33,7 +33,7 @@
       const uid=session.user.id;
       rows=await api("game_chat_messages?channel=eq.direct&or=(and(sender_user_id.eq."+uid+",recipient_user_id.eq."+friendId+"),and(sender_user_id.eq."+friendId+",recipient_user_id.eq."+uid+"))&select=*&order=created_at.asc&limit=100");
     }
-    log.innerHTML=(rows||[]).map(m=>'<div class="game-chat-line"><b>'+esc(profiles.get(m.sender_user_id)||(m.sender_user_id===session.user.id?"YOU":"PLAYER"))+'</b><span>'+esc(m.body)+'</span></div>').join("") || '<div class="game-chat-empty">'+(mode==="global"?"NO ACTIVE GLOBAL MESSAGES.":"SELECT A FRIEND TO OPEN DIRECT COMMS.")+'</div>';
+    log.innerHTML=(rows||[]).map(m=>{const sent=new Date(m.created_at);const stamp=sent.toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"})+" · "+sent.toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"});return '<div class="game-chat-line"><div class="game-chat-meta"><b>'+esc(profiles.get(m.sender_user_id)||(m.sender_user_id===session.user.id?"YOU":"PLAYER"))+'</b><small>'+esc(stamp)+'</small></div><span>'+esc(m.body)+'</span></div>'}).join("") || '<div class="game-chat-empty">'+(mode==="global"?"NO ACTIVE GLOBAL MESSAGES.":"SELECT A FRIEND TO OPEN DIRECT COMMS.")+'</div>';
     log.scrollTop=log.scrollHeight;
   }
   function setMode(next){
