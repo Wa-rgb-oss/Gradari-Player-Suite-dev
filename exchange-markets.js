@@ -30,7 +30,22 @@ function render(){
     }catch(error){GMUI.setState($("marketState"),"TRADE FAILED // "+error.message,"error")}
   }));
 }
-async function load(){state=await GMPlayerData.load(session);render();}
+async function load(){
+  const uid=encodeURIComponent(session.user.id);
+  const [memberships,resources,stations,listings]=await Promise.all([
+    GMAuth.api("faction_memberships?user_id=eq."+uid+"&select=*&order=created_at.asc"),
+    GMAuth.api("resource_catalog?player_visible=eq.true&select=*&order=category.asc,name.asc"),
+    GMAuth.api("trade_station_markets?player_visible=eq.true&select=*&order=station_name.asc"),
+    GMAuth.api("trade_station_resource_listings?select=*&order=resource_code.asc")
+  ]);
+  const primaryMembership=(memberships||[]).find(row=>row.status==="active")||(memberships||[])[0]||null;
+  let factionResources=[];
+  if(primaryMembership?.faction_id){
+    factionResources=await GMAuth.api("faction_resources?faction_id=eq."+encodeURIComponent(primaryMembership.faction_id)+"&select=*&order=resource_code.asc");
+  }
+  state={primaryMembership,resourceCatalog:resources||[],factionResources:factionResources||[],tradeStations:stations||[],tradeStationResources:listings||[]};
+  render();
+}
 async function init(){session=await GMUI.initProtected();if(!session)return;await load();}
 init().catch(error=>{const el=$("marketState");if(el)GMUI.setState(el,"EXCHANGE LOAD FAILED // "+error.message,"error");});
 })();
