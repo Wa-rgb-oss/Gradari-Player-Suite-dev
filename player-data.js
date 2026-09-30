@@ -11,7 +11,7 @@
       proposals, proposalMembers, factionInvitations, factionTransactions,
       facilityTypes, facilities, markets, marketListings, events,
       eventObjectives, eventParticipation, characterSuccessions,
-      resourceCatalog, factionResources, systemEconomies, resourceDeposits,
+      resourceCatalog, playerResources, factionResources, systemEconomies, resourceDeposits,
       facilityConnections, factoryRecipes, factoryOrders, tradeStations, tradeStationResources,
       shipBlueprints, ships, shipyardOrders, territories
     ] = await Promise.all([
@@ -43,6 +43,7 @@
       GMAuth.api("event_participants?user_id=eq." + uid + "&select=*&order=joined_at.desc"),
       GMAuth.api("character_successions?user_id=eq." + uid + "&select=*&order=created_at.desc"),
       GMAuth.api("resource_catalog?select=*&order=category.asc,name.asc").catch(() => []),
+      GMAuth.api("player_resources?user_id=eq." + uid + "&select=*&order=resource_code.asc").catch(() => []),
       GMAuth.api("faction_resources?select=*&order=resource_code.asc").catch(() => []),
       GMAuth.api("system_economies?select=*").catch(() => []),
       GMAuth.api("map_resource_deposits?select=*&order=location_ref.asc,resource_code.asc").catch(() => []),
@@ -122,6 +123,7 @@
       eventParticipation: eventParticipation || [],
       characterSuccessions: characterSuccessions || [],
       resourceCatalog: resourceCatalog || [],
+      playerResources: playerResources || [],
       factionResources: factionResources || [],
       systemEconomies: systemEconomies || [],
       resourceDeposits: resourceDeposits || [],
