@@ -119,6 +119,27 @@
     for(let i=0;i<300;i++)ctx.fillRect((i*911)%Math.max(1,rect.width),(i*577)%Math.max(1,rect.height),1.4,1.4);
   }
 
+  function drawSystemMarkers(){
+    (data?.mapHexes||[]).filter(row=>Number(row.habitable_systems||0)>0 && row.player_visible!==false).forEach(row=>{
+      const p=worldToScreen(hexToPixel(Number(row.q),Number(row.r)));
+      const economy=(data?.systemEconomies||[]).find(x=>x.location_ref===row.location_ref);
+      const isCapital=Boolean(economy?.is_capital);
+      const markerSize=Math.max(5,(isCapital?8:6)*camera.zoom);
+      ctx.beginPath();ctx.arc(p.x,p.y,markerSize,0,Math.PI*2);
+      ctx.fillStyle=isCapital?"#d8a35d":"#dce9ed";ctx.fill();
+      ctx.strokeStyle=isCapital?"#ffe8be":"#45d7e8";ctx.lineWidth=Math.max(1,1.5*camera.zoom);ctx.stroke();
+      if(camera.zoom>=.55 && row.display_name){
+        const fontSize=Math.max(8,10*camera.zoom);
+        ctx.font="600 "+fontSize+"px Share Tech Mono, Consolas, monospace";
+        ctx.textAlign="center";ctx.textBaseline="bottom";
+        ctx.lineJoin="round";ctx.lineCap="round";ctx.miterLimit=2;
+        ctx.strokeStyle="#02080c";ctx.lineWidth=4;ctx.strokeText(row.display_name,p.x,p.y-markerSize-5);
+        ctx.fillStyle=isCapital?"#f1d7b0":"#dce9ed";ctx.fillText(row.display_name,p.x,p.y-markerSize-5);
+      }
+    });
+    ctx.textBaseline="alphabetic";
+  }
+
   function drawLabels(){
     (data?.mapLabels||[]).forEach(label=>{
       const p=worldToScreen({x:Number(label.x),y:Number(label.y)});
@@ -188,7 +209,7 @@
       const h=parseRef(row.location_ref),faction=factionById(row.faction_id);
       if(h&&faction)drawHex(h.q,h.r,rgba(faction.color,.6),faction.color);
     });
-    drawBorders();drawLabels();drawBuildings();
+    drawBorders();drawSystemMarkers();drawLabels();drawBuildings();
     $("adminMapClaimedCount").textContent=String((data?.territories||[]).filter(row=>row.faction_id).length);
     $("adminMapLabelCount").textContent=String((data?.mapLabels||[]).length);
     $("adminMapBuildingCount").textContent=String((data?.facilities||[]).filter(row=>parseRef(row.location_ref)).length);
@@ -570,11 +591,24 @@
   function loadSystemFields(ref){
     selectedSystemRef=ref;
     const system=(data?.systemEconomies||[]).find(row=>row.location_ref===ref);
+    const mapHex=(data?.mapHexes||[]).find(row=>row.location_ref===ref);
+    const territory=territoryByRef(ref);
     const deposits=(data?.resourceDeposits||[]).filter(row=>row.location_ref===ref);
     const has=code=>deposits.some(row=>row.resource_code===code);
-    $("adminMapSystemRef").textContent=ref;
+    $("adminMapSystemRef").textContent=(mapHex?.display_name||territory?.display_name||ref)+" // "+ref;
+    $("adminMapSystemName").value=mapHex?.display_name||territory?.display_name||"";
+    $("adminMapSystemRegion").value=mapHex?.region_name||"";
+    $("adminMapSystemTerrain").value=mapHex?.terrain_type||"";
+    $("adminMapDevelopmentTier").value=system?.development_tier||"colony";
+    $("adminMapDevelopmentLevel").value=Math.max(1,Number(system?.development_level||1));
+    $("adminMapIsCapital").checked=Boolean(system?.is_capital);
     $("adminMapPopulation").value=Number(system?.population||0);
     $("adminMapManpower").value=Number(system?.manpower||0);
+    $("adminMapFood").value=Number(system?.food||0);
+    $("adminMapSlotLimit").value=Number(system?.slot_limit ?? (system?.development_tier==="developed"?8:system?.development_tier==="system"?6:4));
+    $("adminMapSystemStatus").value=mapHex?.status||"open";
+    $("adminMapSystemNotes").value=mapHex?.notes||"";
+    $("adminMapSystemVisible").checked=mapHex?.player_visible!==false;
     $("adminResEnergy").checked=has("energy");
     $("adminResGold").checked=has("gold_ore");
     $("adminResAetherite").checked=has("aetherite");
@@ -588,7 +622,32 @@
 
   async function saveSystem(){
     if(!selectedSystemRef)return setState($("adminMapState"),"SELECT A HEX FIRST","error");
-    const economy={location_ref:selectedSystemRef,population:Number($("adminMapPopulation").value)||0,manpower:Number($("adminMapManpower").value)||0,slot_limit:8};
+    const tier=$("adminMapDevelopmentTier").value;
+    const slotLimit=Math.max(0,Math.floor(Number($("adminMapSlotLimit").value)||0));
+    const economy={
+      location_ref:selectedSystemRef,
+      population:Math.max(0,Math.floor(Number($("adminMapPopulation").value)||0)),
+      manpower:Math.max(0,Math.floor(Number($("adminMapManpower").value)||0)),
+      food:Math.max(0,Number($("adminMapFood").value)||0),
+      slot_limit:slotLimit,
+      development_tier:tier,
+      development_level:Math.max(1,Math.floor(Number($("adminMapDevelopmentLevel").value)||1)),
+      is_capital:$("adminMapIsCapital").checked
+    };
+    const mapHex=(data?.mapHexes||[]).find(row=>row.location_ref===selectedSystemRef);
+    const coords=parseRef(selectedSystemRef);
+    const hexMetadata={
+      location_ref:selectedSystemRef,
+      q:Number(mapHex?.q ?? coords?.q ?? 0),
+      r:Number(mapHex?.r ?? coords?.r ?? 0),
+      display_name:$("adminMapSystemName").value.trim()||null,
+      region_name:$("adminMapSystemRegion").value.trim()||null,
+      terrain_type:$("adminMapSystemTerrain").value.trim()||null,
+      habitable_systems:1,
+      status:$("adminMapSystemStatus").value.trim()||"open",
+      notes:$("adminMapSystemNotes").value.trim()||null,
+      player_visible:$("adminMapSystemVisible").checked
+    };
     const wanted=[
       ["energy",$("adminResEnergy").checked],
       ["gold_ore",$("adminResGold").checked],
@@ -596,6 +655,11 @@
       ["vyr_ore",$("adminResVyr").checked]
     ];
     try{
+      await GMAuth.api("map_hexes?on_conflict=location_ref",{method:"POST",headers:{Prefer:"resolution=merge-duplicates,return=minimal"},body:JSON.stringify(hexMetadata)});
+      const existingTerritory=territoryByRef(selectedSystemRef);
+      if(existingTerritory && hexMetadata.display_name!==existingTerritory.display_name){
+        await GMAuth.api("territories?location_ref=eq."+encodeURIComponent(selectedSystemRef),{method:"PATCH",headers:{Prefer:"return=minimal"},body:JSON.stringify({display_name:hexMetadata.display_name})});
+      }
       await GMAuth.api("system_economies?on_conflict=location_ref",{method:"POST",headers:{Prefer:"resolution=merge-duplicates,return=minimal"},body:JSON.stringify(economy)});
       await GMAuth.api("map_resource_deposits?location_ref=eq."+encodeURIComponent(selectedSystemRef),{method:"DELETE",headers:{Prefer:"return=minimal"}});
       const rows=wanted.filter(([,enabled])=>enabled).map(([resource_code])=>({location_ref:selectedSystemRef,resource_code,richness:1}));
