@@ -1015,6 +1015,17 @@
     updateBuildPreview();
   }
 
+  function updateMapProductionCountdowns(){
+    document.querySelectorAll("[data-map-countdown]").forEach(el=>{
+      const ms=new Date(el.dataset.mapCountdown).getTime()-Date.now();
+      if(!Number.isFinite(ms)){el.textContent="--:--:--";return}
+      if(ms<=0){el.textContent="READY";return}
+      const sec=Math.ceil(ms/1000),h=Math.floor(sec/3600),m=Math.floor((sec%3600)/60),s=sec%60;
+      el.textContent=String(h).padStart(2,"0")+":"+String(m).padStart(2,"0")+":"+String(s).padStart(2,"0");
+    });
+  }
+  if(!window.__gmMapProductionCountdown)window.__gmMapProductionCountdown=setInterval(updateMapProductionCountdowns,1000);
+
   function renderSelection() {
     if (!selectedHex) {
       $("mapSelectedReadout").textContent="SELECT A HEX";
@@ -1080,8 +1091,13 @@
     $("selectedFacilityEmpty").hidden=selectedFacilities.length>0;
     $("selectedFacilityList").innerHTML=selectedFacilities.map(row => {
       const type=facilityTypeById(row.facility_type_id);
-      return '<article class="notice map-list-row"><div><strong>'+esc(row.name || type?.name || "Holding")+'</strong><div class="section-code">'+esc(type?.name || "FACILITY")+'</div></div><span>'+esc(fmt(type?.upkeep_aureum_per_cycle || 0))+' A / DAY</span></article>';
+      const clock=(player.facilityProductionClocks||[]).find(x=>x.facility_id===row.id);
+      const order=(player.factoryOrders||[]).find(x=>x.facility_id===row.id&&x.status==="producing");
+      const nextAt=order?.completes_at||clock?.next_production_at;
+      const timer=nextAt?'<div class="section-code">'+(order?'PRODUCTION':'NEXT OUTPUT')+' // <span data-map-countdown="'+esc(nextAt)+'">--:--:--</span></div>':'';
+      return '<article class="notice map-list-row"><div><strong>'+esc(row.name || type?.name || "Holding")+'</strong><div class="section-code">'+esc(type?.name || "FACILITY")+'</div>'+timer+'</div><span>'+esc(fmt(type?.upkeep_aureum_per_day ?? (Number(type?.upkeep_aureum_per_cycle||0)/20)))+' A / DAY</span></article>';
     }).join("");
+    updateMapProductionCountdowns();
 
     const factionId=activeMembership()?.faction_id;
     const ownedFacilities=selectedFacilities.filter(row => row.owner_faction_id===factionId || row.controlling_faction_id===factionId);
