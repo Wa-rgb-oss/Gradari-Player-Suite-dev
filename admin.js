@@ -409,6 +409,24 @@
     ] = results;
   }
 
+
+  function renderGMTools() {
+    if (!$("gmResourceCode")) return;
+    const current=$("gmResourceCode").value;
+    $("gmResourceCode").innerHTML=(data.resourceCatalog||[]).map(r=>'<option value="'+esc(r.code)+'">'+esc(r.name)+' // '+esc((r.category||"RESOURCE").toUpperCase())+'</option>').join("");
+    if((data.resourceCatalog||[]).some(r=>r.code===current)) $("gmResourceCode").value=current;
+    const factionId=document.querySelector("#gmResourceForm [name=faction_id]")?.value;
+    const stock=(data.factionResources||[]).filter(r=>!factionId||r.faction_id===factionId).filter(r=>Number(r.quantity)>0);
+    $("gmStockpileList").innerHTML=stock.map(r=>'<div class="resource-row"><div><strong>'+esc((data.resourceCatalog||[]).find(x=>x.code===r.resource_code)?.name||r.resource_code)+'</strong></div><span>'+esc(fmt(r.quantity))+'</span></div>').join("")||'<div class="empty-state">NO RESOURCES HELD.</div>';
+    $("gmFacilitySelect").innerHTML='<option value="">Select facility</option>'+(data.facilities||[]).map(f=>'<option value="'+esc(f.id)+'">'+esc(f.name||"Facility")+' // '+esc(f.location_ref||"UNPLACED")+'</option>').join("");
+    const orders=(data.factoryOrders||[]).filter(o=>o.status==="producing");
+    $("gmFactoryOrders").innerHTML=orders.map(o=>{const f=(data.facilities||[]).find(x=>x.id===o.facility_id);return '<article class="notice"><div class="split-actions"><div><strong>'+esc(f?.name||"Factory")+'</strong><div class="section-code">'+esc(o.recipe_code)+' // '+esc(fmt(o.quantity))+' UNITS</div></div><button class="hud-button danger gm-cancel-factory" data-id="'+esc(o.facility_id)+'" type="button">CANCEL + REFUND</button></div><div class="small">'+esc(o.completes_at?new Date(o.completes_at).toLocaleString():"NO COMPLETION")+'</div></article>'}).join("")||'<div class="empty-state">NO ACTIVE FACTORY ORDERS.</div>';
+    $("gmFactoryOrders").querySelectorAll(".gm-cancel-factory").forEach(b=>b.addEventListener("click",async()=>{try{await GMAuth.api("rpc/admin_cancel_factory_order",{method:"POST",body:JSON.stringify({p_facility_id:b.dataset.id,p_refund:true})});await refreshData("FACTORY ORDER CANCELLED // INPUTS REFUNDED")}catch(e){setState($("gmFactoryState"),"CANCEL FAILED // "+e.message,"error")}}));
+    const activeFacilities=(data.facilities||[]).filter(f=>f.status==="active").length;
+    const damaged=(data.facilities||[]).filter(f=>Number(f.health??100)<100).length;
+    $("gmOpsSnapshot").innerHTML='<div class="telemetry-row"><span>Players</span><strong>'+data.profiles.length+'</strong></div><div class="telemetry-row"><span>Factions</span><strong>'+data.factions.length+'</strong></div><div class="telemetry-row"><span>Active Facilities</span><strong>'+activeFacilities+'</strong></div><div class="telemetry-row"><span>Damaged Facilities</span><strong>'+damaged+'</strong></div><div class="telemetry-row"><span>Active Production</span><strong>'+orders.length+'</strong></div><div class="telemetry-row"><span>Pending Actions</span><strong>'+data.actions.filter(x=>(x.status||"Pending")==="Pending").length+'</strong></div>';
+  }
+
   function renderAll() {
     fillSelects();
     renderOverview();
@@ -416,6 +434,7 @@
     renderCharactersAdmin();
     renderFactions();
     renderWallets();
+    renderGMTools();
     renderActions();
     renderWorld();
     window.GMAdminData = data;
@@ -476,6 +495,13 @@
     showLogin();
   });
   $("statusFilter").addEventListener("change", renderActions);
+
+  $("gmResourceForm").addEventListener("submit",async event=>{event.preventDefault();const d=Object.fromEntries(new FormData(event.currentTarget));try{const n=await GMAuth.api("rpc/admin_adjust_faction_resource",{method:"POST",body:JSON.stringify({p_faction_id:d.faction_id,p_resource_code:d.resource_code,p_mode:d.mode,p_amount:Number(d.amount)})});setState($("gmResourceState"),"RESOURCE UPDATED // "+fmt(n),"success");await refreshData()}catch(e){setState($("gmResourceState"),"RESOURCE UPDATE FAILED // "+e.message,"error")}});
+  document.querySelector("#gmResourceForm [name=faction_id]").addEventListener("change",renderGMTools);
+  $("gmWalletForm").addEventListener("submit",async event=>{event.preventDefault();const d=Object.fromEntries(new FormData(event.currentTarget));try{const n=await GMAuth.api("rpc/admin_adjust_player_wallet",{method:"POST",body:JSON.stringify({p_user_id:d.user_id,p_mode:d.mode,p_amount:Number(d.amount),p_reason:d.reason||null})});setState($("gmWalletState"),"WALLET UPDATED // "+fmt(n)+" AUREUM","success");await refreshData()}catch(e){setState($("gmWalletState"),"WALLET UPDATE FAILED // "+e.message,"error")}});
+  $("gmTreasuryForm").addEventListener("submit",async event=>{event.preventDefault();const d=Object.fromEntries(new FormData(event.currentTarget));try{const n=await GMAuth.api("rpc/admin_adjust_faction_treasury",{method:"POST",body:JSON.stringify({p_faction_id:d.faction_id,p_mode:d.mode,p_amount:Number(d.amount)})});setState($("gmTreasuryState"),"TREASURY UPDATED // "+fmt(n)+" AUREUM","success");await refreshData()}catch(e){setState($("gmTreasuryState"),"TREASURY UPDATE FAILED // "+e.message,"error")}});
+  $("gmFacilityForm").addEventListener("submit",async event=>{event.preventDefault();const d=Object.fromEntries(new FormData(event.currentTarget));try{await GMAuth.api("rpc/admin_set_facility_state",{method:"POST",body:JSON.stringify({p_facility_id:d.facility_id,p_status:d.status,p_health:Number(d.health)})});setState($("gmFacilityState"),"FACILITY UPDATED","success");await refreshData()}catch(e){setState($("gmFacilityState"),"FACILITY UPDATE FAILED // "+e.message,"error")}});
+
 
   $("membershipForm").addEventListener("submit", async event => {
     event.preventDefault();
