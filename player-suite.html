@@ -19,8 +19,9 @@
         <a href="dashboard.html"><span class="nav-index">01</span><span class="nav-label">HOME</span><span class="nav-arrow">›</span></a>
         <a href="map.html"><span class="nav-index">02</span><span class="nav-label">MAP</span><span class="nav-arrow">›</span></a>
         <a href="politics.html"><span class="nav-index">03</span><span class="nav-label">POLITICS</span><span class="nav-arrow">›</span></a>
-        <a class="active" href="player-suite.html"><span class="nav-index">04</span><span class="nav-label">PLAYER SUITE</span><span class="nav-arrow">›</span></a>
-        <a href="about.html"><span class="nav-index">05</span><span class="nav-label">ABOUT</span><span class="nav-arrow">›</span></a>
+        <a href="exchange-markets.html"><span class="nav-index">04</span><span class="nav-label">EXCHANGE MARKETS</span><span class="nav-arrow">›</span></a>
+        <a class="active" href="player-suite.html"><span class="nav-index">05</span><span class="nav-label">PLAYER SUITE</span><span class="nav-arrow">›</span></a>
+        <a href="about.html"><span class="nav-index">06</span><span class="nav-label">ABOUT</span><span class="nav-arrow">›</span></a>
       </nav>
       <div class="sidebar-footer">
         <div class="user-readout"><strong>SIGNED IN</strong><span data-user-email>Loading identity...</span></div>
@@ -45,7 +46,6 @@
         <div class="tabs" data-tabs>
           <button class="tab active" type="button" data-tab-target="suite-account">ACCOUNT</button>
           <button class="tab" type="button" data-tab-target="suite-economy">ECONOMY &amp; FACILITIES</button>
-          <button class="tab" type="button" data-tab-target="suite-markets">MARKETS</button>
           <button class="tab" type="button" data-tab-target="suite-faction">FACTION</button>
           <button class="tab" type="button" data-tab-target="suite-characters">CHARACTER & INVENTORY</button>
           <button class="tab" type="button" data-tab-target="suite-friends">FRIENDS</button>
@@ -155,24 +155,6 @@
             <div class="table-wrap"><table class="data-table"><thead><tr><th>Date</th><th>Type</th><th>Description</th><th>Amount</th><th>Balance</th></tr></thead><tbody id="transactionRows"></tbody></table></div>
             <div class="empty-state" id="transactionEmpty" hidden>NO TRANSACTIONS RECORDED.</div>
           </article>
-        </section>
-
-        <section class="panel" id="suite-markets" data-tab-panel>
-          <article class="hud-panel">
-            <div class="section-head"><div><div class="section-code">ECONOMY / MARKETS</div><h2>Exchange Markets</h2></div></div>
-            <p class="hero-copy" style="margin:0 0 20px">Browse available resources and goods through the Guilded Concord Exchange and other markets accessible to your player account.</p>
-            <div id="marketList" class="stack"></div>
-            <div class="empty-state" id="marketEmpty" hidden>NO ACTIVE MARKET LISTINGS ARE CURRENTLY AVAILABLE.</div>
-          </article>
-          <div id="factionMarketControls" hidden></div>
-          <div id="factionMarketUnavailable" hidden></div>
-          <form id="factionMarketForm" hidden></form>
-          <form id="factionListingForm" hidden></form>
-          <select id="factionMarketSelect" hidden></select>
-          <select id="factionListingAsset" hidden></select>
-          <div class="form-state" id="factionMarketState" hidden></div>
-          <div class="form-state" id="factionListingState" hidden></div>
-          <div class="form-state" id="marketState"></div>
         </section>
 
         <section class="panel" id="suite-faction" data-tab-panel>
