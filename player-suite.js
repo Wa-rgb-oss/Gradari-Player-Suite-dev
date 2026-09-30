@@ -264,17 +264,22 @@
       : '<span class="status-chip muted">STANDARD MEMBER</span>';
 
     const ownFactionAssets = factionAssets.filter(row => row.faction_id === faction.id);
-    if (!ownFactionAssets.length) {
-      $("factionAssetList").innerHTML = "";
-      $("factionAssetEmpty").hidden = false;
-    } else {
-      $("factionAssetEmpty").hidden = true;
-      $("factionAssetList").innerHTML = ownFactionAssets.map(row => `
-        <div class="resource-row">
-          <div><strong>${esc(row.asset?.name || "Unknown Asset")}</strong><div class="section-code">${esc((row.asset?.kind || "asset").toUpperCase())}</div></div>
-          <span>${esc(fmt(row.quantity))} ${esc(row.asset?.unit || "unit")}</span>
-        </div>`).join("");
-    }
+    const resourceNames = new Map((state.resourceCatalog || []).map(row => [row.code,row]));
+    const strategicResources = (state.factionResources || []).filter(row => row.faction_id===faction.id && Number(row.quantity)!==0);
+    const resourceHtml = strategicResources.map(row => {
+      const item=resourceNames.get(row.resource_code);
+      return `<div class="resource-row">
+        <div><strong>${esc(item?.name || row.resource_code)}</strong><div class="section-code">${esc(String(item?.category || "resource").toUpperCase())}</div></div>
+        <span>${esc(fmt(row.quantity))} ${esc(item?.unit || "units")}</span>
+      </div>`;
+    }).join("");
+    const assetHtml = ownFactionAssets.map(row => `
+      <div class="resource-row">
+        <div><strong>${esc(row.asset?.name || "Unknown Asset")}</strong><div class="section-code">${esc((row.asset?.kind || "asset").toUpperCase())}</div></div>
+        <span>${esc(fmt(row.quantity))} ${esc(row.asset?.unit || "unit")}</span>
+      </div>`).join("");
+    $("factionAssetList").innerHTML = resourceHtml + assetHtml;
+    $("factionAssetEmpty").hidden = Boolean(strategicResources.length || ownFactionAssets.length);
   }
 
   function renderCharacterFactionOptions() {
