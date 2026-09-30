@@ -2196,3 +2196,10 @@ dialog::backdrop{background:rgba(0,0,0,.72);backdrop-filter:blur(2px)}
 .gm-modal-open{overflow:hidden}
 .facility-edit-actions{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}
 .facility-edit-actions .hud-button{padding:7px 10px;font-size:.7rem}
+
+.facility-health{margin-top:10px;display:grid;grid-template-columns:auto auto;gap:5px 12px;align-items:center;max-width:310px}
+.facility-health>span,.facility-health small{font-size:.65rem;letter-spacing:.08em;color:var(--muted)}
+.facility-health>strong{font-size:.72rem;text-align:right}
+.facility-health-track{grid-column:1/-1;height:5px;border:1px solid rgba(134,215,232,.22);background:rgba(0,0,0,.28);overflow:hidden}
+.facility-health-track i{display:block;height:100%;background:currentColor;box-shadow:0 0 8px currentColor}
+.facility-health small{grid-column:1/-1}
