@@ -532,6 +532,41 @@
     finally{$("adminMapImportFile").value=""}
   }
 
+  function renderTradeResourceEditor(){
+    const marketId=$("adminTradeStationMarket").value;
+    const catalog=data?.resourceCatalog || [];
+    $("adminTradeResourceCode").innerHTML=catalog.map(row=>'<option value="'+esc(row.code)+'">'+esc(row.name)+'</option>').join("");
+    const rows=(data?.tradeStationResources||[]).filter(row=>row.market_id===marketId);
+    $("adminTradeResourceList").innerHTML=rows.length ? rows.map(row=>{
+      const item=catalog.find(x=>x.code===row.resource_code);
+      return '<div class="resource-row"><div><strong>'+esc(item?.name||row.resource_code)+'</strong><div class="section-code">BUY '+esc(fmt(row.buy_price))+' A // SELL '+esc(fmt(row.sell_price))+' A</div></div><button class="hud-button danger admin-trade-resource-delete" type="button" data-market="'+esc(row.market_id)+'" data-resource="'+esc(row.resource_code)+'">REMOVE</button></div>';
+    }).join("") : '<div class="empty-state map-mini-empty">NO STRATEGIC RESOURCE LISTINGS.</div>';
+    document.querySelectorAll(".admin-trade-resource-delete").forEach(button=>button.addEventListener("click",async()=>{
+      try{
+        await GMAuth.api("trade_station_resource_listings?market_id=eq."+encodeURIComponent(button.dataset.market)+"&resource_code=eq."+encodeURIComponent(button.dataset.resource),{method:"DELETE",headers:{Prefer:"return=minimal"}});
+        await window.GMAdminRefresh("STATION LISTING REMOVED");
+        renderTradeResourceEditor();
+      }catch(error){setState($("adminMapState"),"LISTING DELETE FAILED // "+error.message,"error")}
+    }));
+  }
+
+  async function saveTradeResource(){
+    const marketId=$("adminTradeStationMarket").value;
+    if(!$("adminTradeStationEnabled").checked || !marketId) return setState($("adminMapState"),"SAVE THE TRADE STATION AND MARKET FIRST","error");
+    const row={
+      market_id:marketId,
+      resource_code:$("adminTradeResourceCode").value,
+      buy_price:Number($("adminTradeBuyPrice").value||0),
+      sell_price:Number($("adminTradeSellPrice").value||0),
+      stock:$("adminTradeStock").value===""?null:Number($("adminTradeStock").value)
+    };
+    try{
+      await GMAuth.api("trade_station_resource_listings?on_conflict=market_id,resource_code",{method:"POST",headers:{Prefer:"resolution=merge-duplicates,return=minimal"},body:JSON.stringify(row)});
+      await window.GMAdminRefresh("STATION RESOURCE LISTING SAVED");
+      loadSystemFields(selectedSystemRef);
+    }catch(error){setState($("adminMapState"),"LISTING SAVE FAILED // "+error.message,"error")}
+  }
+
   function loadSystemFields(ref){
     selectedSystemRef=ref;
     const system=(data?.systemEconomies||[]).find(row=>row.location_ref===ref);
@@ -548,6 +583,7 @@
     $("adminTradeStationEnabled").checked=Boolean(station);
     $("adminTradeStationName").value=station?.station_name || "";
     $("adminTradeStationMarket").value=station?.market_id || "";
+    renderTradeResourceEditor();
   }
 
   async function saveSystem(){
@@ -658,6 +694,8 @@
   $("adminMapImportBtn").addEventListener("click",()=>$("adminMapImportFile").click());
   $("adminMapImportFile").addEventListener("change",event=>importMap(event.target.files?.[0]));
   $("adminMapSaveSystemBtn").addEventListener("click",saveSystem);
+  $("adminTradeStationMarket").addEventListener("change",renderTradeResourceEditor);
+  $("adminTradeResourceSaveBtn").addEventListener("click",saveTradeResource);
   $("adminRunIndustryCycleBtn").addEventListener("click",runIndustryCycle);
 
   canvas.addEventListener("pointerdown",event=>{
