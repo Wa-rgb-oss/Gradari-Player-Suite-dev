@@ -2265,3 +2265,10 @@ dialog::backdrop{background:rgba(0,0,0,.72);backdrop-filter:blur(2px)}
 .imperial-office-section{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:10px}
 .imperial-office-note{margin-top:16px;color:rgba(220,238,241,.42);font:600 .6rem "Share Tech Mono",monospace;letter-spacing:.1em}
 @media(max-width:800px){.imperial-office-section{grid-template-columns:1fr}}
+
+/* Politics stage tabs keep the active chamber measurable and prevent office-label overlap. */
+.politics-stage{display:flex;flex-direction:column}
+.politics-stage-panel.active{display:flex;flex:1;min-height:0}
+.politics-stage-panel.active>.senate-stage,.politics-stage-panel.active>.imperial-offices-board{width:100%;flex:1}
+.offices-stage-label{position:static!important;inset:auto!important;display:block;margin:0 0 14px;padding:0;transform:none!important}
+.imperial-offices-board{box-sizing:border-box}
