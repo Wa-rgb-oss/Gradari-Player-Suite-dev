@@ -343,7 +343,7 @@
         ctx.fillStyle="rgba(226,241,244,.80)";
         ctx.strokeStyle="rgba(2,8,12,.90)";
         ctx.lineWidth=3;
-        ctx.strokeText(row.display_name.toUpperCase(),p.x,p.y-13*camera.zoom);
+        strokeMapText(row.display_name.toUpperCase(),p.x,p.y-13*camera.zoom);
         ctx.fillText(row.display_name.toUpperCase(),p.x,p.y-13*camera.zoom);
       });
       ctx.restore();
@@ -360,6 +360,15 @@
     if (code.includes("FACTORY")) return "▣";
     if (code.includes("SHIP")) return "⊕";
     return "■";
+  }
+
+  function strokeMapText(text,x,y){
+    ctx.save();
+    ctx.lineJoin="round";
+    ctx.lineCap="round";
+    ctx.miterLimit=2;
+    ctx.strokeText(text,x,y);
+    ctx.restore();
   }
 
   function drawMapLabels() {
@@ -387,7 +396,7 @@
       if(border==="outline"){
         ctx.strokeStyle=colorWithAlpha(label.border_color||"#000000",borderOpacity);
         ctx.lineWidth=Math.max(1,3*camera.zoom);
-        ctx.strokeText(label.text,p.x,p.y);
+        strokeMapText(label.text,p.x,p.y);
       }
       ctx.fillStyle=colorWithAlpha(label.color||"#ffffff",opacity);
       ctx.fillText(label.text,p.x,p.y);
@@ -447,7 +456,7 @@
         ctx.textBaseline="bottom";
         ctx.strokeStyle="rgba(2,8,12,.95)";
         ctx.lineWidth=4;
-        ctx.strokeText(String(station.station_name||"GUILDED CONCORD").toUpperCase(),p.x,p.y-size-4);
+        strokeMapText(String(station.station_name||"GUILDED CONCORD").toUpperCase(),p.x,p.y-size-4);
         ctx.fillStyle="#f1d7b0";
         ctx.fillText(String(station.station_name||"GUILDED CONCORD").toUpperCase(),p.x,p.y-size-4);
       }
@@ -651,7 +660,7 @@
         ctx.textBaseline="bottom";
         ctx.strokeStyle="rgb(2,8,12)";
         ctx.lineWidth=4;
-        ctx.strokeText(location.name,p.x,p.y-markerSize-5);
+        strokeMapText(location.name,p.x,p.y-markerSize-5);
         ctx.fillStyle="rgb(241,215,176)";
         ctx.fillText(location.name,p.x,p.y-markerSize-5);
       }
