@@ -454,6 +454,36 @@
     ctx.restore();
   }
 
+  function drawShips() {
+    const ships=player?.ships || [];
+    if(!ships.length) return;
+    ctx.save();
+    ships.forEach(ship=>{
+      const h=parseRef(ship.location_ref);
+      if(!h || !mapHexSet.has(ship.location_ref)) return;
+      const p=worldToScreen(hexToWorld(h.q,h.r));
+      const x=p.x+Math.max(12,18*camera.zoom);
+      const y=p.y-Math.max(10,14*camera.zoom);
+      ctx.beginPath();
+      ctx.moveTo(x,y-Math.max(5,7*camera.zoom));
+      ctx.lineTo(x+Math.max(5,7*camera.zoom),y+Math.max(6,8*camera.zoom));
+      ctx.lineTo(x,y+Math.max(3,4*camera.zoom));
+      ctx.lineTo(x-Math.max(5,7*camera.zoom),y+Math.max(6,8*camera.zoom));
+      ctx.closePath();
+      ctx.fillStyle="rgba(216,163,93,.95)";
+      ctx.fill();
+      ctx.strokeStyle="rgba(241,215,176,.95)";
+      ctx.lineWidth=1;
+      ctx.stroke();
+      if(camera.zoom>=.85){
+        ctx.font=`600 ${Math.max(8,9*camera.zoom)}px "Share Tech Mono", Consolas, monospace`;
+        ctx.textAlign="center";ctx.textBaseline="top";ctx.fillStyle="#f1d7b0";
+        ctx.fillText(String(ship.name||"SHIP").toUpperCase(),x,y+Math.max(8,10*camera.zoom));
+      }
+    });
+    ctx.restore();
+  }
+
   function drawArmies() {
     ctx.save();
     ctx.textAlign="center";
@@ -582,6 +612,7 @@
     drawModifiers();
     drawTradeStations();
     drawFacilities();
+    drawShips();
     drawArmies();
     drawCharacter();
     drawSelection();
