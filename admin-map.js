@@ -544,6 +544,10 @@
     $("adminResGold").checked=has("gold_ore");
     $("adminResAetherite").checked=has("aetherite");
     $("adminResVyr").checked=has("vyr_ore");
+    const station=(data?.tradeStations||[]).find(row=>row.location_ref===ref);
+    $("adminTradeStationEnabled").checked=Boolean(station);
+    $("adminTradeStationName").value=station?.station_name || "";
+    $("adminTradeStationMarket").value=station?.market_id || "";
   }
 
   async function saveSystem(){
@@ -560,6 +564,22 @@
       await GMAuth.api("map_resource_deposits?location_ref=eq."+encodeURIComponent(selectedSystemRef),{method:"DELETE",headers:{Prefer:"return=minimal"}});
       const rows=wanted.filter(([,enabled])=>enabled).map(([resource_code])=>({location_ref:selectedSystemRef,resource_code,richness:1}));
       if(rows.length)await GMAuth.api("map_resource_deposits",{method:"POST",headers:{Prefer:"return=minimal"},body:JSON.stringify(rows)});
+
+      const stationEnabled=$("adminTradeStationEnabled").checked;
+      const existingStation=(data?.tradeStations||[]).find(row=>row.location_ref===selectedSystemRef);
+      if(stationEnabled){
+        const marketId=$("adminTradeStationMarket").value;
+        if(!marketId) throw new Error("Select an exchange market for the trade station.");
+        const stationRow={market_id:marketId,location_ref:selectedSystemRef,station_name:$("adminTradeStationName").value.trim()||"Guilded Concord Trade Station",player_visible:true};
+        if(existingStation){
+          await GMAuth.api("trade_station_markets?market_id=eq."+encodeURIComponent(existingStation.market_id),{method:"PATCH",headers:{Prefer:"return=minimal"},body:JSON.stringify(stationRow)});
+        }else{
+          await GMAuth.api("trade_station_markets",{method:"POST",headers:{Prefer:"return=minimal"},body:JSON.stringify(stationRow)});
+        }
+      }else if(existingStation){
+        await GMAuth.api("trade_station_markets?market_id=eq."+encodeURIComponent(existingStation.market_id),{method:"DELETE",headers:{Prefer:"return=minimal"}});
+      }
+
       await window.GMAdminRefresh("SYSTEM ECONOMY SAVED");
       loadSystemFields(selectedSystemRef);
     }catch(error){setState($("adminMapState"),"SYSTEM SAVE FAILED // "+error.message,"error")}
@@ -591,6 +611,10 @@
   function renderAll(){
     if(!data)return;
     buildMapHexes();renderFactionControls();renderBuildingControls();
+    const stationMarket=$("adminTradeStationMarket");
+    const stationCurrent=stationMarket.value;
+    stationMarket.innerHTML='<option value="">Select market</option>'+(data.markets||[]).map(row=>'<option value="'+esc(row.id)+'">'+esc(row.name)+'</option>').join("");
+    if((data.markets||[]).some(row=>row.id===stationCurrent)) stationMarket.value=stationCurrent;
     $("adminMapLabelCount").textContent=String((data.mapLabels||[]).length);
     if(canvas.getBoundingClientRect().width>0)resizeCanvas(firstVisibleResize);
     else draw();
