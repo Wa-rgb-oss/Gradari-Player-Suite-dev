@@ -896,7 +896,10 @@
     let facilityControls="";
     ownedRefineries.forEach(refinery => {
       const links=(player.facilityConnections || []).filter(link=>link.refinery_facility_id===refinery.id);
-      facilityControls += '<article class="notice"><strong>'+esc(refinery.name || "Refinery")+'</strong><div class="section-code">'+links.length+' / 3 EXTRACTORS</div><button class="hud-button secondary refinery-connect-btn" type="button" data-refinery="'+esc(refinery.id)+'">CONNECT EXTRACTOR</button></article>';
+      const linkedRows=links.map(link=>player.facilities.find(row=>row.id===link.extractor_facility_id)).filter(Boolean);
+      facilityControls += '<article class="notice"><strong>'+esc(refinery.name || "Refinery")+'</strong><div class="section-code">'+links.length+' / 3 EXTRACTORS</div>'+
+        linkedRows.map(extractor=>'<div class="split-actions" style="margin-top:8px"><span>'+esc(extractor.name||facilityTypeById(extractor.facility_type_id)?.name||"Extractor")+' // '+esc(extractor.location_ref)+'</span><button class="hud-button secondary refinery-disconnect-btn" type="button" data-refinery="'+esc(refinery.id)+'" data-extractor="'+esc(extractor.id)+'">DISCONNECT</button></div>').join("")+
+        '<button class="hud-button secondary refinery-connect-btn" type="button" data-refinery="'+esc(refinery.id)+'" style="margin-top:8px" '+(links.length>=3?'disabled':'')+'>CONNECT EXTRACTOR</button></article>';
     });
     ownedFactories.forEach(factory => {
       const order=(player.factoryOrders || []).find(row=>row.facility_id===factory.id);
@@ -925,6 +928,13 @@
         await GMAuth.api("rpc/connect_refinery_extractor",{method:"POST",body:JSON.stringify({p_refinery_id:refineryId,p_extractor_id:candidates[choice].id})});
         await refreshAll("EXTRACTOR CONNECTED",$("mapBuildState"));
       }catch(error){setState($("mapBuildState"),"CONNECTION FAILED // "+error.message,"error")}
+    }));
+
+    document.querySelectorAll(".refinery-disconnect-btn").forEach(button=>button.addEventListener("click",async()=>{
+      try{
+        await GMAuth.api("rpc/disconnect_refinery_extractor",{method:"POST",body:JSON.stringify({p_refinery_id:button.dataset.refinery,p_extractor_id:button.dataset.extractor})});
+        await refreshAll("EXTRACTOR DISCONNECTED",$("mapBuildState"));
+      }catch(error){setState($("mapBuildState"),"DISCONNECT FAILED // "+error.message,"error")}
     }));
 
     document.querySelectorAll(".factory-recipe-save").forEach(button=>button.addEventListener("click",async()=>{
