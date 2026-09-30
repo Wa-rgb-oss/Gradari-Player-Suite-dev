@@ -2249,3 +2249,19 @@ dialog::backdrop{background:rgba(0,0,0,.72);backdrop-filter:blur(2px)}
 .market-price-high{color:#ff6969;font-weight:700}
 .market-price-low{color:#59df8a;font-weight:700}
 .market-price-neutral{color:var(--text);font-weight:700}
+
+.politics-stage{position:relative}
+.politics-stage-tabs{display:flex;justify-content:flex-end;gap:6px;margin-bottom:8px}
+.politics-stage-tab{border:1px solid rgba(92,202,220,.28);background:rgba(4,12,17,.78);color:rgba(220,238,241,.62);font:700 .68rem "Share Tech Mono",monospace;letter-spacing:.12em;padding:8px 15px;cursor:pointer}
+.politics-stage-tab.active{border-color:rgba(92,202,220,.72);color:#dceff2;background:rgba(20,67,76,.42)}
+.politics-stage-panel{display:none}.politics-stage-panel.active{display:block}
+.imperial-offices-board{border:1px solid rgba(92,202,220,.22);background:rgba(3,10,14,.82);padding:18px;min-height:620px}
+.imperial-office-feature,.imperial-office-section>div{border:1px solid rgba(92,202,220,.18);background:rgba(7,20,26,.7);padding:16px}
+.imperial-office-feature{border-color:rgba(216,163,93,.42);margin:18px 0}
+.imperial-office-feature span,.imperial-office-section span{display:block;color:#d8a35d;font:700 .62rem "Share Tech Mono",monospace;letter-spacing:.13em;margin-bottom:6px}
+.imperial-office-feature strong,.imperial-office-section strong{display:block;text-transform:uppercase;letter-spacing:.06em;font-size:1.05rem}
+.imperial-office-feature p,.imperial-office-section p{color:rgba(220,238,241,.68);font-size:.78rem;line-height:1.5;margin:8px 0 14px}
+.imperial-office-feature b,.imperial-office-section b{color:rgba(92,202,220,.72);font:600 .62rem "Share Tech Mono",monospace;letter-spacing:.08em}
+.imperial-office-section{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:10px}
+.imperial-office-note{margin-top:16px;color:rgba(220,238,241,.42);font:600 .6rem "Share Tech Mono",monospace;letter-spacing:.1em}
+@media(max-width:800px){.imperial-office-section{grid-template-columns:1fr}}
