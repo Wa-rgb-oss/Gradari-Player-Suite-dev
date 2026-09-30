@@ -2213,3 +2213,20 @@ dialog::backdrop{background:rgba(0,0,0,.72);backdrop-filter:blur(2px)}
 .faction-command-metrics strong{font-size:1rem;text-transform:uppercase}
 .faction-command-columns{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(280px,.5fr);gap:18px}
 @media(max-width:900px){.faction-command-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.faction-command-columns{grid-template-columns:1fr}}
+
+/* Politics command workspace */
+.politics-command-page{padding:0;overflow:hidden}
+.politics-workspace{display:grid;grid-template-columns:minmax(330px,430px) minmax(0,1fr);gap:18px;height:calc(100vh - 132px);min-height:620px}
+.politics-command-panel{border:1px solid rgba(79,212,232,.25);background:linear-gradient(180deg,rgba(8,18,24,.98),rgba(4,10,14,.98));display:flex;flex-direction:column;min-width:0;overflow:hidden;transition:width .18s ease}
+.politics-command-head{min-height:62px;padding:12px 14px;border-bottom:1px solid rgba(79,212,232,.18);display:flex;align-items:center;justify-content:space-between;gap:12px}
+.politics-command-head>div{display:grid;gap:3px}.politics-command-head strong{font-size:.92rem;letter-spacing:.1em}
+.politics-command-tabs{display:flex;overflow-x:auto;border-bottom:1px solid rgba(79,212,232,.18);scrollbar-width:thin}
+.politics-command-tab{appearance:none;border:0;border-right:1px solid rgba(79,212,232,.12);background:transparent;color:var(--muted);padding:11px 10px;font:inherit;font-size:.62rem;letter-spacing:.07em;cursor:pointer;white-space:nowrap}
+.politics-command-tab.active{color:var(--text);background:rgba(79,212,232,.08);box-shadow:inset 0 -2px 0 var(--cyan)}
+.politics-command-content{overflow:auto;min-height:0;padding:16px}
+.politics-command-page{display:none}.politics-command-page.active{display:block}
+.politics-command-page h2{margin:5px 0 14px;text-transform:uppercase}
+.politics-stage{min-width:0;min-height:0}.politics-stage .senate-stage{height:100%;min-height:0}
+.politics-command-panel.collapsed{width:54px;min-width:54px}.politics-command-panel.collapsed .politics-command-tabs,.politics-command-panel.collapsed .politics-command-content,.politics-command-panel.collapsed .politics-command-head>div{display:none}
+.politics-workspace:has(.politics-command-panel.collapsed){grid-template-columns:54px minmax(0,1fr)}
+@media(max-width:900px){.politics-workspace{grid-template-columns:1fr;height:auto}.politics-command-panel{max-height:none}.politics-stage{min-height:560px}.politics-command-panel.collapsed{width:100%;min-width:0;height:54px}.politics-workspace:has(.politics-command-panel.collapsed){grid-template-columns:1fr}}
