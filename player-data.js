@@ -10,7 +10,9 @@
       characters, actions, transactions, world, news, config, directory,
       proposals, proposalMembers, factionInvitations, factionTransactions,
       facilityTypes, facilities, markets, marketListings, events,
-      eventObjectives, eventParticipation, characterSuccessions
+      eventObjectives, eventParticipation, characterSuccessions,
+      resourceCatalog, factionResources, systemEconomies, resourceDeposits,
+      facilityConnections, factoryRecipes, factoryOrders, tradeStations
     ] = await Promise.all([
       GMAuth.api("player_profiles?user_id=eq." + uid + "&select=*&limit=1"),
       GMAuth.api("players_tab?user_id=eq." + uid + "&select=*&limit=1"),
@@ -38,7 +40,15 @@
       GMAuth.api("game_events?select=*&order=starts_at.asc,created_at.desc"),
       GMAuth.api("event_objectives?select=*&order=sort_order.asc"),
       GMAuth.api("event_participants?user_id=eq." + uid + "&select=*&order=joined_at.desc"),
-      GMAuth.api("character_successions?user_id=eq." + uid + "&select=*&order=created_at.desc")
+      GMAuth.api("character_successions?user_id=eq." + uid + "&select=*&order=created_at.desc"),
+      GMAuth.api("resource_catalog?select=*&order=category.asc,name.asc").catch(() => []),
+      GMAuth.api("faction_resources?select=*&order=resource_code.asc").catch(() => []),
+      GMAuth.api("system_economies?select=*").catch(() => []),
+      GMAuth.api("map_resource_deposits?select=*&order=location_ref.asc,resource_code.asc").catch(() => []),
+      GMAuth.api("facility_connections?select=*").catch(() => []),
+      GMAuth.api("factory_recipes?player_visible=eq.true&select=*&order=name.asc").catch(() => []),
+      GMAuth.api("factory_orders?select=*").catch(() => []),
+      GMAuth.api("trade_station_markets?player_visible=eq.true&select=*").catch(() => [])
     ]);
 
     const factionMap = new Map((factions || []).map(row => [row.id,row]));
@@ -104,7 +114,15 @@
       events: events || [],
       eventObjectives: enrichedObjectives,
       eventParticipation: eventParticipation || [],
-      characterSuccessions: characterSuccessions || []
+      characterSuccessions: characterSuccessions || [],
+      resourceCatalog: resourceCatalog || [],
+      factionResources: factionResources || [],
+      systemEconomies: systemEconomies || [],
+      resourceDeposits: resourceDeposits || [],
+      facilityConnections: facilityConnections || [],
+      factoryRecipes: factoryRecipes || [],
+      factoryOrders: factoryOrders || [],
+      tradeStations: tradeStations || []
     };
   }
 
