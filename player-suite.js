@@ -324,6 +324,8 @@
       $("factionRank").textContent = "--";
       $("factionTreasury").textContent = "--";
       $("factionLeadership").textContent = "--";
+      $("factionTerritoryCount").textContent = "--";
+      $("factionSystemCount").textContent = "--";
       $("permissionList").innerHTML = '<span class="status-chip muted">NO FACTION PERMISSIONS</span>';
       $("factionAssetList").innerHTML = "";
       $("factionAssetEmpty").hidden = false;
@@ -337,6 +339,11 @@
     $("factionRank").textContent = membership.rank || "Unranked";
     $("factionTreasury").textContent = fmt(faction.treasury) + " Aureum";
     $("factionLeadership").textContent = faction.leadership_status === "vacant" ? "VACANT" : "ACTIVE";
+    const factionTerritory=(state.territories || []).filter(row=>row.faction_id===faction.id);
+    const territoryRefs=new Set(factionTerritory.map(row=>row.location_ref));
+    const factionSystems=(state.systemEconomies || []).filter(row=>territoryRefs.has(row.location_ref));
+    $("factionTerritoryCount").textContent=fmt(factionTerritory.length)+" HEX"+(factionTerritory.length===1?"":"ES");
+    $("factionSystemCount").textContent=fmt(factionSystems.length);
 
     const permissions = membership.permissions || [];
     $("permissionList").innerHTML = permissions.length
