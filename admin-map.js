@@ -585,6 +585,15 @@
     }catch(error){setState($("adminMapState"),"SYSTEM SAVE FAILED // "+error.message,"error")}
   }
 
+  async function runIndustryCycle(){
+    if(!confirm("Run one industrial production cycle now?")) return;
+    try{
+      setState($("adminMapState"),"RUNNING INDUSTRY CYCLE...");
+      const result=await GMAuth.api("rpc/run_industry_cycle",{method:"POST",body:"{}"});
+      await window.GMAdminRefresh("INDUSTRY CYCLE COMPLETE // "+Number(result?.processed||0)+" OPERATIONS");
+    }catch(error){setState($("adminMapState"),"INDUSTRY CYCLE FAILED // "+error.message,"error")}
+  }
+
   function handleCanvasClick(mx,my){
     if(mode==="label"){placeLabel(mx,my);return}
     if(mode==="select"){
@@ -649,6 +658,7 @@
   $("adminMapImportBtn").addEventListener("click",()=>$("adminMapImportFile").click());
   $("adminMapImportFile").addEventListener("change",event=>importMap(event.target.files?.[0]));
   $("adminMapSaveSystemBtn").addEventListener("click",saveSystem);
+  $("adminRunIndustryCycleBtn").addEventListener("click",runIndustryCycle);
 
   canvas.addEventListener("pointerdown",event=>{
     if(event.pointerType==="mouse"&&event.button!==0)return;
