@@ -366,7 +366,7 @@
               return `<div class="resource-row station-resource-row" data-market="${esc(row.market_id)}" data-resource="${esc(row.resource_code)}">
                 <div><strong>${esc(resource?.name || row.resource_code)}</strong><div class="section-code">${esc(String(resource?.category || "resource").toUpperCase())} // MARKET STOCK: ${row.stock==null?"UNLIMITED":esc(fmt(row.stock))} // AVAILABLE TO SELL: ${esc(fmt(Number((state.factionResources || []).find(item=>item.faction_id===state.primaryMembership?.faction_id && item.resource_code===row.resource_code)?.quantity || 0)))}</div></div>
                 <div style="display:flex;gap:7px;align-items:center;justify-content:flex-end;flex-wrap:wrap">
-                  <span>BUY ${esc(fmt(row.buy_price))} A // SELL ${esc(fmt(row.sell_price))} A</span>
+                  <span class="${Number(row.demand_index||1)>1.015?"market-price-high":Number(row.demand_index||1)<.985?"market-price-low":"market-price-neutral"}">AVG ${esc(fmt(row.market_value ?? ((Number(row.buy_price)+Number(row.sell_price))/2)))} A // BUY ${esc(fmt(row.buy_price))} A // SELL ${esc(fmt(row.sell_price))} A</span>
                   <input class="station-resource-qty" type="number" min="0.01" step="0.01" value="1" style="width:82px">
                   <button class="hud-button secondary station-resource-buy" type="button">BUY</button>
                   <button class="hud-button secondary station-resource-sell" type="button">SELL</button>
