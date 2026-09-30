@@ -416,7 +416,6 @@
     renderCharactersAdmin();
     renderFactions();
     renderWallets();
-    renderAssets();
     renderActions();
     renderWorld();
     window.GMAdminData = data;
@@ -550,26 +549,6 @@
     }
   });
 
-  $("assetForm").addEventListener("submit", async event => {
-    event.preventDefault();
-    const form = event.currentTarget;
-    const d = Object.fromEntries(new FormData(form));
-    try {
-      await GMAuth.api("asset_catalog", {method:"POST",headers:{Prefer:"return=minimal"},body:JSON.stringify({
-        code:d.code.trim() || null,
-        name:d.name.trim(),
-        kind:d.kind,
-        unit:d.unit.trim() || "unit",
-        description:d.description.trim() || null
-      })});
-      form.reset();
-      setState($("assetState"), "ASSET TYPE CREATED", "success");
-      await refreshData();
-    } catch (error) {
-      setState($("assetState"), "ASSET CREATE FAILED // " + error.message, "error");
-    }
-  });
-
   async function saveAssetAssignment(table, keys, quantity) {
     const filters = Object.entries(keys).map(([key,value]) => key + "=eq." + encodeURIComponent(value)).join("&");
     const rows = await GMAuth.api(table + "?" + filters + "&select=*");
@@ -579,30 +558,6 @@
       await GMAuth.api(table, {method:"POST",headers:{Prefer:"return=minimal"},body:JSON.stringify({...keys,quantity})});
     }
   }
-
-  $("playerAssetForm").addEventListener("submit", async event => {
-    event.preventDefault();
-    const d = Object.fromEntries(new FormData(event.currentTarget));
-    try {
-      await saveAssetAssignment("player_assets",{user_id:d.user_id,asset_id:d.asset_id},Number(d.quantity || 0));
-      setState($("playerAssetState"), "PLAYER ASSET SAVED", "success");
-      await refreshData();
-    } catch (error) {
-      setState($("playerAssetState"), "PLAYER ASSET SAVE FAILED // " + error.message, "error");
-    }
-  });
-
-  $("factionAssetForm").addEventListener("submit", async event => {
-    event.preventDefault();
-    const d = Object.fromEntries(new FormData(event.currentTarget));
-    try {
-      await saveAssetAssignment("faction_assets",{faction_id:d.faction_id,asset_id:d.asset_id},Number(d.quantity || 0));
-      setState($("factionAssetState"), "FACTION ASSET SAVED", "success");
-      await refreshData();
-    } catch (error) {
-      setState($("factionAssetState"), "FACTION ASSET SAVE FAILED // " + error.message, "error");
-    }
-  });
 
   $("worldForm").addEventListener("submit", async event => {
     event.preventDefault();
