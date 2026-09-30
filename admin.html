@@ -504,14 +504,11 @@
       </section>
 
       <section class="panel" id="admin-map" data-tab-panel>
-        <section class="admin-map-editor">
-          <aside class="admin-map-tools">
-            <div class="admin-map-editor-title">
-              <h1>GRADARI MIRERIS</h1>
-              <div class="subtitle">Strategic Galaxy Cartograph</div>
-            </div>
-
-            <article class="hud-panel compact admin-map-panel">
+        <section class="admin-map-editor admin-map-editor-v2">
+          <aside class="admin-map-tools admin-map-command">
+            <div class="admin-map-editor-title"><h1>GRADARI MIRERIS</h1><div class="subtitle">Strategic Galaxy Cartograph</div></div>
+            <nav class="admin-map-subtabs" aria-label="Map editor tools"><button class="admin-map-subtab active" type="button" data-admin-map-tool="world"><strong>WORLD</strong><span>Territory & factions</span></button><button class="admin-map-subtab" type="button" data-admin-map-tool="system"><strong>SYSTEM</strong><span>Selected system</span></button><button class="admin-map-subtab" type="button" data-admin-map-tool="industry"><strong>INDUSTRY</strong><span>Facilities & assets</span></button><button class="admin-map-subtab" type="button" data-admin-map-tool="ships"><strong>SHIPS</strong><span>Ship classes</span></button><button class="admin-map-subtab" type="button" data-admin-map-tool="labels"><strong>LABELS</strong><span>Map annotation</span></button><button class="admin-map-subtab" type="button" data-admin-map-tool="tools"><strong>TOOLS</strong><span>Map utilities</span></button></nav>
+            <div class="admin-map-tool-viewport"><div class="admin-map-tool-panel active" data-admin-map-tool-panel="world"><article class="hud-panel compact admin-map-panel">
               <label>Faction Mandate</label>
               <select id="adminMapFaction"></select>
               <div class="button-grid">
@@ -520,9 +517,7 @@
                 <button class="hud-button secondary" id="adminMapCenterBtn" type="button">CENTER MAP</button>
                 <button class="hud-button danger" id="adminMapClearBtn" type="button">CLEAR CLAIMS</button>
               </div>
-            </article>
-
-            <article class="hud-panel compact admin-map-panel">
+            </article><article class="hud-panel compact admin-map-panel">
               <label>Faction Name</label>
               <input id="adminMapFactionName" placeholder="Faction name">
               <label>Faction Color</label>
@@ -533,44 +528,7 @@
                 <button class="hud-button secondary" id="adminMapNewFactionBtn" type="button">NEW</button>
               </div>
               <div id="adminMapFactionList" class="stack admin-map-list"></div>
-            </article>
-
-            <article class="hud-panel compact admin-map-panel">
-              <label>Map Text</label>
-              <input id="adminMapLabelText" placeholder="New label text">
-              <div class="button-grid">
-                <button class="hud-button secondary" id="adminMapLabelBtn" type="button">PLACE TEXT</button>
-                <button class="hud-button secondary" id="adminMapSelectLabelBtn" type="button">SELECT TEXT</button>
-              </div>
-              <label>Edit Selected Text</label>
-              <input id="adminMapEditLabelText" placeholder="Selected label text">
-              <div class="button-grid">
-                <button class="hud-button secondary" id="adminMapRenameLabelBtn" type="button">RENAME</button>
-                <button class="hud-button danger" id="adminMapDeleteLabelBtn" type="button">DELETE</button>
-              </div>
-              <label>Text Color</label>
-              <input id="adminMapLabelColor" type="color" value="#ffffff">
-              <label>Text Size</label>
-              <input id="adminMapLabelSize" type="number" value="16" min="8" max="72">
-              <label>Text Opacity</label>
-              <input id="adminMapLabelOpacity" type="range" min="0" max="1" step="0.05" value="1">
-              <label>Border Style</label>
-              <select id="adminMapLabelBorder">
-                <option value="none">None</option>
-                <option value="outline">Text Outline</option>
-                <option value="box">Box Border</option>
-              </select>
-              <label>Border Color</label>
-              <input id="adminMapLabelBorderColor" type="color" value="#000000">
-              <label>Border Opacity</label>
-              <input id="adminMapLabelBorderOpacity" type="range" min="0" max="1" step="0.05" value="0.8">
-              <label>Background Color</label>
-              <input id="adminMapLabelBgColor" type="color" value="#000000">
-              <label>Background Opacity</label>
-              <input id="adminMapLabelBgOpacity" type="range" min="0" max="1" step="0.05" value="0">
-            </article>
-
-            <article class="hud-panel compact admin-map-panel">
+            </article></div><div class="admin-map-tool-panel" data-admin-map-tool-panel="system" hidden><article class="hud-panel compact admin-map-panel">
               <div class="section-code">SYSTEM / ECONOMY</div>
               <h2 id="adminMapSystemRef" style="margin:5px 0 14px;text-transform:uppercase">Select a Hex</h2>
               <label>System / Map Name</label>
@@ -620,43 +578,7 @@
               <input id="adminTradeStock" type="number" min="0" step="0.01" placeholder="Blank = unlimited">
               <button class="hud-button secondary" id="adminTradeResourceSaveBtn" type="button">SAVE LISTING</button>
               <button class="hud-button secondary" id="adminMapSaveSystemBtn" type="button" style="margin-top:10px">SAVE SYSTEM</button>
-            </article>
-
-            <article class="hud-panel compact admin-map-panel">
-              <label>Map Save Manager</label>
-              <div class="button-grid">
-                <button class="hud-button secondary" id="adminMapExportBtn" type="button">EXPORT MAP</button>
-                <button class="hud-button secondary" id="adminMapImportBtn" type="button">IMPORT MAP</button>
-              </div>
-              <input id="adminMapImportFile" type="file" accept=".json,application/json" hidden>
-            </article>
-
-            <article class="hud-panel compact admin-map-panel small">
-              <div>Mode: <span id="adminMapModeReadout">select</span></div>
-              <div>Total Map Hexes: <span id="adminMapHexCount">0</span></div>
-              <div>Claimed Hexes: <span id="adminMapClaimedCount">0</span></div>
-              <div>Labels: <span id="adminMapLabelCount">0</span></div>
-              <div>Buildings: <span id="adminMapBuildingCount">0</span></div>
-              <br>
-              Scroll to zoom.<br>
-              Drag empty map to move.<br>
-              Click hexes to paint.<br>
-              Use Select Text to move labels.
-              <div class="form-state" id="adminMapState"></div>
-            </article>
-          </aside>
-
-          <section class="admin-map-canvas-shell">
-            <canvas id="adminGalaxyMap" aria-label="Admin galaxy map editor"></canvas>
-          </section>
-
-          <aside class="admin-map-industry">
-            <div class="admin-map-editor-title">
-              <h1>INDUSTRY</h1>
-              <div class="subtitle">Planetary Assets</div>
-            </div>
-
-            <article class="hud-panel compact admin-map-panel">
+            </article></div><div class="admin-map-tool-panel" data-admin-map-tool-panel="industry" hidden><article class="hud-panel compact admin-map-panel">
               <label>Purchasing Faction</label>
               <select id="adminMapIndustryFaction"></select>
               <label>Available Building</label>
@@ -674,9 +596,7 @@
               </div>
               <p class="small">Build mode places the selected facility on a map hex using the live faction, facility, production, and upkeep systems. Initial setup can leave treasury charging off.</p>
               <button class="hud-button amber" id="adminRunIndustryCycleBtn" type="button" style="margin-top:12px">RUN INDUSTRY CYCLE</button>
-            </article>
-
-            <article class="hud-panel compact admin-map-panel">
+            </article><article class="hud-panel compact admin-map-panel">
               <label>Selected Asset Name</label>
               <input id="adminMapEditBuildingName" placeholder="No building selected">
               <label>Selected Asset Faction</label>
@@ -689,9 +609,10 @@
                 <button class="hud-button secondary" id="adminMapSaveBuildingBtn" type="button">SAVE ASSET</button>
                 <button class="hud-button danger" id="adminMapDeleteBuildingBtn" type="button">DELETE ASSET</button>
               </div>
-            </article>
-
-            <article class="hud-panel compact admin-map-panel">
+            </article><article class="hud-panel compact admin-map-panel">
+              <label>Constructed Assets</label>
+              <div id="adminMapBuildingList" class="stack admin-map-list"></div>
+            </article></div><div class="admin-map-tool-panel" data-admin-map-tool-panel="ships" hidden><article class="hud-panel compact admin-map-panel">
               <div class="hud-kicker amber">SHIP BLUEPRINTS</div>
               <div id="adminShipBlueprintList" class="stack admin-map-list"></div>
               <label>Class Name</label>
@@ -707,13 +628,63 @@
               <label>Resource Costs</label>
               <textarea id="adminShipBlueprintCosts" placeholder="vyrsteel=10, electronics=5, ship_components=4"></textarea>
               <button class="hud-button secondary" id="adminShipBlueprintSaveBtn" type="button">ADD BLUEPRINT</button>
-            </article>
-
-            <article class="hud-panel compact admin-map-panel">
-              <label>Constructed Assets</label>
-              <div id="adminMapBuildingList" class="stack admin-map-list"></div>
-            </article>
+            </article></div><div class="admin-map-tool-panel" data-admin-map-tool-panel="labels" hidden><article class="hud-panel compact admin-map-panel">
+              <label>Map Text</label>
+              <input id="adminMapLabelText" placeholder="New label text">
+              <div class="button-grid">
+                <button class="hud-button secondary" id="adminMapLabelBtn" type="button">PLACE TEXT</button>
+                <button class="hud-button secondary" id="adminMapSelectLabelBtn" type="button">SELECT TEXT</button>
+              </div>
+              <label>Edit Selected Text</label>
+              <input id="adminMapEditLabelText" placeholder="Selected label text">
+              <div class="button-grid">
+                <button class="hud-button secondary" id="adminMapRenameLabelBtn" type="button">RENAME</button>
+                <button class="hud-button danger" id="adminMapDeleteLabelBtn" type="button">DELETE</button>
+              </div>
+              <label>Text Color</label>
+              <input id="adminMapLabelColor" type="color" value="#ffffff">
+              <label>Text Size</label>
+              <input id="adminMapLabelSize" type="number" value="16" min="8" max="72">
+              <label>Text Opacity</label>
+              <input id="adminMapLabelOpacity" type="range" min="0" max="1" step="0.05" value="1">
+              <label>Border Style</label>
+              <select id="adminMapLabelBorder">
+                <option value="none">None</option>
+                <option value="outline">Text Outline</option>
+                <option value="box">Box Border</option>
+              </select>
+              <label>Border Color</label>
+              <input id="adminMapLabelBorderColor" type="color" value="#000000">
+              <label>Border Opacity</label>
+              <input id="adminMapLabelBorderOpacity" type="range" min="0" max="1" step="0.05" value="0.8">
+              <label>Background Color</label>
+              <input id="adminMapLabelBgColor" type="color" value="#000000">
+              <label>Background Opacity</label>
+              <input id="adminMapLabelBgOpacity" type="range" min="0" max="1" step="0.05" value="0">
+            </article></div><div class="admin-map-tool-panel" data-admin-map-tool-panel="tools" hidden><article class="hud-panel compact admin-map-panel">
+              <label>Map Save Manager</label>
+              <div class="button-grid">
+                <button class="hud-button secondary" id="adminMapExportBtn" type="button">EXPORT MAP</button>
+                <button class="hud-button secondary" id="adminMapImportBtn" type="button">IMPORT MAP</button>
+              </div>
+              <input id="adminMapImportFile" type="file" accept=".json,application/json" hidden>
+            </article><article class="hud-panel compact admin-map-panel small">
+              <div>Mode: <span id="adminMapModeReadout">select</span></div>
+              <div>Total Map Hexes: <span id="adminMapHexCount">0</span></div>
+              <div>Claimed Hexes: <span id="adminMapClaimedCount">0</span></div>
+              <div>Labels: <span id="adminMapLabelCount">0</span></div>
+              <div>Buildings: <span id="adminMapBuildingCount">0</span></div>
+              <br>
+              Scroll to zoom.<br>
+              Drag empty map to move.<br>
+              Click hexes to paint.<br>
+              Use Select Text to move labels.
+              <div class="form-state" id="adminMapState"></div>
+            </article></div></div>
           </aside>
+          <section class="admin-map-canvas-shell">
+            <canvas id="adminGalaxyMap" aria-label="Admin galaxy map editor"></canvas>
+          </section>
         </section>
       </section>
     </section>
