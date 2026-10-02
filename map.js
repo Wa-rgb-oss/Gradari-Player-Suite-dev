@@ -28,6 +28,7 @@
   let drag = null;
   const activeMapPointers = new Map();
   let pinch = null;
+  let starField = {width:0,height:0,stars:[]};
   let firstResize = true;
 
   const layers = {
@@ -274,21 +275,78 @@
     return `rgba(${r},${g},${b},${alpha})`;
   }
 
+  function seededStarRandom(seed) {
+    const value=Math.sin(seed)*10000;
+    return value-Math.floor(value);
+  }
+
+  function buildStarField(width,height) {
+    const stars=[];
+    const count=Math.max(140,Math.floor((width*height)/4200));
+
+    for(let i=0;i<count;i++){
+      const rx=seededStarRandom(i*12.9898+width*.013);
+      const ry=seededStarRandom(i*78.233+height*.017);
+      const rs=seededStarRandom(i*33.333+width*.009+height*.011);
+      const ro=seededStarRandom(i*54.123+width*.015);
+      const tierRoll=seededStarRandom(i*91.777+width*.007);
+
+      let size;
+      if(tierRoll>.985) size=2.6+rs*1.4;
+      else if(tierRoll>.93) size=1.6+rs*.9;
+      else size=.7+rs*.8;
+
+      let alpha;
+      if(size>=2.6) alpha=.85+ro*.15;
+      else if(size>=1.6) alpha=.55+ro*.25;
+      else alpha=.28+ro*.35;
+
+      stars.push({x:rx*width,y:ry*height,size,alpha,accent:false});
+    }
+
+    const accentCount=Math.max(18,Math.floor(count*.08));
+    for(let i=0;i<accentCount;i++){
+      const rx=seededStarRandom(i*17.123+500);
+      const ry=seededStarRandom(i*39.321+900);
+      const rs=seededStarRandom(i*71.713+1200);
+      stars.push({
+        x:rx*width,
+        y:ry*height,
+        size:1.1+rs*1.2,
+        alpha:.18+rs*.18,
+        accent:true
+      });
+    }
+
+    return stars;
+  }
+
   function drawStars(width,height) {
+    if(!starField.stars.length || starField.width!==width || starField.height!==height){
+      starField={width,height,stars:buildStarField(width,height)};
+    }
+
     ctx.save();
-    ctx.fillStyle="rgba(218,239,244,.52)";
-    for (let i=0;i<220;i++) {
-      const x=(i*911+137)%Math.max(1,width);
-      const y=(i*577+83)%Math.max(1,height);
-      const size=(i%9===0?1.6:1);
-      ctx.fillRect(x,y,size,size);
+
+    for(const star of starField.stars){
+      ctx.fillStyle=star.accent
+        ? `rgba(79,168,196,${star.alpha})`
+        : `rgba(218,239,244,${star.alpha})`;
+
+      if(star.size>2.3){
+        ctx.beginPath();
+        ctx.arc(star.x,star.y,star.size*.5,0,Math.PI*2);
+        ctx.fill();
+
+        ctx.fillStyle=`rgba(218,239,244,${Math.max(.08,star.alpha*.22)})`;
+        ctx.beginPath();
+        ctx.arc(star.x,star.y,star.size*1.2,0,Math.PI*2);
+        ctx.fill();
+      }else{
+        ctx.fillRect(star.x,star.y,star.size,star.size);
+      }
     }
-    ctx.fillStyle="rgba(79,168,196,.20)";
-    for (let i=0;i<48;i++) {
-      const x=(i*421+67)%Math.max(1,width);
-      const y=(i*733+149)%Math.max(1,height);
-      ctx.fillRect(x,y,1.3,1.3);
-    }
+
     ctx.restore();
   }
 
