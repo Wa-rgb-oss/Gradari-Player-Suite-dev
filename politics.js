@@ -31,11 +31,17 @@
       pages.forEach(page=>page.classList.toggle("active",page.id===tab.dataset.politicsTab));
       if (tab.dataset.politicsTab==="politics-senate") scheduleChamberDraw();
     }));
-    $("politicsPanelCollapse")?.addEventListener("click",()=>{
-      panel?.classList.toggle("collapsed");
-      $("politicsPanelCollapse").textContent=panel?.classList.contains("collapsed") ? "›" : "‹";
-      setTimeout(scheduleChamberDraw,80);
-    });
+    const collapseButton=$("politicsPanelCollapse");
+    if(collapseButton && window.matchMedia("(max-width:760px)").matches){
+      collapseButton.hidden=true;
+      panel?.classList.remove("collapsed");
+    }else{
+      collapseButton?.addEventListener("click",()=>{
+        panel?.classList.toggle("collapsed");
+        collapseButton.textContent=panel?.classList.contains("collapsed") ? "›" : "‹";
+        setTimeout(scheduleChamberDraw,80);
+      });
+    }
   }
 
   function factionById(id) {
@@ -227,8 +233,9 @@
     const stage = senateCanvas.closest(".senate-stage");
     if (!stage) return;
 
-    const width = Math.max(460,stage.clientWidth || 900);
-    const height = Math.max(560,stage.clientHeight || 720);
+    const mobile=window.matchMedia("(max-width:760px)").matches;
+    const width = Math.max(mobile ? 280 : 460,stage.clientWidth || 900);
+    const height = Math.max(mobile ? 360 : 560,stage.clientHeight || 720);
     const dpr = Math.min(2,window.devicePixelRatio || 1);
     const total = currentChamberTotal();
     const owners = buildSeatOwners(total);
@@ -241,8 +248,10 @@
     senateCtx.setTransform(dpr,0,0,dpr,0,0);
     senateCtx.clearRect(0,0,width,height);
 
-    const scale = Math.min(width/930,height/790);
-    const center = {x:width/2,y:height*.72};
+    const scale = mobile
+      ? Math.min(width/790,height/700)
+      : Math.min(width/930,height/790);
+    const center = {x:width/2,y:height*(mobile ? .74 : .72)};
     const positions = buildSeatPositions(total);
 
     const ordered = positions
@@ -282,7 +291,7 @@
       const factionId = ownerByPosition[index];
       const x = center.x+position.x*scale;
       const y = center.y+position.y*scale;
-      const size = Math.max(7,13*scale);
+      const size = Math.max(mobile ? 4.5 : 7,13*scale);
 
       hexPath(senateCtx,x,y,size);
 
@@ -328,22 +337,22 @@
     senateCtx.textAlign = "center";
     senateCtx.textBaseline = "middle";
     senateCtx.fillStyle = "#d8a35d";
-    senateCtx.font = `500 ${Math.max(17,22*scale)}px "Share Tech Mono", Consolas, monospace`;
+    senateCtx.font = `500 ${Math.max(mobile ? 12 : 17,22*scale)}px "Share Tech Mono", Consolas, monospace`;
     senateCtx.fillText("SENATE",center.x,titleY);
 
     senateCtx.fillStyle = "rgba(134,215,232,.55)";
-    senateCtx.font = `400 ${Math.max(8,10*scale)}px "Share Tech Mono", Consolas, monospace`;
+    senateCtx.font = `400 ${Math.max(mobile ? 6 : 8,10*scale)}px "Share Tech Mono", Consolas, monospace`;
     senateCtx.fillText(
       `${owners.filter(Boolean).length} ASSIGNED // ${total} TOTAL SEATS`,
       center.x,titleY+26*scale
     );
 
     senateCtx.fillStyle = "#91a9b1";
-    senateCtx.font = `400 ${Math.max(9,12*scale)}px "Share Tech Mono", Consolas, monospace`;
+    senateCtx.font = `400 ${Math.max(mobile ? 7 : 9,12*scale)}px "Share Tech Mono", Consolas, monospace`;
     senateCtx.fillText("FIRST CONSUL",center.x,center.y-10*scale);
 
     senateCtx.fillStyle = "#d8a35d";
-    senateCtx.font = `500 ${Math.max(13,18*scale)}px "Share Tech Mono", Consolas, monospace`;
+    senateCtx.font = `500 ${Math.max(mobile ? 10 : 13,18*scale)}px "Share Tech Mono", Consolas, monospace`;
     senateCtx.fillText(republic?.first_consul_name || "Vacant",center.x,center.y+17*scale);
   }
 
