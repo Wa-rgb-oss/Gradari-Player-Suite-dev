@@ -5,8 +5,8 @@
   function shell(){
     if(document.getElementById("gmGameChat")) return;
     document.body.insertAdjacentHTML("beforeend",`
-      <aside class="game-chat" id="gmGameChat" aria-label="Game chat">
-        <div class="game-chat-head"><div><span>COMMS</span><strong id="gmChatTitle">GLOBAL</strong></div><button id="gmChatMin" type="button">−</button></div>
+      <aside class="game-chat minimized" id="gmGameChat" aria-label="Game chat">
+        <div class="game-chat-head" id="gmChatHead"><div><span class="game-chat-expanded-label">COMMS</span><span class="game-chat-collapsed-label">CHAT</span><strong id="gmChatTitle">GLOBAL</strong></div><button id="gmChatMin" type="button" aria-label="Open chat">⌃</button></div>
         <div class="game-chat-tabs"><button class="active" data-chat-mode="global">GLOBAL</button><button data-chat-mode="direct">DIRECT</button></div>
         <select id="gmChatFriend" hidden><option value="">SELECT FRIEND</option></select>
         <div class="game-chat-log" id="gmChatLog"></div>
@@ -43,16 +43,33 @@
     document.getElementById("gmChatTitle").textContent=mode==="global"?"GLOBAL":"DIRECT";
     loadMessages().catch(()=>{});
   }
+  function setMinimized(minimized){
+    const chat=document.getElementById("gmGameChat");
+    const button=document.getElementById("gmChatMin");
+    if(!chat || !button) return;
+    chat.classList.toggle("minimized",Boolean(minimized));
+    button.textContent=minimized?"⌃":"−";
+    button.setAttribute("aria-label",minimized?"Open chat":"Close chat");
+    if(!minimized) loadMessages().catch(()=>{});
+  }
   function focusChat(){
-    const chat=document.getElementById("gmGameChat"); chat.classList.remove("minimized");
+    setMinimized(false);
     document.getElementById("gmChatInput").focus();
   }
   async function init(){
     session=await GMAuth.getSession(); if(!session?.user) return;
-    shell(); await loadFriends(); await loadMessages();
+    shell(); await loadFriends(); setMinimized(true);
     document.querySelectorAll("[data-chat-mode]").forEach(b=>b.addEventListener("click",()=>setMode(b.dataset.chatMode)));
     document.getElementById("gmChatFriend").addEventListener("change",e=>{friendId=e.target.value||null;loadMessages().catch(()=>{})});
-    document.getElementById("gmChatMin").addEventListener("click",()=>document.getElementById("gmGameChat").classList.toggle("minimized"));
+    document.getElementById("gmChatMin").addEventListener("click",event=>{
+      event.stopPropagation();
+      const chat=document.getElementById("gmGameChat");
+      setMinimized(!chat.classList.contains("minimized"));
+    });
+    document.getElementById("gmChatHead").addEventListener("click",()=>{
+      const chat=document.getElementById("gmGameChat");
+      if(chat.classList.contains("minimized")) setMinimized(false);
+    });
     document.getElementById("gmChatForm").addEventListener("submit",async e=>{
       e.preventDefault(); const input=document.getElementById("gmChatInput"),body=input.value.trim(); if(!body)return;
       try{await api("rpc/send_game_chat_message",{method:"POST",body:JSON.stringify({p_channel:mode,p_body:body,p_recipient_user_id:mode==="direct"?friendId:null})});input.value="";await loadMessages()}catch(err){input.placeholder=err.message}
@@ -60,10 +77,14 @@
     document.addEventListener("keydown",e=>{
       const input=document.getElementById("gmChatInput"); const typing=document.activeElement===input;
       if(e.key==="Escape"&&typing){e.preventDefault();input.blur();return}
+      if(window.matchMedia("(max-width:760px)").matches) return;
       if((e.key==="t"||e.key==="T"||e.key==="Enter")&&!typing&&!["INPUT","TEXTAREA","SELECT"].includes(document.activeElement?.tagName)){e.preventDefault();focusChat()}
     });
     document.addEventListener("gm:friends-updated",()=>loadFriends().then(loadMessages));
-    timer=setInterval(()=>loadMessages().catch(()=>{}),4000);
+    timer=setInterval(()=>{
+      const chat=document.getElementById("gmGameChat");
+      if(chat && !chat.classList.contains("minimized")) loadMessages().catch(()=>{});
+    },4000);
   }
   window.addEventListener("load",()=>init().catch(()=>{}));
 })();
