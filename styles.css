@@ -2982,3 +2982,99 @@ dialog::backdrop{background:rgba(0,0,0,.72);backdrop-filter:blur(2px)}
   .map-workspace-unified{min-height:460px!important}
 }
 
+/* MOBILE POLITICS + CHAT REFINEMENT */
+.game-chat-collapsed-label{display:none}
+
+@media (max-width:760px){
+  /* Senate display should use the real phone width instead of a clipped desktop minimum. */
+  .politics-stage,
+  .politics-stage-panel.active,
+  .politics-stage-panel.active>.senate-stage{
+    width:100%!important;
+    min-width:0!important;
+  }
+  .politics-stage-panel.active>.senate-stage{
+    height:min(56svh,500px)!important;
+    min-height:400px!important;
+    max-height:500px!important;
+    overflow:hidden!important;
+  }
+  #senateCanvas{
+    display:block!important;
+    width:100%!important;
+    max-width:100%!important;
+    height:100%!important;
+  }
+
+  /* The Senate command is already stacked below the chamber on mobile, so collapse adds no value. */
+  .politics-command-panel .map-panel-collapse{
+    display:none!important;
+  }
+  .politics-command-head{
+    justify-content:flex-start!important;
+  }
+
+  /* Mobile chat is a tiny closed tab until the player explicitly opens it. */
+  .game-chat.minimized{
+    left:auto!important;
+    right:8px!important;
+    bottom:calc(78px + env(safe-area-inset-bottom))!important;
+    width:96px!important;
+    height:38px!important;
+    max-height:38px!important;
+    min-height:38px!important;
+    overflow:hidden!important;
+    border:1px solid rgba(79,212,232,.34)!important;
+    background:rgba(4,10,14,.96)!important;
+    backdrop-filter:none!important;
+    -webkit-backdrop-filter:none!important;
+    box-shadow:0 8px 24px rgba(0,0,0,.34)!important;
+  }
+  .game-chat.minimized .game-chat-head{
+    width:100%!important;
+    height:36px!important;
+    min-height:36px!important;
+    padding:0 8px!important;
+    border:0!important;
+    background:transparent!important;
+    cursor:pointer;
+  }
+  .game-chat.minimized .game-chat-head>div{
+    gap:0!important;
+  }
+  .game-chat.minimized .game-chat-expanded-label,
+  .game-chat.minimized #gmChatTitle{
+    display:none!important;
+  }
+  .game-chat.minimized .game-chat-collapsed-label{
+    display:inline!important;
+    color:var(--text)!important;
+    font:600 .62rem var(--mono)!important;
+    letter-spacing:.10em!important;
+  }
+  .game-chat.minimized #gmChatMin{
+    width:28px!important;
+    height:28px!important;
+    padding:0!important;
+    display:grid!important;
+    place-items:center!important;
+    font-size:.92rem!important;
+  }
+  .game-chat:not(.minimized){
+    left:8px!important;
+    right:8px!important;
+    bottom:calc(78px + env(safe-area-inset-bottom))!important;
+    width:auto!important;
+    height:min(62svh,520px)!important;
+  }
+}
+
+@media (max-width:380px){
+  .politics-stage-panel.active>.senate-stage{
+    min-height:370px!important;
+  }
+  .game-chat.minimized{
+    width:92px!important;
+  }
+}
+
