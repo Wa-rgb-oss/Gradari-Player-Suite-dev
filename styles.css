@@ -2847,3 +2847,138 @@ dialog::backdrop{background:rgba(0,0,0,.72);backdrop-filter:blur(2px)}
   .admin-map-panel .button-grid{grid-template-columns:1fr!important}
 }
 
+/* MOBILE MAP DRAWER + NAV SIZE FIX */
+@media (max-width:760px){
+  /* Give the bottom navigation slightly larger, easier touch targets. */
+  .sidebar{
+    height:calc(70px + env(safe-area-inset-bottom))!important;
+    padding:4px 5px env(safe-area-inset-bottom)!important;
+    backdrop-filter:none!important;
+    -webkit-backdrop-filter:none!important;
+  }
+  .primary-nav{height:64px!important}
+  .primary-nav a{
+    min-height:60px!important;
+    height:60px!important;
+    padding:6px 3px!important;
+  }
+  .nav-label{
+    font-size:.60rem!important;
+    line-height:1.08!important;
+    white-space:normal!important;
+    overflow:visible!important;
+    text-overflow:clip!important;
+  }
+  .app-shell{padding-bottom:calc(74px + env(safe-area-inset-bottom))!important}
+  .game-chat{bottom:calc(78px + env(safe-area-inset-bottom))!important}
+
+  /* Mobile map is a full working surface with Map Command as a collapsible overlay drawer. */
+  .map-page{
+    height:auto!important;
+    min-height:0!important;
+    padding:0!important;
+  }
+  .map-workspace-unified{
+    display:block!important;
+    position:relative!important;
+    width:100%!important;
+    height:calc(100svh - 122px)!important;
+    min-height:500px!important;
+    padding:0!important;
+    margin:0!important;
+    overflow:hidden!important;
+  }
+  .map-workspace-unified .map-canvas-shell,
+  .map-canvas-shell{
+    position:absolute!important;
+    inset:0!important;
+    width:100%!important;
+    height:100%!important;
+    min-height:0!important;
+    max-height:none!important;
+    margin:0!important;
+    z-index:1!important;
+  }
+  .map-command-panel{
+    position:absolute!important;
+    left:0!important;
+    top:0!important;
+    bottom:0!important;
+    right:auto!important;
+    width:min(90vw,380px)!important;
+    height:100%!important;
+    min-width:0!important;
+    max-height:none!important;
+    display:flex!important;
+    flex-direction:column!important;
+    overflow:hidden!important;
+    z-index:40!important;
+    border-right:1px solid rgba(79,168,196,.42)!important;
+    box-shadow:18px 0 34px rgba(0,0,0,.42)!important;
+    background:linear-gradient(180deg,rgba(6,15,20,.99),rgba(3,9,13,.99))!important;
+    transition:width .18s ease,height .18s ease,box-shadow .18s ease!important;
+  }
+  .map-command-head{
+    flex:0 0 auto!important;
+    min-height:52px!important;
+    padding:8px 10px!important;
+  }
+  .map-panel-collapse{
+    display:grid!important;
+    place-items:center!important;
+    flex:0 0 40px!important;
+    width:40px!important;
+    height:40px!important;
+    padding:0!important;
+    font-size:1.45rem!important;
+    line-height:1!important;
+    cursor:pointer!important;
+  }
+  .map-command-tabs{
+    flex:0 0 auto!important;
+    display:flex!important;
+  }
+  .map-command-content{
+    flex:1 1 auto!important;
+    min-height:0!important;
+    max-height:none!important;
+    padding:12px!important;
+    overflow-y:auto!important;
+    overflow-x:hidden!important;
+    -webkit-overflow-scrolling:touch;
+  }
+
+  /* Collapsed state leaves only one small control over the map. */
+  .map-panel-collapsed .map-command-panel{
+    width:50px!important;
+    height:50px!important;
+    bottom:auto!important;
+    overflow:hidden!important;
+    border:1px solid rgba(79,168,196,.42)!important;
+    box-shadow:0 8px 24px rgba(0,0,0,.38)!important;
+  }
+  .map-panel-collapsed .map-command-head{
+    width:50px!important;
+    height:50px!important;
+    min-height:50px!important;
+    padding:5px!important;
+    justify-content:center!important;
+    border-bottom:0!important;
+  }
+  .map-panel-collapsed .map-command-head>div,
+  .map-panel-collapsed .map-command-tabs,
+  .map-panel-collapsed .map-command-content{
+    display:none!important;
+  }
+  .map-panel-collapsed .map-panel-collapse{
+    display:grid!important;
+    width:40px!important;
+    height:40px!important;
+  }
+}
+
+@media (max-width:380px){
+  .nav-label{font-size:.56rem!important}
+  .map-workspace-unified{min-height:460px!important}
+}
+
