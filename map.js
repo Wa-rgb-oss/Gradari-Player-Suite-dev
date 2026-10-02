@@ -26,6 +26,8 @@
   let mapHexSet = new Set();
   let camera = {x:0,y:0,zoom:1};
   let drag = null;
+  const activeMapPointers = new Map();
+  let pinch = null;
   let firstResize = true;
 
   const layers = {
@@ -1208,10 +1210,38 @@
     return {x:event.clientX-rect.left,y:event.clientY-rect.top};
   }
 
+  function pointerPair() {
+    return [...activeMapPointers.entries()].slice(0,2);
+  }
+
+  function beginPinch() {
+    const pair=pointerPair();
+    if (pair.length<2) {
+      pinch=null;
+      return;
+    }
+    const a=pair[0][1];
+    const b=pair[1][1];
+    const midpoint={x:(a.x+b.x)/2,y:(a.y+b.y)/2};
+    pinch={
+      startDistance:Math.max(1,Math.hypot(b.x-a.x,b.y-a.y)),
+      startZoom:camera.zoom,
+      anchorWorld:screenToWorld(midpoint.x,midpoint.y)
+    };
+    drag=null;
+  }
+
   canvas.addEventListener("pointerdown",event => {
     if (event.pointerType==="mouse" && event.button!==0) return;
     canvas.setPointerCapture(event.pointerId);
     const p=canvasPoint(event);
+    activeMapPointers.set(event.pointerId,p);
+
+    if (activeMapPointers.size>=2) {
+      beginPinch();
+      return;
+    }
+
     drag={
       pointerId:event.pointerId,
       startX:p.x,
@@ -1224,6 +1254,27 @@
 
   canvas.addEventListener("pointermove",event => {
     const p=canvasPoint(event);
+
+    if (activeMapPointers.has(event.pointerId)) {
+      activeMapPointers.set(event.pointerId,p);
+    }
+
+    if (activeMapPointers.size>=2) {
+      if (!pinch) beginPinch();
+      const pair=pointerPair();
+      const a=pair[0][1];
+      const b=pair[1][1];
+      const midpoint={x:(a.x+b.x)/2,y:(a.y+b.y)/2};
+      const distance=Math.max(1,Math.hypot(b.x-a.x,b.y-a.y));
+      const nextZoom=Math.min(2.7,Math.max(.35,pinch.startZoom*(distance/pinch.startDistance)));
+
+      camera.zoom=nextZoom;
+      camera.x=midpoint.x-pinch.anchorWorld.x*nextZoom;
+      camera.y=midpoint.y-pinch.anchorWorld.y*nextZoom;
+      draw();
+      return;
+    }
+
     if (!drag || drag.pointerId!==event.pointerId) {
       if (event.pointerType==="mouse") updateHover(p.x,p.y);
       return;
@@ -1239,16 +1290,40 @@
     }
   });
 
-  canvas.addEventListener("pointerup",event => {
-    if (!drag || drag.pointerId!==event.pointerId) return;
+  function releaseMapPointer(event,cancelled=false) {
     const p=canvasPoint(event);
-    if (!drag.moved) selectAt(p.x,p.y);
-    drag=null;
-  });
+    const wasPinching=Boolean(pinch) || activeMapPointers.size>=2;
+    activeMapPointers.delete(event.pointerId);
 
-  canvas.addEventListener("pointercancel",()=>{drag=null;});
+    if (wasPinching) {
+      pinch=null;
+      drag=null;
+
+      if (activeMapPointers.size===1) {
+        const remaining=[...activeMapPointers.entries()][0];
+        drag={
+          pointerId:remaining[0],
+          startX:remaining[1].x,
+          startY:remaining[1].y,
+          cameraX:camera.x,
+          cameraY:camera.y,
+          moved:true
+        };
+      }
+      return;
+    }
+
+    if (!cancelled && drag?.pointerId===event.pointerId && !drag.moved) {
+      selectAt(p.x,p.y);
+    }
+    if (drag?.pointerId===event.pointerId) drag=null;
+  }
+
+  canvas.addEventListener("pointerup",event => releaseMapPointer(event,false));
+  canvas.addEventListener("pointercancel",event => releaseMapPointer(event,true));
+
   canvas.addEventListener("pointerleave",event => {
-    if (event.pointerType==="mouse" && !drag) {
+    if (event.pointerType==="mouse" && !drag && !activeMapPointers.size) {
       hoverHex=null;
       draw();
     }
@@ -1264,6 +1339,11 @@
     camera.y=p.y-before.y*camera.zoom;
     draw();
   },{passive:false});
+
+  // Keep iOS Safari from interpreting a two-finger map gesture as page zoom.
+  ["gesturestart","gesturechange","gestureend"].forEach(type => {
+    canvas.addEventListener(type,event=>event.preventDefault(),{passive:false});
+  });
 
   document.querySelectorAll("[data-map-tab]").forEach(button => {
     button.addEventListener("click", () => {
