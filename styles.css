@@ -3078,3 +3078,12 @@ dialog::backdrop{background:rgba(0,0,0,.72);backdrop-filter:blur(2px)}
   }
 }
 
+/* MOBILE MAP PINCH GESTURES */
+@media (max-width:760px){
+  #galaxyMap{
+    touch-action:none!important;
+    -webkit-user-select:none!important;
+    user-select:none!important;
+  }
+}
+
