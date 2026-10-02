@@ -58,7 +58,7 @@
   }
   async function init(){
     session=await GMAuth.getSession(); if(!session?.user) return;
-    shell(); await loadFriends(); setMinimized(true);
+    shell(); await loadFriends(); setMinimized(window.matchMedia("(max-width:760px)").matches);
     document.querySelectorAll("[data-chat-mode]").forEach(b=>b.addEventListener("click",()=>setMode(b.dataset.chatMode)));
     document.getElementById("gmChatFriend").addEventListener("change",e=>{friendId=e.target.value||null;loadMessages().catch(()=>{})});
     document.getElementById("gmChatMin").addEventListener("click",event=>{
