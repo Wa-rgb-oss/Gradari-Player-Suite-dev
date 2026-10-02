@@ -3087,3 +3087,81 @@ dialog::backdrop{background:rgba(0,0,0,.72);backdrop-filter:blur(2px)}
   }
 }
 
+/* MOBILE MAP VIEWPORT SCROLL LOCK */
+@media (max-width:760px){
+  /* The map is an app-like viewport. Never allow the document behind it to scroll. */
+  html:has(body.map-body),
+  body.map-body{
+    width:100%!important;
+    height:100%!important;
+    min-height:0!important;
+    overflow:hidden!important;
+    overscroll-behavior:none!important;
+  }
+
+  body.map-body .app-shell{
+    width:100%!important;
+    height:100dvh!important;
+    min-height:0!important;
+    padding-bottom:0!important;
+    overflow:hidden!important;
+  }
+
+  body.map-body .main-frame{
+    width:100%!important;
+    height:100dvh!important;
+    min-height:0!important;
+    overflow:hidden!important;
+  }
+
+  body.map-body .topbar{
+    height:52px!important;
+    min-height:52px!important;
+    max-height:52px!important;
+  }
+
+  body.map-body .map-page{
+    box-sizing:border-box!important;
+    width:100%!important;
+    height:calc(100dvh - 52px - 70px - env(safe-area-inset-bottom))!important;
+    min-height:0!important;
+    max-height:none!important;
+    padding:0!important;
+    margin:0!important;
+    overflow:hidden!important;
+  }
+
+  body.map-body .map-workspace-unified{
+    box-sizing:border-box!important;
+    width:100%!important;
+    height:100%!important;
+    min-height:0!important;
+    max-height:none!important;
+    margin:0!important;
+    padding:0!important;
+    overflow:hidden!important;
+  }
+
+  body.map-body .map-command-panel{
+    max-height:100%!important;
+    overscroll-behavior:contain!important;
+  }
+
+  body.map-body .map-command-content{
+    min-height:0!important;
+    height:auto!important;
+    max-height:none!important;
+    overflow-y:auto!important;
+    overflow-x:hidden!important;
+    overscroll-behavior:contain!important;
+    -webkit-overflow-scrolling:touch;
+  }
+
+  body.map-body .map-canvas-shell{
+    width:100%!important;
+    height:100%!important;
+    min-height:0!important;
+    max-height:none!important;
+  }
+}
+
