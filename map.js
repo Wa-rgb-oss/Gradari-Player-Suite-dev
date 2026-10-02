@@ -1272,12 +1272,25 @@
     });
   });
 
-  $("mapPanelCollapse")?.addEventListener("click", () => {
-    const workspace = document.querySelector(".map-workspace-unified");
-    workspace?.classList.toggle("map-panel-collapsed");
-    $("mapPanelCollapse").textContent = workspace?.classList.contains("map-panel-collapsed") ? "›" : "‹";
-    setTimeout(resize, 180);
+  const mapWorkspace=document.querySelector(".map-workspace-unified");
+  const mapCollapseButton=$("mapPanelCollapse");
+
+  function setMapPanelCollapsed(collapsed){
+    if(!mapWorkspace || !mapCollapseButton) return;
+    mapWorkspace.classList.toggle("map-panel-collapsed",collapsed);
+    mapCollapseButton.textContent=collapsed ? "›" : "‹";
+    mapCollapseButton.setAttribute("aria-expanded",String(!collapsed));
+    mapCollapseButton.setAttribute("aria-label",collapsed ? "Open map controls" : "Collapse map controls");
+    setTimeout(()=>resizeCanvas(false),190);
+  }
+
+  mapCollapseButton?.addEventListener("click",()=>{
+    setMapPanelCollapsed(!mapWorkspace?.classList.contains("map-panel-collapsed"));
   });
+
+  if(window.matchMedia("(max-width:760px)").matches){
+    setMapPanelCollapsed(true);
+  }
 
   $("mapCenterBtn").addEventListener("click",centerMap);
 
