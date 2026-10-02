@@ -2328,3 +2328,522 @@ dialog::backdrop{background:rgba(0,0,0,.72);backdrop-filter:blur(2px)}
 .resource-contribution-controls select,.resource-contribution-controls input{height:42px}
 .resource-contribution-controls .hud-button{height:42px;white-space:nowrap}
 @media(max-width:760px){.resource-contribution-head{align-items:flex-start;flex-direction:column}.resource-contribution-controls{grid-template-columns:1fr}.resource-contribution-controls .hud-button{width:100%}}
+
+/* MOBILE COMMAND UI // PHONE PRESENTATION LAYER */
+@media (max-width:760px){
+  html,body{width:100%;max-width:100%;overflow-x:hidden}
+  body{min-width:0}
+  .app-shell{
+    display:block;
+    min-height:100svh;
+    padding-bottom:calc(68px + env(safe-area-inset-bottom));
+  }
+  .main-frame{width:100%;min-width:0;overflow:visible}
+
+  /* Phone navigation: preserve every destination without carrying the desktop rail. */
+  .sidebar{
+    position:fixed!important;
+    left:0;right:0;bottom:0;top:auto;
+    width:100%;
+    height:calc(64px + env(safe-area-inset-bottom));
+    padding:4px 5px env(safe-area-inset-bottom)!important;
+    border:0!important;
+    border-top:1px solid rgba(79,168,196,.34)!important;
+    background:rgba(4,10,14,.96);
+    backdrop-filter:blur(14px);
+    box-shadow:0 -10px 30px rgba(0,0,0,.36);
+    z-index:1000;
+    overflow:visible;
+  }
+  .brand-block{display:none!important}
+  .primary-nav{
+    height:58px;
+    padding:0!important;
+    margin:0;
+    display:grid!important;
+    grid-template-columns:repeat(6,minmax(0,1fr));
+    gap:2px!important;
+    overflow:visible!important;
+  }
+  .primary-nav a{
+    min-width:0!important;
+    min-height:54px!important;
+    height:54px;
+    padding:6px 2px!important;
+    display:flex!important;
+    align-items:center;
+    justify-content:center;
+    border:0!important;
+    background:transparent!important;
+    clip-path:none!important;
+    overflow:hidden;
+  }
+  .primary-nav a::before{
+    left:8px!important;
+    right:8px!important;
+    top:0!important;
+    bottom:auto!important;
+    width:auto!important;
+    height:2px!important;
+  }
+  .primary-nav a.active{
+    color:#e9f5f7!important;
+    background:linear-gradient(180deg,rgba(79,168,196,.12),rgba(79,168,196,0))!important;
+  }
+  .nav-index,.nav-arrow{display:none!important}
+  .nav-label{
+    width:100%;
+    color:inherit;
+    font:600 clamp(.43rem,2vw,.56rem)/1.1 var(--mono)!important;
+    letter-spacing:.035em!important;
+    text-align:center;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+
+  /* Keep sign-out available without carrying account telemetry into the phone nav. */
+  .sidebar-footer{
+    position:fixed!important;
+    top:7px;right:7px;left:auto;bottom:auto;
+    width:auto!important;
+    display:block!important;
+    margin:0!important;
+    padding:0!important;
+    border:0!important;
+    background:transparent!important;
+    z-index:1003;
+  }
+  .sidebar-footer .user-readout,
+  .sidebar-footer .admin-access-btn{display:none!important}
+  .sidebar-footer .signout-btn{
+    width:auto!important;
+    min-width:0!important;
+    min-height:34px;
+    margin:0!important;
+    padding:7px 9px!important;
+    border-color:rgba(79,168,196,.28)!important;
+    background:rgba(5,13,18,.94)!important;
+    font-size:.54rem!important;
+    letter-spacing:.07em!important;
+  }
+
+  /* Compact mobile header. */
+  .topbar{
+    position:sticky!important;
+    top:0;
+    min-height:52px!important;
+    padding:8px 66px 8px 10px!important;
+    gap:8px!important;
+    z-index:900!important;
+    border-bottom-color:rgba(79,168,196,.28)!important;
+  }
+  .page-id{gap:9px!important;width:100%;min-width:0}
+  .page-bracket{width:5px!important;height:28px!important;flex:0 0 auto}
+  .page-id strong{
+    max-width:calc(100vw - 105px);
+    font-size:.76rem!important;
+    letter-spacing:.065em!important;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .page-id span:not(.page-bracket){display:none!important}
+  .top-telemetry{display:none!important}
+
+  /* Shared phone content system. */
+  .page-content{
+    width:100%!important;
+    max-width:none!important;
+    padding:12px 10px 24px!important;
+  }
+  .hud-panel,
+  .hud-panel.compact{
+    padding:15px 13px!important;
+    clip-path:polygon(0 0,calc(100% - 11px) 0,100% 11px,100% 100%,11px 100%,0 calc(100% - 11px));
+  }
+  .hero-grid,.content-grid,.form-grid{
+    grid-template-columns:1fr!important;
+    gap:10px!important;
+  }
+  .hero-grid,.content-grid{margin-bottom:10px!important;margin-top:10px!important}
+  .stack{gap:10px!important}
+  .section-head{
+    align-items:flex-start!important;
+    flex-direction:column!important;
+    gap:7px!important;
+    margin-bottom:12px!important;
+  }
+  .section-head h2{font-size:1.24rem!important;line-height:1.05}
+  .section-head p{display:none!important}
+  .section-code{font-size:.56rem!important;letter-spacing:.07em!important}
+  .hud-kicker{font-size:.61rem!important;margin-bottom:9px!important}
+  .hero-title{
+    font-size:clamp(2.55rem,13vw,4rem)!important;
+    line-height:.84!important;
+    letter-spacing:-.025em!important;
+  }
+  .hero-title small{
+    font-size:.72rem!important;
+    margin-bottom:10px!important;
+    letter-spacing:.08em!important;
+  }
+  .hero-copy{
+    margin-top:12px!important;
+    font-size:.88rem!important;
+    line-height:1.45!important;
+  }
+  .hero-actions{
+    display:grid!important;
+    grid-template-columns:1fr 1fr;
+    gap:7px!important;
+    margin-top:15px!important;
+  }
+  .hero-actions .hud-button{text-align:center}
+  .hud-button,button.hud-button{
+    min-height:43px!important;
+    padding:9px 11px!important;
+    font-size:.64rem!important;
+    letter-spacing:.065em!important;
+  }
+
+  /* Home becomes a glanceable command screen instead of a stacked desktop dashboard. */
+  main.page-content>.hero-grid:first-child>aside.hud-panel.compact.amber{display:none!important}
+  .metric-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:8px!important;
+    margin:10px 0!important;
+  }
+  .metric-card{min-height:94px!important;padding:11px!important}
+  .metric-label{font-size:.56rem!important;letter-spacing:.075em!important}
+  .metric-value{font-size:1.42rem!important;margin:14px 0 5px!important}
+  .metric-detail{font-size:.56rem!important;line-height:1.25!important}
+  .command-row{
+    grid-template-columns:30px minmax(0,1fr) auto!important;
+    gap:9px!important;
+    padding:11px 0!important;
+  }
+  .command-row .command-icon{width:30px;height:30px}
+  .command-row h3{font-size:.88rem!important;margin:0!important}
+  main.page-content>.content-grid .command-row p{display:none!important}
+  .command-row>a{
+    grid-column:auto!important;
+    font-size:.58rem!important;
+    align-self:center;
+    white-space:nowrap;
+  }
+  .telemetry-row{
+    gap:9px!important;
+    padding:8px 0!important;
+    font-size:.62rem!important;
+    letter-spacing:.055em!important;
+  }
+
+  /* Forms and actions: one thumb-friendly column, no accidental horizontal expansion. */
+  input,textarea,select{max-width:100%;font-size:16px!important}
+  .form-actions,.split-actions{
+    gap:7px!important;
+    flex-wrap:wrap!important;
+  }
+  .form-actions .hud-button{flex:1 1 auto}
+  .resource-row,.friend-row{
+    min-width:0;
+    align-items:flex-start!important;
+  }
+
+  /* Player Suite + Admin tabs behave like an app tab strip instead of a desktop button grid. */
+  .page-content[data-tab-scope]>.hud-panel:first-child .hero-copy{display:none!important}
+  .page-content[data-tab-scope]>.tabs,
+  #adminDashboard>.tabs{
+    position:sticky!important;
+    top:52px;
+    z-index:120;
+    display:flex!important;
+    grid-template-columns:none!important;
+    gap:6px!important;
+    overflow-x:auto!important;
+    overscroll-behavior-x:contain;
+    scrollbar-width:none;
+    margin:0 -10px 10px!important;
+    padding:8px 10px!important;
+    border-top:1px solid rgba(79,168,196,.12);
+    border-bottom:1px solid rgba(79,168,196,.24);
+    background:rgba(4,10,14,.97);
+    backdrop-filter:blur(10px);
+  }
+  .page-content[data-tab-scope]>.tabs::-webkit-scrollbar,
+  #adminDashboard>.tabs::-webkit-scrollbar{display:none}
+  .page-content[data-tab-scope]>.tabs .tab,
+  #adminDashboard>.tabs .tab{
+    flex:0 0 auto!important;
+    width:auto!important;
+    min-height:40px!important;
+    padding:8px 11px!important;
+    white-space:nowrap!important;
+    font-size:.6rem!important;
+  }
+  .panel{min-width:0}
+  .account-profile-layout,
+  .faction-command-columns,
+  .character-dashboard-grid,
+  .friends-grid{
+    grid-template-columns:1fr!important;
+    gap:10px!important;
+  }
+  .account-profile-layout{justify-items:center}
+  .account-profile-form{width:100%}
+  .account-photo-frame{width:88px!important;height:88px!important}
+  .account-user-id-value{min-width:0}
+  .account-user-id-value strong{
+    min-width:0;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .registration-panel{margin-top:10px}
+  .resource-stockpile-grid{grid-template-columns:1fr!important;gap:7px!important}
+  .resource-stockpile-item{min-height:58px!important;padding:10px 12px!important}
+  .resource-stockpile-qty{font-size:1rem!important}
+  .resource-contribution-controls{grid-template-columns:1fr!important}
+  .character-identity-panel{order:-1}
+  .character-standing-grid{grid-template-columns:1fr 1fr!important}
+  .character-standing-block{min-height:74px!important;padding:12px!important}
+  .inventory-slot-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+  .faction-command-metrics{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .table-wrap{
+    width:100%;
+    max-width:100%;
+    overflow-x:auto!important;
+    -webkit-overflow-scrolling:touch;
+    overscroll-behavior-x:contain;
+  }
+  .data-table{min-width:650px}
+
+  /* Exchange market rows become vertical transaction cards. */
+  #marketList{gap:10px!important}
+  .exchange-station-card{padding:12px!important}
+  .exchange-station-head{align-items:flex-start!important;flex-direction:column!important}
+  .exchange-station-tools{width:100%!important;justify-content:stretch!important}
+  .exchange-sort-label{flex:1 1 100%!important}
+  .exchange-sort{width:100%!important;min-width:0!important}
+  .exchange-collapse{flex:0 0 auto}
+  .station-resource-row{
+    display:grid!important;
+    grid-template-columns:1fr!important;
+    gap:9px!important;
+    align-items:start!important;
+    padding:12px 0!important;
+  }
+  .station-resource-row>div:last-child{
+    display:grid!important;
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+    justify-content:stretch!important;
+    gap:6px!important;
+  }
+  .station-resource-row>div:last-child>span{
+    text-align:center;
+    font-size:.6rem;
+  }
+  .station-resource-row .station-resource-qty{
+    width:100%!important;
+    grid-column:1/-1;
+  }
+  .station-resource-row .station-resource-buy,
+  .station-resource-row .station-resource-sell{
+    width:100%;
+  }
+  .station-resource-row .station-resource-buy{grid-column:1/2}
+  .station-resource-row .station-resource-sell{grid-column:2/4}
+
+  /* Map: canvas first, controls second. No phone viewport is spent on duplicate telemetry. */
+  .map-page{
+    width:100%!important;
+    height:auto!important;
+    min-height:0!important;
+    padding:0 0 10px!important;
+    display:block!important;
+  }
+  .map-hudbar{display:none!important}
+  .map-workspace-unified{
+    display:flex!important;
+    flex-direction:column!important;
+    gap:9px!important;
+    height:auto!important;
+    min-height:0!important;
+    overflow:visible!important;
+    padding:8px!important;
+  }
+  .map-canvas-shell{
+    order:1!important;
+    width:100%!important;
+    height:calc(100svh - 132px)!important;
+    min-height:420px!important;
+    max-height:680px;
+    grid-row:auto!important;
+    position:relative!important;
+  }
+  .map-command-panel{
+    order:2!important;
+    width:100%!important;
+    min-width:0!important;
+    max-height:none!important;
+    overflow:visible!important;
+  }
+  .map-command-head,.politics-command-head{min-height:48px!important;padding:9px 11px!important}
+  .map-panel-collapse{display:none!important}
+  .map-command-tabs,.politics-command-tabs{
+    overflow-x:auto!important;
+    overscroll-behavior-x:contain;
+    scrollbar-width:none;
+  }
+  .map-command-tabs::-webkit-scrollbar,.politics-command-tabs::-webkit-scrollbar{display:none}
+  .map-command-tab,.politics-command-tab{
+    flex:0 0 auto!important;
+    min-height:40px;
+    padding:9px 10px!important;
+    font-size:.57rem!important;
+  }
+  .map-command-content,.politics-command-content{
+    padding:12px!important;
+    overflow:visible!important;
+    max-height:none!important;
+  }
+  .map-command-panel.collapsed{
+    width:100%!important;min-width:0!important;height:auto!important;
+  }
+  .map-command-panel.collapsed .map-command-tabs{display:flex!important}
+  .map-command-panel.collapsed .map-command-content{display:block!important}
+  .map-command-panel.collapsed .map-command-head>div{display:grid!important}
+  .map-button-grid{grid-template-columns:1fr 1fr!important}
+  .map-canvas-readout{
+    max-width:calc(100% - 16px);
+    font-size:.49rem!important;
+    line-height:1.3;
+  }
+
+  /* Politics: chamber first, command console second. */
+  .politics-command-screen{padding:8px!important}
+  .politics-workspace{
+    display:flex!important;
+    flex-direction:column!important;
+    gap:9px!important;
+    height:auto!important;
+    min-height:0!important;
+  }
+  .politics-stage{
+    order:1!important;
+    min-height:0!important;
+    width:100%;
+  }
+  .politics-stage-tabs{
+    justify-content:stretch!important;
+    gap:5px!important;
+    margin-bottom:6px!important;
+  }
+  .politics-stage-tab{
+    flex:1 1 0;
+    min-height:38px;
+    padding:8px 6px!important;
+    font-size:.58rem!important;
+  }
+  .politics-command-panel{
+    order:2!important;
+    width:100%!important;
+    min-width:0!important;
+    max-height:none!important;
+    overflow:visible!important;
+  }
+  .politics-command-panel.collapsed{
+    width:100%!important;
+    min-width:0!important;
+    height:auto!important;
+  }
+  .politics-command-panel.collapsed .politics-command-tabs{display:flex!important}
+  .politics-command-panel.collapsed .politics-command-content{display:block!important}
+  .politics-command-panel.collapsed .politics-command-head>div{display:grid!important}
+  .politics-stage-panel.active>.senate-stage{
+    width:100%!important;
+    height:52svh!important;
+    min-height:360px!important;
+    max-height:520px;
+  }
+  #senateCanvas{width:100%!important;height:100%!important;min-height:0!important}
+  .senate-stage-label{top:9px!important;left:10px!important;font-size:.48rem!important}
+  .senate-stage-footer{
+    left:10px!important;right:10px!important;bottom:8px!important;
+    font-size:.48rem!important;
+  }
+  .senate-stage-footer span:first-child{display:none!important}
+  .imperial-offices-board{min-height:0!important;padding:12px!important}
+  .imperial-office-feature,.imperial-office-section>div{padding:12px!important}
+  .imperial-office-section{grid-template-columns:1fr!important;gap:7px!important}
+
+  /* Admin: mobile GM tools prioritize the working surface and prevent table/form blowout. */
+  body>main.page-content{padding:10px 9px 24px!important}
+  body>main.page-content>.hud-panel:first-child .hero-copy{display:none!important}
+  #adminDashboard>.hud-panel .split-actions{align-items:stretch!important;flex-direction:column!important}
+  #adminDashboard>.hud-panel .form-actions{width:100%}
+  #adminDashboard>.hud-panel .form-actions .hud-button{flex:1}
+  .admin-map-editor,.admin-map-editor-v2{
+    display:flex!important;
+    flex-direction:column!important;
+    height:auto!important;
+    min-height:0!important;
+    overflow:visible!important;
+    gap:9px!important;
+  }
+  .admin-map-editor-v2 .admin-map-canvas-shell,
+  .admin-map-canvas-shell{
+    order:1!important;
+    width:100%!important;
+    height:58svh!important;
+    min-height:420px!important;
+    max-height:620px;
+    position:relative!important;
+    top:auto!important;
+    grid-row:auto!important;
+  }
+  .admin-map-editor-v2 .admin-map-command,
+  .admin-map-tools{
+    order:2!important;
+    width:100%!important;
+    max-height:none!important;
+    overflow:visible!important;
+  }
+  .admin-map-subtabs{
+    display:flex!important;
+    grid-template-columns:none!important;
+    overflow-x:auto!important;
+    gap:5px!important;
+    scrollbar-width:none;
+  }
+  .admin-map-subtabs::-webkit-scrollbar{display:none}
+  .admin-map-subtab{
+    flex:0 0 auto!important;
+    min-width:112px;
+    padding:8px!important;
+  }
+  .admin-map-tool-viewport{overflow:visible!important}
+  .admin-map-panel .button-grid{grid-template-columns:1fr 1fr!important}
+
+  /* Chat opens above the fixed phone navigation and can use the phone screen deliberately. */
+  .game-chat{
+    left:8px!important;
+    right:8px!important;
+    bottom:calc(72px + env(safe-area-inset-bottom))!important;
+    width:auto!important;
+    height:min(62svh,520px)!important;
+    max-height:calc(100svh - 140px);
+  }
+  .game-chat.minimized{height:42px!important}
+}
+
+@media (max-width:380px){
+  .nav-label{font-size:.43rem!important}
+  .metric-grid{grid-template-columns:1fr!important}
+  .hero-actions{grid-template-columns:1fr!important}
+  .character-standing-grid{grid-template-columns:1fr!important}
+  .map-canvas-shell{min-height:390px!important}
+  .politics-stage-panel.active>.senate-stage{min-height:330px!important}
+  .admin-map-panel .button-grid{grid-template-columns:1fr!important}
+}
+
