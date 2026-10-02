@@ -282,14 +282,19 @@
       return;
     }
     $("transactionEmpty").hidden = true;
-    body.innerHTML = state.transactions.map(row => `
+    body.innerHTML = state.transactions.map(row => {
+      const typeLabel=String(row.kind || "Transaction")
+        .replace(/_/g," ")
+        .replace(/\b\w/g,char=>char.toUpperCase());
+      return `
       <tr>
         <td>${esc(new Date(row.created_at).toLocaleDateString())}</td>
-        <td>${esc(row.kind || "Transaction")}</td>
+        <td>${esc(typeLabel)}</td>
         <td>${esc(row.description || "—")}</td>
         <td>${row.amount >= 0 ? "+" : ""}${esc(fmt(row.amount))} ${esc(row.currency || "Aureum")}</td>
         <td>${row.balance_after == null ? "—" : esc(fmt(row.balance_after))}</td>
-      </tr>`).join("");
+      </tr>`;
+    }).join("");
   }
 
   function renderAssets() {
