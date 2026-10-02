@@ -1411,24 +1411,24 @@
   });
 
   const mapWorkspace=document.querySelector(".map-workspace-unified");
+  const mapCommandPanel=document.querySelector(".map-command-panel");
   const mapCollapseButton=$("mapPanelCollapse");
+  const mobileMapQuery=window.matchMedia("(max-width:760px)");
 
-  function setMapPanelCollapsed(collapsed){
-    if(!mapWorkspace || !mapCollapseButton) return;
+  function setMapPanelCollapsed(collapsed,{skipResize=false}={}){
+    if(!mapWorkspace || !mapCommandPanel || !mapCollapseButton) return;
     mapWorkspace.classList.toggle("map-panel-collapsed",collapsed);
+    mapCommandPanel.classList.toggle("map-command-collapsed",collapsed);
+    mapCommandPanel.classList.remove("map-mobile-initial-collapsed");
     mapCollapseButton.textContent=collapsed ? "›" : "‹";
     mapCollapseButton.setAttribute("aria-expanded",String(!collapsed));
     mapCollapseButton.setAttribute("aria-label",collapsed ? "Open map controls" : "Collapse map controls");
-    setTimeout(()=>resizeCanvas(false),190);
+    if(!skipResize) setTimeout(()=>resizeCanvas(false),190);
   }
 
   mapCollapseButton?.addEventListener("click",()=>{
-    setMapPanelCollapsed(!mapWorkspace?.classList.contains("map-panel-collapsed"));
+    setMapPanelCollapsed(!mapCommandPanel?.classList.contains("map-command-collapsed"));
   });
-
-  if(window.matchMedia("(max-width:760px)").matches){
-    setMapPanelCollapsed(true);
-  }
 
   $("mapCenterBtn").addEventListener("click",centerMap);
 
@@ -1594,6 +1594,15 @@
       buildCircle();
       renderUi();
       resizeCanvas(true);
+
+      if(mobileMapQuery.matches){
+        requestAnimationFrame(()=>{
+          setMapPanelCollapsed(true,{skipResize:true});
+          requestAnimationFrame(()=>resizeCanvas(false));
+        });
+      }else{
+        mapCommandPanel?.classList.remove("map-mobile-initial-collapsed");
+      }
     } catch (error) {
       const page=document.querySelector(".map-page");
       if (page) page.insertAdjacentHTML("afterbegin",'<div class="notice">MAP SYSTEM ERROR // '+esc(error.message)+'</div>');
