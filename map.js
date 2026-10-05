@@ -739,14 +739,15 @@
     if (!selectedHex) return;
     const p=worldToScreen(hexToWorld(selectedHex.q,selectedHex.r));
     const size=hexSize*camera.zoom;
-    const halfW=size*Math.sqrt(3)/2;
-    const halfH=size;
     ctx.save();
     ctx.beginPath();
+    // Match the exact pointy-top geometry used by the map hex grid.
+    // The previous selection multiplied X by sqrt(3)/2 a second time,
+    // which made the cyan outline look horizontally compressed.
     for(let i=0;i<6;i++){
       const angle=Math.PI/6 + i*Math.PI/3;
-      const x=p.x+halfW*Math.cos(angle);
-      const y=p.y+halfH*Math.sin(angle);
+      const x=p.x+size*Math.cos(angle);
+      const y=p.y+size*Math.sin(angle);
       if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
     }
     ctx.closePath();
