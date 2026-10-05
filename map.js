@@ -1193,7 +1193,9 @@
     if(station){
       facilityControls += '<article class="notice"><strong>'+esc(station.station_name || "Guilded Concord Trade Station")+'</strong><div class="section-code">GUILDED CONCORD EXCHANGE</div><a class="hud-button secondary" href="exchange-markets.html" style="display:inline-flex;margin-top:8px">OPEN MARKET</a></article>';
     }
-    $("selectedFacilityControls").innerHTML=facilityControls;
+    $("selectedFacilityControls").innerHTML=facilityControls
+      ? '<div class="section-code map-panel-divider location-actions-heading">LOCATION ACTIONS</div>'+facilityControls
+      : "";
 
     document.querySelectorAll(".refinery-connect-btn").forEach(button=>button.addEventListener("click",async()=>{
       const refineryId=button.dataset.refinery;
