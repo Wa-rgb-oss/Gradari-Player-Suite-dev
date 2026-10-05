@@ -1070,6 +1070,16 @@
   }
   if(!window.__gmMapProductionCountdown)window.__gmMapProductionCountdown=setInterval(updateMapProductionCountdowns,1000);
 
+  function mapFacilityDailyOutputs(facility){
+    const type=facilityTypeById(facility.facility_type_id),code=facilityCode(type),health=Math.max(0,Math.min(100,Number(facility.health??100)))/100,modifier=Number(facility.production_modifier??1),outputs=[];
+    if(code.includes("AGRI")||code.includes("FARM")) outputs.push({code:"food",quantity:360*modifier*health});
+    else if(code.includes("MINE")||code.includes("EXTRACT")) (player.resourceDeposits||[]).filter(d=>d.location_ref===facility.location_ref).forEach(d=>outputs.push({code:String(d.resource_code),quantity:360*Number(d.richness??1)*modifier*health}));
+    else if(code.includes("REFIN")){const seen=new Set();(player.facilityConnections||[]).filter(x=>x.refinery_facility_id===facility.id).forEach(link=>{const extractor=(player.facilities||[]).find(x=>x.id===link.extractor_facility_id);if(!extractor)return;(player.resourceDeposits||[]).filter(d=>d.location_ref===extractor.location_ref).forEach(d=>{const out={gold_ore:"refined_gold",vyr_ore:"vyrsteel",aetherite:"refined_aetherite"}[d.resource_code];if(!out||seen.has(d.resource_code))return;seen.add(d.resource_code);outputs.push({code:out,quantity:288*Number(d.richness??1)*modifier*health});});});}
+    else if(code.includes("FACTORY")){const order=(player.factoryOrders||[]).find(x=>x.facility_id===facility.id&&["producing","queued","active","in_progress"].includes(String(x.status||"").toLowerCase()));const recipe=(player.factoryRecipes||[]).find(x=>x.code===order?.recipe_code);if(recipe){const hours=Math.max(1,Number(recipe.production_hours||recipe.hours_per_unit||recipe.duration_hours||1));outputs.push({code:String(recipe.output_resource_code),quantity:(36/hours)*Number(recipe.output_quantity||1)*modifier*health});}}
+    return outputs;
+  }
+  function mapFacilityProductionRateHtml(facility){const names=new Map((player.resourceCatalog||[]).map(x=>[String(x.code),x.name])),outputs=mapFacilityDailyOutputs(facility);return outputs.length?'<div class="section-code">PRODUCTION // '+outputs.map(o=>'+'+fmt(o.quantity)+' '+esc(String(names.get(o.code)||o.code).toUpperCase())+' / DAY').join(' // ')+'</div>':'<div class="section-code">PRODUCTION // NO ACTIVE DAILY OUTPUT</div>';}
+
   function renderSelection() {
     if (!selectedHex) {
       $("mapSelectedReadout").textContent="SELECT A HEX";
@@ -1139,7 +1149,7 @@
       const order=(player.factoryOrders||[]).find(x=>x.facility_id===row.id&&x.status==="producing");
       const nextAt=order?.completes_at||clock?.next_production_at;
       const timer=nextAt?'<div class="section-code">'+(order?'PRODUCTION':'NEXT OUTPUT')+' // <span data-map-countdown="'+esc(nextAt)+'">--:--:--</span></div>':'';
-      return '<article class="notice map-list-row"><div><strong>'+esc(row.name || type?.name || "Holding")+'</strong><div class="section-code">'+esc(type?.name || "FACILITY")+'</div>'+timer+'</div><span>'+esc(fmt(type?.upkeep_aureum_per_day ?? Number(type?.upkeep_aureum_per_cycle||0)))+' A / DAY</span></article>';
+      return '<article class="notice map-list-row"><div><strong>'+esc(row.name || type?.name || "Holding")+'</strong><div class="section-code">'+esc(type?.name || "FACILITY")+'</div>'+mapFacilityProductionRateHtml(row)+timer+'</div><span>'+esc(fmt(type?.upkeep_aureum_per_day ?? Number(type?.upkeep_aureum_per_cycle||0)))+' A / DAY</span></article>';
     }).join("");
     updateMapProductionCountdowns();
 
