@@ -3210,3 +3210,18 @@ dialog::backdrop{background:rgba(0,0,0,.72);backdrop-filter:blur(2px)}
   }
 }
 
+/* DAILY FACILITY PRODUCTION PANEL */
+.production-facility-row{display:grid;gap:14px}
+.production-facility-head{display:flex;align-items:center;justify-content:space-between;gap:14px}
+.production-facility-head strong{color:var(--text)}
+.production-output-list{display:grid;gap:7px;padding-top:10px;border-top:1px solid rgba(134,215,232,.14)}
+.production-output-row{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:9px 11px;background:rgba(3,13,18,.48);border:1px solid rgba(134,215,232,.11)}
+.production-output-row>div{display:grid;gap:3px}
+.production-output-row span{font-family:"Share Tech Mono",Consolas,monospace;font-size:.64rem;letter-spacing:.1em;color:var(--muted)}
+.production-output-row>strong{font-family:"Share Tech Mono",Consolas,monospace;font-size:.8rem;letter-spacing:.04em;color:var(--accent,#86d7e8);white-space:nowrap}
+.production-output-empty{font-family:"Share Tech Mono",Consolas,monospace;font-size:.7rem;letter-spacing:.08em;color:var(--muted);padding:4px 0}
+@media(max-width:720px){
+ .production-facility-head,.production-output-row{align-items:flex-start;flex-direction:column}
+ .production-output-row>strong{white-space:normal}
+}
+
