@@ -80,6 +80,7 @@
       if(window.matchMedia("(max-width:760px)").matches) return;
       if((e.key==="t"||e.key==="T"||e.key==="Enter")&&!typing&&!["INPUT","TEXTAREA","SELECT"].includes(document.activeElement?.tagName)){e.preventDefault();focusChat()}
     });
+    window.addEventListener("gm:open-chat",()=>{ setMinimized(false); loadMessages().catch(()=>{}); });
     document.addEventListener("gm:friends-updated",()=>loadFriends().then(loadMessages));
     timer=setInterval(()=>{
       const chat=document.getElementById("gmGameChat");
