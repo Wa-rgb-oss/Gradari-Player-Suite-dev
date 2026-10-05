@@ -735,6 +735,31 @@
     ctx.restore();
   }
 
+  function drawSelection() {
+    if (!selectedHex) return;
+    const p=worldToScreen(hexToWorld(selectedHex.q,selectedHex.r));
+    const size=hexSize*camera.zoom;
+    const halfW=size*Math.sqrt(3)/2;
+    const halfH=size;
+    ctx.save();
+    ctx.beginPath();
+    for(let i=0;i<6;i++){
+      const angle=Math.PI/6 + i*Math.PI/3;
+      const x=p.x+halfW*Math.cos(angle);
+      const y=p.y+halfH*Math.sin(angle);
+      if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    }
+    ctx.closePath();
+    ctx.strokeStyle="rgba(134,215,232,.96)";
+    ctx.lineWidth=Math.max(1.5,2*camera.zoom);
+    ctx.shadowColor="rgba(134,215,232,.45)";
+    ctx.shadowBlur=7*camera.zoom;
+    ctx.stroke();
+    ctx.shadowBlur=0;
+    ctx.restore();
+  }
+
+
   function draw() {
     const rect=canvas.getBoundingClientRect();
     ctx.clearRect(0,0,rect.width,rect.height);
