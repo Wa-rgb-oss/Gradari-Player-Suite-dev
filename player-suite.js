@@ -746,11 +746,6 @@
     $("openCharacterCreate").hidden = false;
     setState(characterState, "");
   });
-  $("toggleCharacterPresence")?.addEventListener("click", () => {
-    const drawer = $("characterPresenceDrawer");
-    drawer.hidden = !drawer.hidden;
-  });
-
   profileForm.addEventListener("submit", async event => {
     event.preventDefault();
     const data = formObject(profileForm);
