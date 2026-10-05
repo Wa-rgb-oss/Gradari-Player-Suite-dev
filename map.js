@@ -702,68 +702,36 @@
     if (!h) return;
 
     const p=worldToScreen(hexToWorld(h.q,h.r));
-    const r=Math.max(12,17*camera.zoom);
+    const scale=Math.max(.72,Math.min(1.35,camera.zoom));
+    const pinH=Math.max(24,30*scale);
+    const pinW=Math.max(18,22*scale);
+    const headR=pinW*.5;
+
     ctx.save();
+    ctx.translate(p.x,p.y-pinH*.46);
+
+    // Player position is a blue cartographic pin rather than a generic circle.
     ctx.beginPath();
-    ctx.arc(p.x,p.y,r,0,Math.PI*2);
-    ctx.strokeStyle="#d8a35d";
-    ctx.lineWidth=Math.max(2,2.3*camera.zoom);
-    ctx.shadowColor="rgba(216,163,93,.55)";
-    ctx.shadowBlur=12*camera.zoom;
+    ctx.moveTo(0,pinH*.5);
+    ctx.bezierCurveTo(-pinW*.08,pinH*.36,-pinW*.5,pinH*.13,-pinW*.5,-pinH*.10);
+    ctx.arc(0,-pinH*.10,headR,Math.PI,0,false);
+    ctx.bezierCurveTo(pinW*.5,pinH*.13,pinW*.08,pinH*.36,0,pinH*.5);
+    ctx.closePath();
+
+    ctx.fillStyle="rgba(62,166,218,.96)";
+    ctx.strokeStyle="rgba(168,229,255,.98)";
+    ctx.lineWidth=Math.max(1.5,2*scale);
+    ctx.shadowColor="rgba(62,166,218,.72)";
+    ctx.shadowBlur=12*scale;
+    ctx.fill();
     ctx.stroke();
+
     ctx.shadowBlur=0;
-
     ctx.beginPath();
-    ctx.moveTo(p.x-r*.5,p.y);
-    ctx.lineTo(p.x+r*.5,p.y);
-    ctx.moveTo(p.x,p.y-r*.5);
-    ctx.lineTo(p.x,p.y+r*.5);
-    ctx.strokeStyle="rgba(240,201,143,.88)";
-    ctx.lineWidth=1;
-    ctx.stroke();
-    ctx.restore();
-  }
+    ctx.arc(0,-pinH*.10,headR*.38,0,Math.PI*2);
+    ctx.fillStyle="rgba(235,249,255,.98)";
+    ctx.fill();
 
-  function drawSelection() {
-    const targets=[
-      {hex:hoverHex,color:"rgba(134,215,232,.65)",width:1.5},
-      {hex:selectedHex,color:"#d8a35d",width:2.8}
-    ];
-    targets.forEach(item => {
-      if (!item.hex) return;
-      hexPath(item.hex.q,item.hex.r);
-      ctx.strokeStyle=item.color;
-      ctx.lineWidth=Math.max(item.width,item.width*camera.zoom);
-      ctx.stroke();
-    });
-  }
-
-  function drawCanonLocations() {
-    ctx.save();
-    Object.entries(canonLocations).forEach(([ref,location]) => {
-      const h=parseRef(ref);
-      if (!h || !mapHexSet.has(ref)) return;
-      const p=worldToScreen(hexToWorld(h.q,h.r));
-      const markerSize=Math.max(5,7*camera.zoom);
-      ctx.beginPath();
-      ctx.arc(p.x,p.y,markerSize,0,Math.PI*2);
-      ctx.fillStyle="rgb(216,163,93)";
-      ctx.fill();
-      ctx.strokeStyle="rgb(255,232,190)";
-      ctx.lineWidth=Math.max(1,1.5*camera.zoom);
-      ctx.stroke();
-      if (camera.zoom >= .55) {
-        const fontSize=Math.max(9,11*camera.zoom);
-        ctx.font="600 "+fontSize+"px Share Tech Mono, Consolas, monospace";
-        ctx.textAlign="center";
-        ctx.textBaseline="bottom";
-        ctx.strokeStyle="rgb(2,8,12)";
-        ctx.lineWidth=4;
-        strokeMapText(location.name,p.x,p.y-markerSize-5);
-        ctx.fillStyle="rgb(241,215,176)";
-        ctx.fillText(location.name,p.x,p.y-markerSize-5);
-      }
-    });
     ctx.restore();
   }
 
