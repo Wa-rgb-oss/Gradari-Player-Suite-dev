@@ -328,6 +328,47 @@
     empty.hidden=true;
   }
 
+  function facilityDailyOutputs(facility,typeMap,ownedFacilities){
+    const type=typeMap.get(facility.facility_type_id);
+    const code=String(type?.code || "").toUpperCase();
+    const health=Math.max(0,Math.min(100,Number(facility.health ?? 100)))/100;
+    const modifier=Number(facility.production_modifier ?? 1);
+    const outputs=[];
+    if(code==="AGRI_COMPLEX") outputs.push({code:"food",quantity:360*modifier*health});
+    else if(code==="MINE"){
+      (state.resourceDeposits||[]).filter(d=>d.location_ref===facility.location_ref).forEach(d=>outputs.push({code:String(d.resource_code),quantity:360*Number(d.richness??1)*modifier*health}));
+    }else if(code==="REFINERY"){
+      const seen=new Set();
+      (state.facilityConnections||[]).filter(x=>x.refinery_facility_id===facility.id).forEach(link=>{
+        const extractor=ownedFacilities.find(x=>x.id===link.extractor_facility_id) || (state.facilities||[]).find(x=>x.id===link.extractor_facility_id);
+        if(!extractor) return;
+        (state.resourceDeposits||[]).filter(d=>d.location_ref===extractor.location_ref).forEach(d=>{
+          const out={gold_ore:"refined_gold",vyr_ore:"vyrsteel",aetherite:"refined_aetherite"}[d.resource_code];
+          if(!out||seen.has(d.resource_code)) return; seen.add(d.resource_code);
+          outputs.push({code:out,quantity:288*Number(d.richness??1)*modifier*health});
+        });
+      });
+    }else if(code==="FACTORY"){
+      const order=(state.factoryOrders||[]).find(x=>x.facility_id===facility.id&&["producing","queued","active","in_progress"].includes(String(x.status||"").toLowerCase()));
+      const recipe=(state.factoryRecipes||[]).find(x=>x.code===order?.recipe_code);
+      if(recipe){
+        const hours=Math.max(1,Number(recipe.production_hours||recipe.hours_per_unit||recipe.duration_hours||1));
+        outputs.push({code:String(recipe.output_resource_code),quantity:(36/hours)*Number(recipe.output_quantity||1)*modifier*health});
+      }
+    }
+    return outputs;
+  }
+
+  function facilityProductionRateHtml(facility,typeMap,ownedFacilities){
+    const resourceMap=new Map((state.resourceCatalog||[]).map(x=>[String(x.code),x]));
+    const outputs=facilityDailyOutputs(facility,typeMap,ownedFacilities);
+    if(!outputs.length) return '<div class="section-code">PRODUCTION // NO ACTIVE DAILY OUTPUT</div>';
+    return '<div class="section-code">PRODUCTION // '+outputs.map(o=>{
+      const resource=resourceMap.get(o.code);
+      return '+'+fmt(o.quantity)+' '+String(resource?.name||o.code).toUpperCase()+' / DAY';
+    }).join(' // ')+'</div>';
+  }
+
   function renderEconomy() {
     $("economyBalance").textContent = fmt(state.wallet?.balance);
     $("economyCurrency").textContent = String(state.wallet?.currency || "Aureum").toUpperCase();
@@ -361,7 +402,7 @@
         const healthLabel=health>=75?"GOOD":health>=40?"DAMAGED":health>0?"CRITICAL":"OFFLINE";
         return '<article class="notice economy-facility-row">'+
           '<div><strong>'+esc(row.name || type?.name || "Facility")+'</strong>'+
-          '<div class="section-code">'+esc(type?.name || "FACILITY")+' // '+esc(row.location_ref || "LOCATION UNSET")+'</div>'+
+          '<div class="section-code">'+esc(type?.name || "FACILITY")+' // '+esc(row.location_ref || "LOCATION UNSET")+'</div>'+facilityProductionRateHtml(row,typeMap,ownedFacilities)+
           '<div class="facility-health"><span>FACILITY HEALTH</span><strong>'+esc(fmt(health))+'% // '+healthLabel+'</strong><div class="facility-health-track"><i style="width:'+health+'%"></i></div><small>'+esc(fmt(health))+'% PRODUCTION EFFECTIVENESS</small></div></div>'+
           '<div class="economy-facility-meta"><span class="status-chip '+(status==="ACTIVE"?"":"muted")+'">'+esc(status)+'</span>'+
           '<strong class="economy-facility-cost">'+(upkeep?'-'+esc(fmt(upkeep)):'0')+' AUREUM / DAY</strong>'+
