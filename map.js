@@ -1196,7 +1196,7 @@
       const linked=new Set((player.facilityConnections||[]).filter(x=>x.refinery_facility_id===refineryId).map(x=>x.extractor_facility_id));
       const candidates=factionFacilities().filter(row=>{
         const code=facilityCode(facilityTypeById(row.facility_type_id));
-        return (code.includes("EXTRACT")||code.includes("MINE"))&&!linked.has(row.id);
+        return (code.includes("EXTRACT")||code.includes("MINE"))&&!linked.has(row.id)&&row.location_ref===selectedHex?.ref;
       });
       if(!candidates.length) return setState($("mapBuildState"),"NO UNCONNECTED EXTRACTORS AVAILABLE","error");
       const menu=candidates.map((row,i)=>(i+1)+". "+(row.name||facilityTypeById(row.facility_type_id)?.name||"Extractor")+" // "+row.location_ref).join("\n");
