@@ -3295,3 +3295,21 @@ dialog::backdrop{background:rgba(0,0,0,.72);backdrop-filter:blur(2px)}
   .notifications-panel{top:52px;right:8px;width:calc(100vw - 16px);max-height:calc(100svh - 116px)}
 }
 
+/* NOTIFICATION ACCOUNT ACTION ROW */
+.sidebar-footer .notification-btn{
+  display:inline-grid;
+  vertical-align:top;
+}
+.sidebar-footer .notification-btn + .signout-btn{
+  display:inline-block;
+  width:calc(100% - 55px);
+  vertical-align:top;
+  margin-left:8px;
+}
+@media(max-width:760px){
+  .sidebar-footer .notification-btn + .signout-btn{
+    display:block;
+    width:auto!important;
+    margin-left:0!important;
+  }
+}
