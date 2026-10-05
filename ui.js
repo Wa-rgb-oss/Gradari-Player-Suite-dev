@@ -165,9 +165,9 @@
 
     function setOpen(open){panel.hidden=!open;button.classList.toggle("active",open);if(open) refresh();}
     function render(){
-      const visible=filter==="all"?items:items.filter(item=>item.type===filter);
+      const visible=filter==="all"?items:items.filter(item=>filter==="world"?(item.type==="world"||item.type==="friend_request"):item.type===filter);
       list.innerHTML=visible.map(item=>'<button type="button" class="notification-item '+(item.read?"":"unread")+'" data-notification-key="'+esc(readKey(item))+'">'+
-        '<span class="notification-item-type">'+(item.type==="message"?"COMMS":item.type==="event"?"EVENT":item.type==="world"?"WORLD":"NEWS")+'</span>'+
+        '<span class="notification-item-type">'+(item.type==="message"?"COMMS":item.type==="event"?"EVENT":item.type==="world"?"WORLD":item.type==="friend_request"?"SOCIAL":"NEWS")+'</span>'+
         '<span class="notification-item-body"><strong>'+esc(item.title)+'</strong><span>'+esc(item.summary)+'</span><small>'+esc(fmtDate(item.date))+'</small></span>'+
         (item.read?"":'<i class="notification-unread-dot" aria-hidden="true"></i>')+'</button>').join("");
       empty.hidden=visible.length>0;
@@ -176,19 +176,21 @@
     }
     async function refresh(){
       try{
-        const [news,events,messages,world,reads]=await Promise.all([
+        const [news,events,messages,world,friendRequests,reads]=await Promise.all([
           api("game_news?select=id,title,body,published_at,created_at&order=published_at.desc&limit=30"),
           api("game_events?select=id,title,description,event_type,status,created_at,starts_at&status=neq.draft&order=created_at.desc&limit=30"),
           api("game_chat_messages?channel=eq.direct&recipient_user_id=eq."+encodeURIComponent(uid)+"&select=id,sender_user_id,body,created_at&order=created_at.desc&limit=30"),
           api("world_state?player_visible=eq.true&select=key,label,category,value,updated_at&order=updated_at.desc&limit=20"),
+          api("friend_requests?receiver_user_id=eq."+encodeURIComponent(uid)+"&status=eq.pending&select=id,sender_user_id,created_at&order=created_at.desc&limit=30"),
           api("game_notification_reads?user_id=eq."+encodeURIComponent(uid)+"&select=notification_type,source_id,read_at&order=read_at.desc&limit=300")
         ]);
         const readSet=new Set((reads||[]).map(row=>row.notification_type+"::"+row.source_id));
-        const profileIds=[...new Set((messages||[]).map(row=>row.sender_user_id).filter(Boolean))];
+        const profileIds=[...new Set([...(messages||[]).map(row=>row.sender_user_id),...(friendRequests||[]).map(row=>row.sender_user_id)].filter(Boolean))];
         let profiles=[]; if(profileIds.length) profiles=await api("player_profiles?user_id=in.("+profileIds.map(encodeURIComponent).join(",")+")&select=user_id,display_name");
         const names=new Map((profiles||[]).map(row=>[row.user_id,row.display_name||"PLAYER"]));
         items=[
           ...(messages||[]).map(row=>({type:"message",id:row.id,title:names.get(row.sender_user_id)||"DIRECT MESSAGE",summary:String(row.body||"").slice(0,120),date:row.created_at})),
+          ...(friendRequests||[]).map(row=>({type:"friend_request",id:row.id,title:"FRIEND REQUEST",summary:(names.get(row.sender_user_id)||"PLAYER")+" sent you a friend request.",date:row.created_at})),
           ...(events||[]).map(row=>({type:"event",id:row.id,title:row.title||"NEW EVENT",summary:row.description||String(row.event_type||"EVENT").toUpperCase(),date:row.created_at})),
           ...(news||[]).map(row=>({type:"news",id:row.id,title:row.title||"ADMIN BULLETIN",summary:row.body||"NEW WORLD BULLETIN",date:row.published_at||row.created_at})),
           ...(world||[]).filter(row=>row.updated_at && Date.now()-new Date(row.updated_at).getTime()<1000*60*60*24*14).map(row=>({type:"world",id:String(row.key)+"::"+String(row.updated_at),title:row.label||"WORLD STATE UPDATED",summary:typeof row.value==="string"?row.value:"MACRO WORLD STATE UPDATED",date:row.updated_at}))
@@ -212,6 +214,7 @@
       const selected=items.find(item=>readKey(item)===target.dataset.notificationKey); if(!selected) return;
       await markRead([selected]);
       if(selected.type==="message"){window.dispatchEvent(new CustomEvent("gm:open-chat"));setOpen(false);}
+      else if(selected.type==="friend_request") window.location.href="player-suite.html#friends";
       else if(selected.type==="event"||selected.type==="news"||selected.type==="world") window.location.href="dashboard.html";
     });
     document.addEventListener("click",e=>{if(!panel.hidden&&!panel.contains(e.target)&&e.target!==button&&!button.contains(e.target))setOpen(false);});
