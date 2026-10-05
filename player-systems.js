@@ -529,20 +529,26 @@
     const identityLocation = $("characterIdentityLocation");
     if (identityLocation && living) identityLocation.textContent = String(living.location_name || living.location_ref || "LOCATION NOT SET").toUpperCase();
 
-    root.innerHTML = chars.map((char,index) => `
+    root.innerHTML = chars.map((char,index) => {
+      const mode=char.presence_mode==="public"?"public":"hidden";
+      return `
       <article class="notice character-presence-row" data-id="${esc(char.id)}">
         <div class="split-actions">
           <div><strong style="color:var(--text)">${esc(char.name)}</strong><div class="section-code">${esc(char.location_name || char.location_ref || "LOCATION NOT SET")}</div></div>
           <span class="status-chip ${counts[index]?"amber":"muted"}">${counts[index]} OTHER CHARACTER${counts[index]===1?"":"S"} PRESENT</span>
         </div>
-        <label style="margin-top:12px"><span>Presence Visibility</span>
-          <select class="presence-mode">
-            <option value="count_only" ${char.presence_mode==="count_only"?"selected":""}>Count only</option>
-            <option value="public" ${char.presence_mode==="public"?"selected":""}>Public presence</option>
-            <option value="hidden" ${char.presence_mode==="hidden"?"selected":""}>Hidden</option>
-          </select>
-        </label>
-      </article>`).join("");
+        <div class="presence-choice-list" style="margin-top:12px">
+          <label class="presence-choice ${mode==="public"?"selected":""}">
+            <input class="presence-mode" type="radio" name="presence-${esc(char.id)}" value="public" ${mode==="public"?"checked":""}>
+            <span><strong>PUBLIC PRESENCE</strong><small>Other players can see that you are here and see your character listed by name.</small></span>
+          </label>
+          <label class="presence-choice ${mode==="hidden"?"selected":""}">
+            <input class="presence-mode" type="radio" name="presence-${esc(char.id)}" value="hidden" ${mode==="hidden"?"checked":""}>
+            <span><strong>HIDE PRESENCE</strong><small>Your character is completely concealed from other players. You are not named and do not contribute to the visible character count.</small></span>
+          </label>
+        </div>
+      </article>`;
+    }).join("");
 
     root.querySelectorAll(".presence-mode").forEach(select => {
       select.addEventListener("change", async () => {
