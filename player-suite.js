@@ -381,6 +381,21 @@
     const typeMap=new Map((state.facilityTypes || []).map(row => [row.id,row]));
     renderProductionPanel(ownedFacilities,typeMap);
 
+    const storageFacilities=ownedFacilities.filter(row=>String(typeMap.get(row.facility_type_id)?.code||"").toUpperCase()==="STORAGE"&&String(row.status||"active").toLowerCase()==="active");
+    const storageCapacity=storageFacilities.length*5000;
+    const storageUsed=(state.playerResources||state.resources||[]).reduce((sum,row)=>sum+Math.max(0,Number(row.quantity||0)),0);
+    const storageAvailable=Math.max(0,storageCapacity-storageUsed);
+    const storagePct=storageCapacity>0?Math.min(100,(storageUsed/storageCapacity)*100):0;
+    if($("storageStatus")) $("storageStatus").textContent=fmt(storageUsed)+" / "+fmt(storageCapacity);
+    if($("storageUsed")) $("storageUsed").textContent=fmt(storageUsed)+" UNITS";
+    if($("storageCapacity")) $("storageCapacity").textContent=fmt(storageCapacity)+" UNITS";
+    if($("storageAvailable")) $("storageAvailable").textContent=fmt(storageAvailable)+" UNITS";
+    if($("storageFill")) $("storageFill").style.width=storagePct+"%";
+    if($("storageWarning")){
+      $("storageWarning").textContent=storageCapacity<=0?"NO STORAGE CAPACITY // RESOURCE PRODUCTION HALTED":storageAvailable<=0?"STORAGE FULL // RESOURCE PRODUCTION HALTED":"";
+      $("storageWarning").classList.toggle("error",storageCapacity<=0||storageAvailable<=0);
+    }
+
     facilityCount.textContent=ownedFacilities.length+" FACILIT"+(ownedFacilities.length===1?"Y":"IES");
     if(ownedFacilities.length){
       // Player-owned facilities currently debit Aureum upkeep each in-game day. Resource production
