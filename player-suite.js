@@ -191,6 +191,120 @@
     }
   }
 
+  function renderProductionPanel(ownedFacilities,typeMap){
+    const root=$("productionList");
+    const empty=$("productionEmpty");
+    if(!root || !empty) return;
+
+    const depositsByLocation=new Map();
+    (state.resourceDeposits || []).forEach(row=>{
+      const key=String(row.location_ref || "");
+      if(!depositsByLocation.has(key)) depositsByLocation.set(key,[]);
+      depositsByLocation.get(key).push(row);
+    });
+
+    const facilityById=new Map(ownedFacilities.map(row=>[row.id,row]));
+    const connectionsByRefinery=new Map();
+    (state.facilityConnections || []).forEach(connection=>{
+      if(!connectionsByRefinery.has(connection.refinery_facility_id)) connectionsByRefinery.set(connection.refinery_facility_id,[]);
+      connectionsByRefinery.get(connection.refinery_facility_id).push(connection);
+    });
+
+    const resourceMap=new Map((state.resourceCatalog || []).map(row=>[String(row.code),row]));
+    const activeFacilities=ownedFacilities.filter(row=>String(row.status || "active").toLowerCase()==="active");
+
+    const outputsForFacility=facility=>{
+      const type=typeMap.get(facility.facility_type_id);
+      const code=String(type?.code || "").toUpperCase();
+      const health=Math.max(0,Math.min(100,Number(facility.health ?? 100)))/100;
+      const modifier=Number(facility.production_modifier ?? 1);
+      const results=[];
+
+      if(code==="AGRI_COMPLEX"){
+        results.push({code:"food",quantity:360*modifier*health});
+      }else if(code==="MINE"){
+        for(const deposit of depositsByLocation.get(String(facility.location_ref || "")) || []){
+          const richness=Number(deposit.richness ?? 1);
+          results.push({
+            code:String(deposit.resource_code),
+            quantity:360*richness*modifier*health
+          });
+        }
+      }else if(code==="REFINERY"){
+        const connections=connectionsByRefinery.get(facility.id) || [];
+        const seen=new Set();
+        for(const connection of connections){
+          const extractor=facilityById.get(connection.extractor_facility_id);
+          if(!extractor) continue;
+          for(const deposit of depositsByLocation.get(String(extractor.location_ref || "")) || []){
+            if(seen.has(deposit.resource_code)) continue;
+            const outputCode={
+              gold_ore:"refined_gold",
+              vyr_ore:"vyrsteel",
+              aetherite:"refined_aetherite"
+            }[deposit.resource_code];
+            if(!outputCode) continue;
+            seen.add(deposit.resource_code);
+            results.push({
+              code:outputCode,
+              quantity:288*Number(deposit.richness ?? 1)*modifier*health
+            });
+          }
+        }
+      }
+
+      return results;
+    };
+
+    if(!activeFacilities.length){
+      root.innerHTML="";
+      empty.textContent=ownedFacilities.length
+        ? "ALL OWNED FACILITIES ARE CURRENTLY INACTIVE."
+        : "BUILD A FACTORY TO BEGIN MANUFACTURING.";
+      empty.hidden=false;
+      return;
+    }
+
+    const cards=activeFacilities.map(facility=>{
+      const type=typeMap.get(facility.facility_type_id);
+      const outputs=outputsForFacility(facility);
+      const health=Math.max(0,Math.min(100,Number(facility.health ?? 100)));
+      const code=String(type?.code || "").toUpperCase();
+      const passive=code==="MINE" || code==="AGRI_COMPLEX" || code==="REFINERY";
+
+      let outputHtml;
+      if(!passive){
+        outputHtml='<div class="production-output-empty">NO FIXED DAILY OUTPUT // PRODUCTION IS ORDER-BASED</div>';
+      }else if(!outputs.length){
+        outputHtml='<div class="production-output-empty">'+
+          (code==="MINE" ? "NO RESOURCE DEPOSIT CONNECTED." : "NO ACTIVE OUTPUT.")+
+          '</div>';
+      }else{
+        outputHtml=outputs.map(output=>{
+          const item=resourceMap.get(output.code);
+          const unit=item?.unit || "units";
+          const name=item?.name || output.code.replace(/_/g," ");
+          return '<div class="production-output-row">'+
+            '<div><strong>'+esc(name)+'</strong><span>'+esc(String(output.code).toUpperCase())+'</span></div>'+
+            '<strong>+'+esc(fmt(output.quantity))+' '+esc(unit)+' / DAY</strong>'+
+            '</div>';
+        }).join("");
+      }
+
+      return '<article class="notice production-facility-row">'+
+        '<div class="production-facility-head">'+
+          '<div><strong>'+esc(facility.name || type?.name || "Facility")+'</strong>'+
+          '<div class="section-code">'+esc(type?.name || "FACILITY")+' // '+esc(facility.location_ref || "LOCATION UNSET")+'</div></div>'+
+          '<span class="status-chip">'+esc(fmt(health))+'% EFFECTIVENESS</span>'+
+        '</div>'+
+        '<div class="production-output-list">'+outputHtml+'</div>'+
+        '</article>';
+    }).join("");
+
+    root.innerHTML=cards;
+    empty.hidden=true;
+  }
+
   function renderEconomy() {
     $("economyBalance").textContent = fmt(state.wallet?.balance);
     $("economyCurrency").textContent = String(state.wallet?.currency || "Aureum").toUpperCase();
@@ -201,6 +315,7 @@
     const facilityEmpty=$("ownedFacilityEmpty");
     const facilityCount=$("ownedFacilityCount");
     const typeMap=new Map((state.facilityTypes || []).map(row => [row.id,row]));
+    renderProductionPanel(ownedFacilities,typeMap);
 
     facilityCount.textContent=ownedFacilities.length+" FACILIT"+(ownedFacilities.length===1?"Y":"IES");
     if(ownedFacilities.length){
