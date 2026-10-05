@@ -1232,9 +1232,31 @@
       const select=document.querySelector('.factory-recipe-select[data-factory="'+button.dataset.factory+'"]');
       if(!select?.value) return;
       try{
-        await GMAuth.api("rpc/set_factory_recipe",{method:"POST",body:JSON.stringify({p_facility_id:button.dataset.factory,p_recipe_code:select.value})});
-        await refreshAll("FACTORY PRODUCTION SET",$("mapBuildState"));
-      }catch(error){setState($("mapBuildState"),"PRODUCTION UPDATE FAILED // "+error.message,"error")}
+        button.disabled=true;
+        const recipeCode=select.value;
+        const facilityId=button.dataset.factory;
+        await GMAuth.api("rpc/set_factory_recipe",{method:"POST",body:JSON.stringify({p_facility_id:facilityId,p_recipe_code:recipeCode})});
+
+        // Update the local production order immediately so the selected-location UI
+        // reflects the new line without waiting for a full page reload.
+        const recipe=(player.factoryRecipes||[]).find(row=>row.code===recipeCode);
+        const hours=Math.max(1,Number(recipe?.production_world_hours||1));
+        const startedAt=new Date();
+        const completesAt=new Date(startedAt.getTime()+hours*12*60*1000);
+        const existing=(player.factoryOrders||[]).find(row=>row.facility_id===facilityId);
+        if(existing){
+          Object.assign(existing,{recipe_code:recipeCode,quantity:1,status:"producing",started_at:startedAt.toISOString(),completes_at:completesAt.toISOString(),updated_at:startedAt.toISOString()});
+        }else{
+          (player.factoryOrders||(player.factoryOrders=[])).push({facility_id:facilityId,recipe_code:recipeCode,quantity:1,status:"producing",started_at:startedAt.toISOString(),completes_at:completesAt.toISOString(),updated_at:startedAt.toISOString()});
+        }
+        renderSelection();
+        renderProductionRates();
+        draw();
+        setState($("mapBuildState"),"FACTORY PRODUCTION SET","success");
+
+        // Re-sync from Supabase after the optimistic UI update so server timing/state wins.
+        refreshAll().catch(()=>{});
+      }catch(error){setState($("mapBuildState"),"PRODUCTION UPDATE FAILED // "+error.message,"error");button.disabled=false}
     }));
 
     const selectedModifiers=activeModifiersFor(selectedHex.ref);
