@@ -274,7 +274,30 @@
 
       let outputHtml;
       if(!passive){
-        outputHtml='<div class="production-output-empty">NO FIXED DAILY OUTPUT // PRODUCTION IS ORDER-BASED</div>';
+        const orders=(state.factoryOrders || []).filter(order=>order.facility_id===facility.id);
+        const activeOrder=orders.find(order=>String(order.status || "").toLowerCase()==="producing")
+          || orders.find(order=>["queued","active","in_progress"].includes(String(order.status || "").toLowerCase()));
+        if(activeOrder){
+          const recipe=(state.factoryRecipes || []).find(row=>row.code===activeOrder.recipe_code);
+          const resource=resourceMap.get(String(recipe?.output_resource_code || ""));
+          const outputName=resource?.name || recipe?.name || activeOrder.recipe_code || "Factory Output";
+          const quantity=Number(activeOrder.quantity || 1)*Number(recipe?.output_quantity || 1);
+          const completion=activeOrder.completes_at ? new Date(activeOrder.completes_at).toLocaleString() : "IN PROGRESS";
+          outputHtml='<div class="production-output-row">'+
+            '<div><strong>'+esc(outputName)+'</strong><span>ACTIVE FACTORY ORDER</span></div>'+
+            '<strong>'+esc(fmt(quantity))+' '+esc(resource?.unit || "UNITS")+'</strong>'+
+            '</div>'+
+            '<div class="production-output-row">'+
+            '<div><strong>COMPLETION</strong><span>PRODUCTION SCHEDULE</span></div>'+
+            '<strong>'+esc(completion)+'</strong>'+
+            '</div>';
+        }else{
+          const selected=(state.factoryOrders || []).find(order=>order.facility_id===facility.id);
+          const recipe=(state.factoryRecipes || []).find(row=>row.code===selected?.recipe_code);
+          outputHtml='<div class="production-output-empty">'+
+            (recipe ? 'PRODUCTION LINE // '+esc(recipe.name || recipe.code) : 'NO ACTIVE FACTORY PRODUCTION')+
+            '<br><span>SET FACTORY PRODUCTION FROM MAP // LOCATION ACTIONS</span></div>';
+        }
       }else if(!outputs.length){
         outputHtml='<div class="production-output-empty">'+
           (code==="MINE" ? "NO RESOURCE DEPOSIT CONNECTED." : "NO ACTIVE OUTPUT.")+
