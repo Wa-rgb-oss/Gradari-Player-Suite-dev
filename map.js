@@ -906,7 +906,7 @@
     });
     const names=new Map((player.resourceCatalog||[]).map(row=>[row.code,row.name]));
     root.innerHTML=rates.size ? [...rates.entries()].map(([code,amount])=>
-      '<div class="telemetry-row"><span>'+esc(names.get(code)||code)+'</span><strong>+'+esc(fmt(amount))+' / DAY</strong></div>'
+      '<div class="telemetry-row"><span>'+esc(code==="research_points"?"Research Points":(names.get(code)||code))+'</span><strong>+'+esc(fmt(amount))+' / DAY</strong></div>'
     ).join("") : '<div class="empty-state map-mini-empty">NO ACTIVE PRODUCTION.</div>';
   }
 
@@ -1064,12 +1064,13 @@
   function mapFacilityDailyOutputs(facility){
     const type=facilityTypeById(facility.facility_type_id),code=facilityCode(type),health=Math.max(0,Math.min(100,Number(facility.health??100)))/100,modifier=Number(facility.production_modifier??1),outputs=[];
     if(code.includes("AGRI")||code.includes("FARM")) outputs.push({code:"food",quantity:360*modifier*health});
+    else if(code.includes("RESEARCH")) outputs.push({code:"research_points",quantity:36*modifier*health});
     else if(code.includes("MINE")||code.includes("EXTRACT")) (player.resourceDeposits||[]).filter(d=>d.location_ref===facility.location_ref).forEach(d=>outputs.push({code:String(d.resource_code),quantity:360*Number(d.richness??1)*modifier*health}));
     else if(code.includes("REFIN")){const seen=new Set();(player.facilityConnections||[]).filter(x=>x.refinery_facility_id===facility.id).forEach(link=>{const extractor=(player.facilities||[]).find(x=>x.id===link.extractor_facility_id);if(!extractor)return;(player.resourceDeposits||[]).filter(d=>d.location_ref===extractor.location_ref).forEach(d=>{const out={gold_ore:"refined_gold",vyr_ore:"vyrsteel",aetherite:"refined_aetherite"}[d.resource_code];if(!out||seen.has(d.resource_code))return;seen.add(d.resource_code);outputs.push({code:out,quantity:288*Number(d.richness??1)*modifier*health});});});}
     else if(code.includes("FACTORY")){const order=(player.factoryOrders||[]).find(x=>x.facility_id===facility.id&&["producing","storage_blocked"].includes(String(x.status||"").toLowerCase()));const recipe=(player.factoryRecipes||[]).find(x=>x.code===order?.recipe_code);if(recipe){const hours=Math.max(1,Number(recipe.production_world_hours||1));outputs.push({code:String(recipe.output_resource_code),quantity:(36/hours)*Number(recipe.output_quantity||1)*modifier*health});}}
     return outputs;
   }
-  function mapFacilityProductionRateHtml(facility){const names=new Map((player.resourceCatalog||[]).map(x=>[String(x.code),x.name])),outputs=mapFacilityDailyOutputs(facility);return outputs.length?'<div class="section-code">PRODUCTION // '+outputs.map(o=>'+'+fmt(o.quantity)+' '+esc(String(names.get(o.code)||o.code).toUpperCase())+' / DAY').join(' // ')+'</div>':'<div class="section-code">PRODUCTION // NO ACTIVE DAILY OUTPUT</div>';}
+  function mapFacilityProductionRateHtml(facility){const names=new Map((player.resourceCatalog||[]).map(x=>[String(x.code),x.name])),outputs=mapFacilityDailyOutputs(facility);return outputs.length?'<div class="section-code">PRODUCTION // '+outputs.map(o=>'+'+fmt(o.quantity)+' '+esc(String(o.code==="research_points"?"RESEARCH POINTS":(names.get(o.code)||o.code)).toUpperCase())+' / DAY').join(' // ')+'</div>':'<div class="section-code">PRODUCTION // NO ACTIVE DAILY OUTPUT</div>';}
 
   function renderSelection() {
     if (!selectedHex) {
