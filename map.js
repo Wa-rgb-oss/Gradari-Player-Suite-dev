@@ -864,9 +864,15 @@
     return String(type?.code || type?.name || "").toUpperCase();
   }
 
-  function factionFacilities() {
+  function canControlFacility(row) {
+    const uid=session?.user?.id;
+    if(row?.owner_user_id) return Boolean(uid && row.owner_user_id===uid);
     const factionId=activeMembership()?.faction_id;
-    return factionId ? (player.facilities || []).filter(row => row.owner_faction_id===factionId || row.controlling_faction_id===factionId) : [];
+    return Boolean(factionId && (row?.owner_faction_id===factionId || row?.controlling_faction_id===factionId));
+  }
+
+  function factionFacilities() {
+    return (player?.facilities || []).filter(canControlFacility);
   }
 
   function hasFacilityKind(kind) {
@@ -883,8 +889,7 @@
   function renderResourceStockpile() {
     const root=$("mapResourceStockpile");
     if(!root) return;
-    const factionId=activeMembership()?.faction_id;
-    const rows=(player.factionResources || []).filter(row=>row.faction_id===factionId && Number(row.quantity)!==0);
+    const rows=(player.playerResources || []).filter(row=>Number(row.quantity)!==0);
     const names=new Map((player.resourceCatalog || []).map(row=>[row.code,row.name]));
     root.innerHTML=rows.length ? rows.map(row =>
       '<div class="telemetry-row"><span>'+esc(names.get(row.resource_code)||row.resource_code)+'</span><strong>'+esc(fmt(row.quantity))+'</strong></div>'
@@ -896,34 +901,12 @@
     if(!root) return;
     const rates=new Map();
     const add=(code,amount)=>rates.set(code,(rates.get(code)||0)+Number(amount||0));
-    const factionId=activeMembership()?.faction_id;
-    const owned=factionFacilities();
-    owned.forEach(facility=>{
-      const code=facilityCode(facilityTypeById(facility.facility_type_id));
-      const mod=Number(facility.production_modifier||1);
-      if(code.includes("EXTRACT")||code.includes("MINE")){
-        (player.resourceDeposits||[]).filter(d=>d.location_ref===facility.location_ref).forEach(d=>add(d.resource_code,Number(d.richness||1)*10*mod));
-      }else if(code.includes("FARM")||code.includes("AGRI")){
-        add("food",100*mod);
-      }else if(code.includes("REFIN")){
-        const links=(player.facilityConnections||[]).filter(x=>x.refinery_facility_id===facility.id).slice(0,3);
-        links.forEach(link=>{
-          const extractor=player.facilities.find(x=>x.id===link.extractor_facility_id);
-          if(!extractor) return;
-          (player.resourceDeposits||[]).filter(d=>d.location_ref===extractor.location_ref).forEach(d=>{
-            const out=d.resource_code==="gold_ore"?"refined_gold":d.resource_code==="vyr_ore"?"vyrsteel":d.resource_code==="aetherite"?"refined_aetherite":null;
-            if(out) add(out,Number(d.richness||1)*8*mod);
-          });
-        });
-      }else if(code.includes("FACTORY")){
-        const order=(player.factoryOrders||[]).find(x=>x.facility_id===facility.id);
-        const recipe=(player.factoryRecipes||[]).find(x=>x.code===order?.recipe_code);
-        if(recipe) add(recipe.output_resource_code,Number(recipe.output_quantity||1)*mod);
-      }
+    factionFacilities().forEach(facility=>{
+      mapFacilityDailyOutputs(facility).forEach(output=>add(output.code,output.quantity));
     });
     const names=new Map((player.resourceCatalog||[]).map(row=>[row.code,row.name]));
     root.innerHTML=rates.size ? [...rates.entries()].map(([code,amount])=>
-      '<div class="telemetry-row"><span>'+esc(names.get(code)||code)+'</span><strong>+'+esc(fmt(amount))+'</strong></div>'
+      '<div class="telemetry-row"><span>'+esc(names.get(code)||code)+'</span><strong>+'+esc(fmt(amount))+' / DAY</strong></div>'
     ).join("") : '<div class="empty-state map-mini-empty">NO ACTIVE PRODUCTION.</div>';
   }
 
@@ -1059,11 +1042,19 @@
     updateBuildPreview();
   }
 
+  let productionRefreshTimer=null;
+  function scheduleProductionRefresh(){
+    if(productionRefreshTimer) return;
+    productionRefreshTimer=setTimeout(()=>{
+      productionRefreshTimer=null;
+      refreshAll().catch(()=>{});
+    },1500);
+  }
   function updateMapProductionCountdowns(){
     document.querySelectorAll("[data-map-countdown]").forEach(el=>{
       const ms=new Date(el.dataset.mapCountdown).getTime()-Date.now();
       if(!Number.isFinite(ms)){el.textContent="--:--:--";return}
-      if(ms<=0){el.textContent="READY";return}
+      if(ms<=0){el.textContent="READY";scheduleProductionRefresh();return}
       const sec=Math.ceil(ms/1000),h=Math.floor(sec/3600),m=Math.floor((sec%3600)/60),s=sec%60;
       el.textContent=String(h).padStart(2,"0")+":"+String(m).padStart(2,"0")+":"+String(s).padStart(2,"0");
     });
@@ -1075,7 +1066,7 @@
     if(code.includes("AGRI")||code.includes("FARM")) outputs.push({code:"food",quantity:360*modifier*health});
     else if(code.includes("MINE")||code.includes("EXTRACT")) (player.resourceDeposits||[]).filter(d=>d.location_ref===facility.location_ref).forEach(d=>outputs.push({code:String(d.resource_code),quantity:360*Number(d.richness??1)*modifier*health}));
     else if(code.includes("REFIN")){const seen=new Set();(player.facilityConnections||[]).filter(x=>x.refinery_facility_id===facility.id).forEach(link=>{const extractor=(player.facilities||[]).find(x=>x.id===link.extractor_facility_id);if(!extractor)return;(player.resourceDeposits||[]).filter(d=>d.location_ref===extractor.location_ref).forEach(d=>{const out={gold_ore:"refined_gold",vyr_ore:"vyrsteel",aetherite:"refined_aetherite"}[d.resource_code];if(!out||seen.has(d.resource_code))return;seen.add(d.resource_code);outputs.push({code:out,quantity:288*Number(d.richness??1)*modifier*health});});});}
-    else if(code.includes("FACTORY")){const order=(player.factoryOrders||[]).find(x=>x.facility_id===facility.id&&["producing","queued","active","in_progress"].includes(String(x.status||"").toLowerCase()));const recipe=(player.factoryRecipes||[]).find(x=>x.code===order?.recipe_code);if(recipe){const hours=Math.max(1,Number(recipe.production_hours||recipe.hours_per_unit||recipe.duration_hours||1));outputs.push({code:String(recipe.output_resource_code),quantity:(36/hours)*Number(recipe.output_quantity||1)*modifier*health});}}
+    else if(code.includes("FACTORY")){const order=(player.factoryOrders||[]).find(x=>x.facility_id===facility.id&&["producing","storage_blocked"].includes(String(x.status||"").toLowerCase()));const recipe=(player.factoryRecipes||[]).find(x=>x.code===order?.recipe_code);if(recipe){const hours=Math.max(1,Number(recipe.production_world_hours||1));outputs.push({code:String(recipe.output_resource_code),quantity:(36/hours)*Number(recipe.output_quantity||1)*modifier*health});}}
     return outputs;
   }
   function mapFacilityProductionRateHtml(facility){const names=new Map((player.resourceCatalog||[]).map(x=>[String(x.code),x.name])),outputs=mapFacilityDailyOutputs(facility);return outputs.length?'<div class="section-code">PRODUCTION // '+outputs.map(o=>'+'+fmt(o.quantity)+' '+esc(String(names.get(o.code)||o.code).toUpperCase())+' / DAY').join(' // ')+'</div>':'<div class="section-code">PRODUCTION // NO ACTIVE DAILY OUTPUT</div>';}
@@ -1146,15 +1137,16 @@
     $("selectedFacilityList").innerHTML=selectedFacilities.map(row => {
       const type=facilityTypeById(row.facility_type_id);
       const clock=(player.facilityProductionClocks||[]).find(x=>x.facility_id===row.id);
-      const order=(player.factoryOrders||[]).find(x=>x.facility_id===row.id&&x.status==="producing");
-      const nextAt=order?.completes_at||clock?.next_production_at;
-      const timer=nextAt?'<div class="section-code">'+(order?'PRODUCTION':'NEXT OUTPUT')+' // <span data-map-countdown="'+esc(nextAt)+'">--:--:--</span></div>':'';
+      const order=(player.factoryOrders||[]).find(x=>x.facility_id===row.id&&["producing","storage_blocked"].includes(String(x.status||"").toLowerCase()));
+      const nextAt=order?.status==="producing"?order?.completes_at:clock?.next_production_at;
+      const timer=order?.status==="storage_blocked"
+        ? '<div class="section-code">STORAGE FULL // OUTPUT HALTED</div>'
+        : nextAt?'<div class="section-code">'+(order?'PRODUCTION':'NEXT OUTPUT')+' // <span data-map-countdown="'+esc(nextAt)+'">--:--:--</span></div>':'';
       return '<article class="notice map-list-row"><div><strong>'+esc(row.name || type?.name || "Holding")+'</strong><div class="section-code">'+esc(type?.name || "FACILITY")+'</div>'+mapFacilityProductionRateHtml(row)+timer+'</div><span>'+esc(fmt(type?.upkeep_aureum_per_day ?? Number(type?.upkeep_aureum_per_cycle||0)))+' A / DAY</span></article>';
     }).join("");
     updateMapProductionCountdowns();
 
-    const factionId=activeMembership()?.faction_id;
-    const ownedFacilities=selectedFacilities.filter(row => row.owner_faction_id===factionId || row.controlling_faction_id===factionId);
+    const ownedFacilities=selectedFacilities.filter(canControlFacility);
     const ownedRefineries=ownedFacilities.filter(row => facilityCode(facilityTypeById(row.facility_type_id)).includes("REFIN"));
     const ownedFactories=ownedFacilities.filter(row => facilityCode(facilityTypeById(row.facility_type_id)).includes("FACTORY"));
     const ownedShipyards=ownedFacilities.filter(row => facilityCode(facilityTypeById(row.facility_type_id)).includes("SHIP"));
@@ -1170,12 +1162,28 @@
     });
     ownedFactories.forEach(factory => {
       const order=(player.factoryOrders || []).find(row=>row.facility_id===factory.id);
-      facilityControls += '<article class="notice"><strong>'+esc(factory.name || "Factory")+'</strong><div class="section-code">PRODUCTION LINE</div><select class="factory-recipe-select" data-factory="'+esc(factory.id)+'">'+
+      const status=String(order?.status||"idle").toLowerCase();
+      const active=status==="producing" || status==="storage_blocked";
+      const recipe=(player.factoryRecipes || []).find(row=>row.code===order?.recipe_code);
+      const resourceName=new Map((player.resourceCatalog||[]).map(row=>[row.code,row.name])).get(recipe?.output_resource_code)||recipe?.output_resource_code;
+      const statusLabel=status==="producing"?"PRODUCING":status==="storage_blocked"?"STORAGE FULL // OUTPUT HALTED":status==="completed"?"COMPLETED":"IDLE";
+      const countdown=status==="producing"&&order?.completes_at
+        ? '<div class="section-code">COMPLETES // <span data-map-countdown="'+esc(order.completes_at)+'">--:--:--</span></div>'
+        : '';
+      const output=recipe
+        ? '<div class="section-code">OUTPUT // +'+esc(fmt(Number(recipe.output_quantity||1)*Number(order?.quantity||1)))+' '+esc(String(resourceName||"RESOURCE").toUpperCase())+'</div>'
+        : '';
+      const blocked=status==="storage_blocked"
+        ? '<div class="status-chip amber" style="margin-top:8px">FREE RESOURCE STORAGE TO RESUME OUTPUT'+(Number(order?.output_remaining||0)>0?' // '+esc(fmt(order.output_remaining))+' REMAINING':'')+'</div>'
+        : '';
+      facilityControls += '<article class="notice"><strong>'+esc(factory.name || "Factory")+'</strong><div class="section-code">'+esc(statusLabel)+'</div>'+output+countdown+blocked+
+        '<select class="factory-recipe-select" data-factory="'+esc(factory.id)+'" style="margin-top:8px" '+(active?'disabled':'')+'>'+
         '<option value="">Select production</option>'+
-        (player.factoryRecipes || []).map(recipe=>'<option value="'+esc(recipe.code)+'" '+(order?.recipe_code===recipe.code?'selected':'')+'>'+esc(recipe.name)+'</option>').join("")+
-        '</select><button class="hud-button secondary factory-recipe-save" type="button" data-factory="'+esc(factory.id)+'" style="margin-top:8px">SET PRODUCTION</button></article>';
+        (player.factoryRecipes || []).map(row=>'<option value="'+esc(row.code)+'" '+(order?.recipe_code===row.code?'selected':'')+'>'+esc(row.name)+'</option>').join("")+
+        '</select><button class="hud-button secondary factory-recipe-save" type="button" data-factory="'+esc(factory.id)+'" style="margin-top:8px" '+(active?'disabled':'')+'>BEGIN PRODUCTION</button></article>';
     });
-    ownedShipyards.forEach(shipyard => {
+
+  ownedShipyards.forEach(shipyard => {
       const orders=(player.shipyardOrders||[]).filter(row=>row.shipyard_facility_id===shipyard.id && row.status==="building");
       facilityControls += '<article class="notice"><strong>'+esc(shipyard.name || "Shipyard")+'</strong><div class="section-code">CONSTRUCTION QUEUE // '+orders.length+' ACTIVE</div>'+
         orders.map(order=>'<div class="split-actions" style="margin-top:8px"><span>'+esc(order.ship_name)+'</span><strong>'+esc(order.cycles_remaining)+' CYCLES</strong></div>').join("")+
@@ -1235,31 +1243,41 @@
         button.disabled=true;
         const recipeCode=select.value;
         const facilityId=button.dataset.factory;
-        await GMAuth.api("rpc/set_factory_recipe",{method:"POST",body:JSON.stringify({p_facility_id:facilityId,p_recipe_code:recipeCode})});
+        const result=await GMAuth.api("rpc/queue_factory_production",{
+          method:"POST",
+          body:JSON.stringify({p_facility_id:facilityId,p_recipe_code:recipeCode,p_quantity:1})
+        });
 
-        // Update the local production order immediately so the selected-location UI
-        // reflects the new line without waiting for a full page reload.
-        const recipe=(player.factoryRecipes||[]).find(row=>row.code===recipeCode);
-        const hours=Math.max(1,Number(recipe?.production_world_hours||1));
-        const startedAt=new Date();
-        const completesAt=new Date(startedAt.getTime()+hours*12*60*1000);
         const existing=(player.factoryOrders||[]).find(row=>row.facility_id===facilityId);
-        if(existing){
-          Object.assign(existing,{recipe_code:recipeCode,quantity:1,status:"producing",started_at:startedAt.toISOString(),completes_at:completesAt.toISOString(),updated_at:startedAt.toISOString()});
-        }else{
-          (player.factoryOrders||(player.factoryOrders=[])).push({facility_id:facilityId,recipe_code:recipeCode,quantity:1,status:"producing",started_at:startedAt.toISOString(),completes_at:completesAt.toISOString(),updated_at:startedAt.toISOString()});
-        }
+        const nextOrder={
+          facility_id:facilityId,
+          recipe_code:recipeCode,
+          quantity:Number(result?.quantity||1),
+          status:String(result?.status||"producing"),
+          started_at:result?.started_at||new Date().toISOString(),
+          completes_at:result?.completes_at||null,
+          output_remaining:null,
+          completed_at:null,
+          updated_at:new Date().toISOString()
+        };
+        if(existing) Object.assign(existing,nextOrder);
+        else (player.factoryOrders||(player.factoryOrders=[])).push(nextOrder);
+
         renderSelection();
         renderProductionRates();
         draw();
-        setState($("mapBuildState"),"FACTORY PRODUCTION SET","success");
+        setState($("mapBuildState"),"FACTORY PRODUCTION STARTED","success");
 
-        // Re-sync from Supabase after the optimistic UI update so server timing/state wins.
         refreshAll().catch(()=>{});
-      }catch(error){setState($("mapBuildState"),"PRODUCTION UPDATE FAILED // "+error.message,"error");button.disabled=false}
+      }catch(error){
+        setState($("mapBuildState"),"PRODUCTION START FAILED // "+error.message,"error");
+        button.disabled=false;
+      }
     }));
 
-    const selectedModifiers=activeModifiersFor(selectedHex.ref);
+    
+
+  const selectedModifiers=activeModifiersFor(selectedHex.ref);
     $("selectedModifierEmpty").hidden=selectedModifiers.length>0;
     $("selectedModifierList").innerHTML=selectedModifiers.map(row =>
       '<article class="notice map-list-row"><div><strong>'+esc(row.label || row.modifier_type || "Location Effect")+'</strong><div class="section-code">'+esc(String(row.modifier_type || "effect").toUpperCase())+'</div></div><span>'+esc(Math.round(Number(row.production_multiplier || 1)*100))+'%</span></article>'
