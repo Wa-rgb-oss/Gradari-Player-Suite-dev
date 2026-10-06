@@ -349,10 +349,10 @@
         });
       });
     }else if(code==="FACTORY"){
-      const order=(state.factoryOrders||[]).find(x=>x.facility_id===facility.id&&["producing","queued","active","in_progress"].includes(String(x.status||"").toLowerCase()));
+      const order=(state.factoryOrders||[]).find(x=>x.facility_id===facility.id&&["producing","storage_blocked"].includes(String(x.status||"").toLowerCase()));
       const recipe=(state.factoryRecipes||[]).find(x=>x.code===order?.recipe_code);
       if(recipe){
-        const hours=Math.max(1,Number(recipe.production_hours||recipe.hours_per_unit||recipe.duration_hours||1));
+        const hours=Math.max(1,Number(recipe.production_world_hours||1));
         outputs.push({code:String(recipe.output_resource_code),quantity:(36/hours)*Number(recipe.output_quantity||1)*modifier*health});
       }
     }
@@ -379,7 +379,6 @@
     const facilityEmpty=$("ownedFacilityEmpty");
     const facilityCount=$("ownedFacilityCount");
     const typeMap=new Map((state.facilityTypes || []).map(row => [row.id,row]));
-    renderProductionPanel(ownedFacilities,typeMap);
 
     const storageFacilities=ownedFacilities.filter(row=>String(typeMap.get(row.facility_type_id)?.code||"").toUpperCase()==="STORAGE"&&String(row.status||"active").toLowerCase()==="active");
     const storageCapacity=storageFacilities.length*5000;
