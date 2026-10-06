@@ -335,6 +335,7 @@
     const modifier=Number(facility.production_modifier ?? 1);
     const outputs=[];
     if(code==="AGRI_COMPLEX") outputs.push({code:"food",quantity:360*modifier*health});
+    else if(code==="RESEARCH_SITE") outputs.push({code:"research_points",quantity:36*modifier*health});
     else if(code==="MINE"){
       (state.resourceDeposits||[]).filter(d=>d.location_ref===facility.location_ref).forEach(d=>outputs.push({code:String(d.resource_code),quantity:360*Number(d.richness??1)*modifier*health}));
     }else if(code==="REFINERY"){
@@ -365,7 +366,8 @@
     if(!outputs.length) return '<div class="section-code">PRODUCTION // NO ACTIVE DAILY OUTPUT</div>';
     return '<div class="section-code">PRODUCTION // '+outputs.map(o=>{
       const resource=resourceMap.get(o.code);
-      return '+'+fmt(o.quantity)+' '+String(resource?.name||o.code).toUpperCase()+' / DAY';
+      const label=o.code==="research_points"?"RESEARCH POINTS":String(resource?.name||o.code).toUpperCase();
+      return '+'+fmt(o.quantity)+' '+label+' / DAY';
     }).join(' // ')+'</div>';
   }
 
@@ -395,7 +397,7 @@
       $("storageWarning").classList.toggle("error",storageCapacity<=0||storageAvailable<=0);
     }
 
-    facilityCount.textContent=ownedFacilities.length+" FACILIT"+(ownedFacilities.length===1?"Y":"IES");
+    facilityCount.textContent=ownedFacilities.length+"/20 FACILITIES";
     if(ownedFacilities.length){
       // Player-owned facilities currently debit Aureum upkeep each in-game day. Resource production
       // remains a strategic output, so it is not falsely converted into Aureum profit here.
