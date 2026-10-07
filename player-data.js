@@ -4,6 +4,7 @@
   async function load(session) {
     const userId = session.user.id;
     const uid = encode(userId);
+    await GMAuth.api("rpc/claim_daily_influence",{method:"POST",body:"{}"});
 
     const [
       profiles, registrations, wallets, memberships, factions, assets, factionAssets, catalog,
