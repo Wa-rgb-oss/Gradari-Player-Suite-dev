@@ -216,9 +216,33 @@
     window.location.replace(siteHref(session?.user?.id ? authTarget : guestTarget));
   }
 
-  async function signOut() {
+  async function recordAuthActivity(action, metadata = {}) {
+    const stored = getStored();
+    if (!stored.access_token) return false;
+
+    try {
+      const response = await fetch(CONFIG.url + "/rest/v1/rpc/record_auth_activity", {
+        method: "POST",
+        headers: {
+          apikey: CONFIG.key,
+          Authorization: "Bearer " + stored.access_token,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          p_action: action,
+          p_metadata: metadata && typeof metadata === "object" ? metadata : {}
+        })
+      });
+      return response.ok;
+    } catch {
+      return false;
+    }
+  }
+
+  async function signOut(metadata = {}) {
     const stored = getStored();
     if (stored.access_token) {
+      await recordAuthActivity("logout", metadata);
       try {
         await request("/auth/v1/logout", {
           method: "POST",
@@ -273,6 +297,7 @@
     signIn,
     signUp,
     consumeAuthRedirect,
+    recordAuthActivity,
     signOut,
     refreshSession,
     getSession,
