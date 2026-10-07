@@ -3418,3 +3418,39 @@ dialog::backdrop{background:rgba(0,0,0,.72);backdrop-filter:blur(2px)}
 @media(max-width:720px){
   .admin-news-builder-actions .hud-button{width:100%}
 }
+
+
+/* NEWS & ABOUT // LEGAL POLICIES */
+#info-terms-of-use>.hud-panel:first-child,
+#info-privacy-policy>.hud-panel:first-child{margin-top:0}
+.legal-policy{max-width:1000px}
+.legal-policy .legal-effective{
+  margin:0 0 24px;
+  padding:10px 12px;
+  border-left:2px solid var(--cyan2);
+  background:rgba(64,139,162,.08);
+  font-family:var(--mono);
+  font-size:.78rem;
+  letter-spacing:.04em;
+}
+.legal-policy ul,
+.legal-policy ol{
+  margin:0 0 18px 1.35rem;
+  padding:0;
+  color:#adbdc2;
+  font-size:1.02rem;
+  line-height:1.65;
+}
+.legal-policy li{margin:6px 0;padding-left:4px}
+.legal-policy .legal-caps{
+  color:#c9d5d8;
+  font-family:var(--mono);
+  font-size:.86rem;
+  letter-spacing:.025em;
+  line-height:1.7;
+}
+@media(max-width:720px){
+  .legal-policy ul,
+  .legal-policy ol{margin-left:1.05rem;font-size:.96rem}
+  .legal-policy .legal-caps{font-size:.78rem}
+}
