@@ -1,0 +1,1 @@
+do $$ declare def text; begin def:=pg_get_functiondef('private.change_factory_production(uuid,text,numeric)'::regprocedure); def:=replace(def,'f.owner_user_id=auth.uid() or','coalesce(f.owner_user_id=auth.uid(),false) or'); execute def; end $$;
