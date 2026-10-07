@@ -7,7 +7,7 @@
   <meta name="theme-color" content="#050a0e">
   <meta name="robots" content="noindex,nofollow">
   <title>GM Administration | Gradari Mireris</title>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css?v=artifacts-20261007">
 </head>
 <body class="auth-pending">
   <main class="page-content" style="max-width:1500px">
@@ -287,6 +287,24 @@
       </section>
 
       <section class="panel" id="admin-gm-tools" data-tab-panel>
+<section class="hud-panel compact" id="gmArtifactTools">
+<div class="section-head"><div><div class="section-code">GM / CHARACTER ARTIFACTS</div><h2>Artifacts</h2></div><p>CATALOG &amp; AWARDS</p></div>
+<p class="hero-copy">Create and edit artifacts, then award them to characters. Equipped Influence bonuses add together up to 100% and apply to political activity earnings. Abilities grant Influence with a cooldown measured in world hours. One in-game day is 36 world hours. Retire an artifact to disable its effects.</p>
+<div class="content-grid">
+<div><h3>Artifact Definition</h3><form id="artifactCatalogForm" class="form-shell">
+<div class="form-grid"><label><span>Code</span><input name="code" required maxlength="80"></label><label><span>Name</span><input name="name" required maxlength="120"></label></div>
+<label><span>Description</span><textarea name="description" rows="3"></textarea></label>
+<div class="form-grid"><label><span>Slot</span><select name="slot"><option value="cloak">Cloak</option><option value="signet">Signet</option><option value="relic">Relic</option></select></label><label><span>Rarity</span><select name="rarity"><option value="uncommon">Uncommon</option><option value="rare" selected>Rare</option><option value="legendary">Legendary</option></select></label></div>
+<label><span>Influence earned bonus (%)</span><input name="influence_bonus_percent" type="number" min="0" max="100" step=".01" value="0" required></label>
+<label><span>Ability Name (optional)</span><input name="ability_name" maxlength="120"></label>
+<label><span>Ability Description</span><textarea name="ability_description" rows="2"></textarea></label>
+<div class="form-grid"><label><span>Influence granted by ability</span><input name="ability_influence" type="number" min="0" max="10000" step=".01" value="0" required></label><label><span>Ability cooldown (world hours)</span><input name="cooldown_world_hours" type="number" min="1" max="9360" step=".01" value="36" required></label></div>
+<label><input name="active" type="checkbox" checked> Available to players</label>
+<div class="artifact-controls"><button class="hud-button" type="submit" id="artifactSaveLabel">Create artifact</button><button class="hud-button secondary" type="button" id="artifactNew">New artifact</button></div>
+</form></div>
+<div><h3>Award Artifact</h3><form id="artifactGrantForm" class="form-shell"><label><span>Character</span><select id="artifactGrantCharacter" required></select></label><label><span>Artifact</span><select id="artifactGrantCatalog" required></select></label><button class="hud-button" type="submit">Award artifact</button></form><h3>Character Holdings</h3><div id="artifactAdminHoldings"></div></div>
+</div><div class="form-state" id="artifactAdminState" role="status" aria-live="polite"></div><h3>Artifact Catalog</h3><div class="artifact-grid" id="artifactAdminCatalog"></div>
+</section>
         <div class="section-head"><div><div class="section-code">ADMIN / OPERATIONS</div><h2>Day-to-Day GM Tools</h2></div><p>LIVE GAME STATE</p></div>
         <div class="content-grid">
           <article class="stack">
@@ -765,6 +783,7 @@
   <script src="ui.js"></script>
   <script src="admin.js"></script>
   <script src="admin-news.js"></script>
+  <script src="admin-artifacts.js"></script>
   <script src="admin-systems.js"></script>
   <script src="admin-politics.js"></script>
   <script src="admin-map.js"></script>
