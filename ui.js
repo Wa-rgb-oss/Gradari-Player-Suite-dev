@@ -231,7 +231,7 @@
       const target=e.target.closest("[data-notification-key]"); if(!target) return;
       const selected=items.find(item=>readKey(item)===target.dataset.notificationKey); if(!selected) return;
       await markRead([selected]);
-      if(selected.type==="message"){window.dispatchEvent(new CustomEvent("gm:open-chat",{detail:{friendId:selected.friendId}}));setOpen(false);}
+      if(selected.type==="message"){window.dispatchEvent(new CustomEvent("gm:open-chat",{detail:{friendId:selected.friendId,messageId:selected.id}}));setOpen(false);}
       else if(selected.type==="friend_request") window.location.href=GMAuth.siteHref("player-suite/#friends");
       else if(selected.type==="news") window.location.href=GMAuth.siteHref("news/#news");
       else if(selected.type==="event"||selected.type==="world") window.location.href=GMAuth.siteHref("home/");
