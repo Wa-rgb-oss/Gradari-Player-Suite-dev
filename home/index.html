@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <base href="../">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#050a0e">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Home | Gradari Mireris</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="auth-pending">
+  <div class="app-shell protected-page">
+    <aside class="sidebar">
+      <div class="brand-block">
+        <div class="brand-code"><span>PLAYER NETWORK</span>GRADARI MIRERIS</div>
+        <div class="brand-sub">PERSISTENT STRATEGY / ROLEPLAY / 4X PLAYER INTERFACE</div>
+      </div>
+      <nav class="primary-nav" aria-label="Primary">
+        <a class="active" href="home/"><span class="nav-index">01</span><span class="nav-label">HOME</span><span class="nav-arrow">›</span></a>
+        <a href="map/"><span class="nav-index">02</span><span class="nav-label">MAP</span><span class="nav-arrow">›</span></a>
+        <a href="politics/"><span class="nav-index">03</span><span class="nav-label">POLITICS</span><span class="nav-arrow">›</span></a>
+        <a href="exchange-markets/"><span class="nav-index">04</span><span class="nav-label">EXCHANGE MARKETS</span><span class="nav-arrow">›</span></a>
+        <a href="research/"><span class="nav-index">05</span><span class="nav-label">RESEARCH</span><span class="nav-arrow">›</span></a>
+        <a href="player-suite/"><span class="nav-index">06</span><span class="nav-label">PLAYER SUITE</span><span class="nav-arrow">›</span></a>
+        <a href="news/"><span class="nav-index">07</span><span class="nav-label">NEWS &amp; ABOUT</span><span class="nav-arrow">›</span></a>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="user-readout"><strong>SIGNED IN</strong><span data-user-email>Loading identity...</span></div>
+        <button class="signout-btn" type="button" data-signout>LOG OUT</button>
+      </div>
+    </aside>
+
+    <div class="main-frame">
+      <header class="topbar">
+        <div class="page-id"><span class="page-bracket"></span><div><strong>HOME / COMMAND OVERVIEW</strong><span>PERSONAL COMMAND INTERFACE</span></div></div>
+        <div class="top-telemetry"><span><i class="status-dot"></i>NETWORK ACTIVE</span><span data-system-time>--:--:--</span></div>
+      </header>
+
+      <main class="page-content">
+        <section class="hero-grid">
+          <article class="hud-panel">
+            <div class="hud-kicker">COMMAND INTERFACE // HOME</div>
+            <h1 class="hero-title"><small id="welcomeLine">AUTHENTICATED PLAYER</small>COMMAND<br>OVERVIEW</h1>
+            <p class="hero-copy">Personal command overview of your account, faction standing, economy, inventory, character, actions, and current world state.</p>
+            <div class="hero-actions">
+              <a class="hud-button" href="player-suite/">OPEN PLAYER SUITE</a>
+              <a class="hud-button secondary" href="map/">OPEN MAP</a>
+            </div>
+          </article>
+
+          <aside class="hud-panel compact amber">
+            <div class="hud-kicker amber">ACCOUNT TELEMETRY</div>
+            <div class="telemetry-stack">
+              <div class="telemetry-row"><span>Session</span><strong>ACTIVE</strong></div>
+              <div class="telemetry-row"><span>Player Record</span><strong id="profileStatus">SCANNING</strong></div>
+              <div class="telemetry-row"><span>Faction</span><strong id="factionStatus">UNASSIGNED</strong></div>
+              <div class="telemetry-row"><span>Pending Actions</span><strong id="pendingTelemetry">--</strong></div>
+            </div>
+          </aside>
+        </section>
+
+        <section class="metric-grid">
+          <article class="metric-card">
+            <div class="metric-label">Personal Bank</div>
+            <div class="metric-value" id="walletBalance">--</div>
+            <div class="metric-detail" id="walletCurrency">AUREUM</div>
+          </article>
+          <article class="metric-card">
+            <div class="metric-label">Faction</div>
+            <div class="metric-value" id="factionMetric">--</div>
+            <div class="metric-detail" id="factionRole">NO ACTIVE MEMBERSHIP</div>
+          </article>
+          <article class="metric-card">
+            <div class="metric-label">Inventory / Resources</div>
+            <div class="metric-value" id="assetCount">--</div>
+            <div class="metric-detail">ASSET TYPES HELD</div>
+          </article>
+          <article class="metric-card">
+            <div class="metric-label">Active / Pending Actions</div>
+            <div class="metric-value" id="actionCount">--</div>
+            <div class="metric-detail">AWAITING OR IN REVIEW</div>
+          </article>
+        </section>
+
+        <section class="content-grid">
+          <article class="hud-panel compact">
+            <div class="section-head">
+              <div><div class="section-code">PLAYER / SYSTEMS</div><h2>Your Systems</h2></div>
+            </div>
+            <div class="command-list">
+              <div class="command-row"><div class="command-icon">E</div><div><h3>Economy</h3><p>Personal Aureum balance, transaction history, and account activity.</p></div><a href="player-suite/#economy">OPEN ›</a></div>
+              <div class="command-row"><div class="command-icon">I</div><div><h3>Inventory / Resources</h3><p>Resources, materials, and assets currently held by your account.</p></div><a href="player-suite/#inventory">OPEN ›</a></div>
+              <div class="command-row"><div class="command-icon">F</div><div><h3>Faction</h3><p>Faction membership, position, permissions, treasury, and shared resources.</p></div><a href="player-suite/#faction">OPEN ›</a></div>\n              <div class="command-row"><div class="command-icon">P</div><div><h3>Politics</h3><p>Senate representation, Influence, legislation, political offices, elections, and Imperial taxation.</p></div><a href="politics/">OPEN ›</a></div>
+              <div class="command-row"><div class="command-icon">R</div><div><h3>Research</h3><p>Research Points, active Research Sites, and unlocked player advancements.</p></div><a href="research/">OPEN ›</a></div>
+              <div class="command-row"><div class="command-icon">A</div><div><h3>Actions</h3><p>Submitted actions, current review status, and resolved records.</p></div><a href="player-suite/#actions">OPEN ›</a></div>
+            </div>
+          </article>
+
+          <aside class="stack">
+            <article class="hud-panel compact">
+              <div class="section-code">PLAYER / IDENTITY</div>
+              <h2 id="playerName" style="margin:5px 0 16px;text-transform:uppercase;letter-spacing:.05em">LOADING</h2>
+              <div class="telemetry-stack">
+                <div class="telemetry-row"><span>Handle</span><strong id="playerHandle">--</strong></div>
+                <div class="telemetry-row"><span>Faction Position</span><strong id="playerRole">--</strong></div>
+                <div class="telemetry-row"><span>Active Character</span><strong id="characterCount">--</strong></div>
+              </div>
+            </article>
+            <article class="notice" id="dashboardNotice">PLAYER DATA IS LOADING.</article>
+          </aside>
+        </section>
+
+        <section class="hud-panel compact" style="margin-top:18px">
+          <div class="section-head">
+            <div><div class="section-code">HOME / ACTIVE EVENTS</div><h2>Events & Campaigns</h2></div>
+            <p>OBJECTIVES // REWARDS // COMPETITION</p>
+          </div>
+          <p class="hero-copy" style="margin:0 0 18px">Active campaigns, competitions, crises, expeditions, and objectives shaping the current Record.</p>
+          <div id="eventFeed" class="stack"></div>
+          <div class="empty-state" id="eventEmpty" hidden>NO ACTIVE EVENTS ARE CURRENTLY AVAILABLE.</div>
+          <div class="form-state" id="eventState"></div>
+        </section>
+
+        <section class="content-grid">
+          <article class="hud-panel compact">
+            <div class="section-head">
+              <div><div class="section-code">WORLD / INFORMATION</div><h2>Current World State</h2></div>
+              <p>CURRENT RECORD</p>
+            </div>
+            <div id="worldStateFeed" class="resource-list"></div>
+            <div class="empty-state" id="worldStateEmpty" hidden>NO PLAYER-VISIBLE WORLD STATE HAS BEEN PUBLISHED.</div>
+          </article>
+
+          <aside class="hud-panel compact">
+            <div class="section-head">
+              <div><div class="section-code">WORLD / NEWS</div><h2>Latest Updates</h2></div>
+              <p>LATEST BULLETINS</p>
+            </div>
+            <div id="newsFeed" class="stack"></div>
+            <div class="empty-state" id="newsEmpty" hidden>NO PLAYER-VISIBLE NEWS HAS BEEN PUBLISHED.</div>
+          </aside>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <script src="auth.js"></script>
+  <script src="ui.js"></script>
+  <script src="player-data.js"></script>
+  <script>
+    (async () => {
+      const session = await GMUI.initProtected();
+      if (!session) return;
+      const notice = document.getElementById("dashboardNotice");
+
+      try {
+        const state = await GMPlayerData.load(session);
+        const name = state.profile?.display_name || state.registration?.preferred || state.registration?.player || "PLAYER";
+        const handle = state.profile?.handle || state.registration?.player || "NOT SET";
+        const membership = state.primaryMembership;
+        const wallet = state.wallet;
+        const pending = state.actions.filter(a => !["Resolved","Rejected"].includes(a.status || "Pending"));
+
+        document.getElementById("welcomeLine").textContent = "WELCOME // " + String(name).toUpperCase();
+        document.getElementById("playerName").textContent = name;
+        document.getElementById("playerHandle").textContent = handle;
+        document.getElementById("profileStatus").textContent = state.registration ? "REGISTERED" : "ACCOUNT ONLY";
+
+        const balance = Number(wallet?.balance || 0);
+        document.getElementById("walletBalance").textContent = balance.toLocaleString(undefined,{maximumFractionDigits:2});
+        document.getElementById("walletCurrency").textContent = String(wallet?.currency || "Aureum").toUpperCase();
+
+        if (membership?.faction) {
+          document.getElementById("factionStatus").textContent = membership.faction.code || membership.faction.name;
+          document.getElementById("factionMetric").textContent = membership.faction.code || "01";
+          document.getElementById("factionRole").textContent = (membership.title || membership.rank || "MEMBER").toUpperCase();
+          document.getElementById("playerRole").textContent = membership.title || membership.rank || "Member";
+        } else {
+          document.getElementById("factionStatus").textContent = "UNASSIGNED";
+          document.getElementById("factionMetric").textContent = "--";
+          document.getElementById("factionRole").textContent = "NO ACTIVE MEMBERSHIP";
+          document.getElementById("playerRole").textContent = "Unassigned";
+        }
+
+        document.getElementById("assetCount").textContent = state.assets.length;
+        document.getElementById("actionCount").textContent = pending.length;
+        document.getElementById("pendingTelemetry").textContent = String(pending.length).padStart(2,"0");
+        document.getElementById("characterCount").textContent = state.characters.some(row => row.status === "active" && row.life_status === "alive") ? "ACTIVE" : "NONE";
+
+        const eventRoot = document.getElementById("eventFeed");
+        const activeEvents = (state.events || []).filter(event => event.status === "active");
+        const joinedEvents = new Set((state.eventParticipation || []).map(row => row.event_id));
+        if (activeEvents.length) {
+          document.getElementById("eventEmpty").hidden = true;
+          eventRoot.innerHTML = activeEvents.map(event => {
+            const objectives = (state.eventObjectives || []).filter(obj => obj.event_id === event.id);
+            const objectiveHtml = objectives.length
+              ? objectives.map(obj => '<div class="resource-row"><div><strong>' + GMUI.esc(obj.title) + '</strong><div class="section-code">' + GMUI.esc(obj.description || "OBJECTIVE") + '</div></div><span>' + GMUI.esc(String(obj.points || 0)) + ' PTS</span></div>').join("")
+              : '<div class="empty-state">OBJECTIVES HAVE NOT YET BEEN PUBLISHED.</div>';
+            const joined = joinedEvents.has(event.id);
+            const timing = [event.starts_at ? new Date(event.starts_at).toLocaleDateString() : null,event.ends_at ? new Date(event.ends_at).toLocaleDateString() : null].filter(Boolean).join(" → ");
+            return '<article class="notice">' +
+              '<div class="split-actions"><div><strong style="color:var(--text)">' + GMUI.esc(event.title) + '</strong><div class="section-code">' + GMUI.esc(String(event.event_type || "EVENT").toUpperCase()) + (timing ? ' // ' + GMUI.esc(timing) : '') + '</div></div>' +
+              '<div style="display:flex;gap:7px;flex-wrap:wrap">' +
+              (event.competitive ? '<span class="status-chip amber">COMPETITIVE</span>' : '<span class="status-chip">COOPERATIVE / OPEN</span>') +
+              (joined ? '<span class="status-chip">JOINED</span>' : '<button class="hud-button secondary event-join" data-event="' + GMUI.esc(event.id) + '" type="button">JOIN EVENT</button>') +
+              '</div></div>' +
+              '<div style="margin-top:10px">' + GMUI.esc(event.description) + '</div>' +
+              (event.reward_summary ? '<div class="section-code" style="margin-top:10px">REWARDS // ' + GMUI.esc(event.reward_summary) + '</div>' : '') +
+              '<div class="resource-list" style="margin-top:10px">' + objectiveHtml + '</div>' +
+              '</article>';
+          }).join("");
+
+          eventRoot.querySelectorAll(".event-join").forEach(button => {
+            button.addEventListener("click", async () => {
+              const eventState = document.getElementById("eventState");
+              try {
+                eventState.textContent = "JOINING EVENT...";
+                await GMAuth.api("rpc/join_game_event",{
+                  method:"POST",
+                  body:JSON.stringify({p_event_id:button.dataset.event})
+                });
+                location.reload();
+              } catch (error) {
+                eventState.textContent = "EVENT JOIN FAILED // " + error.message;
+              }
+            });
+          });
+        } else {
+          eventRoot.innerHTML = "";
+          document.getElementById("eventEmpty").hidden = false;
+        }
+
+        const worldRoot = document.getElementById("worldStateFeed");
+        if (state.world.length) {
+          document.getElementById("worldStateEmpty").hidden = true;
+          worldRoot.innerHTML = state.world.map(row => {
+            const value = typeof row.value === "object" ? JSON.stringify(row.value) : String(row.value ?? "");
+            return '<div class="resource-row"><div><strong>' + GMUI.esc(row.label) + '</strong><div class="section-code">' + GMUI.esc(String(row.category || "general").toUpperCase()) + '</div></div><span>' + GMUI.esc(value) + '</span></div>';
+          }).join("");
+        } else {
+          worldRoot.innerHTML = "";
+          document.getElementById("worldStateEmpty").hidden = false;
+        }
+
+        const newsRoot = document.getElementById("newsFeed");
+        if (state.news.length) {
+          document.getElementById("newsEmpty").hidden = true;
+          newsRoot.innerHTML = state.news.map(row =>
+            '<article class="notice"><strong style="color:var(--text)">' + GMUI.esc(row.title) + '</strong><div class="section-code">' + GMUI.esc(new Date(row.published_at).toLocaleDateString()) + '</div><div style="margin-top:8px">' + GMUI.esc(row.body) + '</div></article>'
+          ).join("");
+        } else {
+          newsRoot.innerHTML = "";
+          document.getElementById("newsEmpty").hidden = false;
+        }
+
+        notice.textContent = state.registration
+          ? "PLAYER ACCOUNT LINKED. PERSONAL DATA IS ISOLATED TO THIS AUTHENTICATED USER."
+          : "ACCOUNT ACTIVE. COMPLETE PLAYER REGISTRATION IN THE PLAYER SUITE WHEN READY.";
+      } catch (error) {
+        notice.textContent = "DASHBOARD DATA ERROR // " + error.message;
+      }
+    })();
+  </script>
+  <script src="game-chat.js"></script>
+</body>
+</html>

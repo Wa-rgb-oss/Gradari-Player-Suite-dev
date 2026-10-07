@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <base href="../">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#050a0e">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Map | Gradari Mireris</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="auth-pending map-body">
+  <div class="app-shell protected-page">
+    <aside class="sidebar">
+      <div class="brand-block">
+        <div class="brand-code"><span>PLAYER NETWORK</span>GRADARI MIRERIS</div>
+        <div class="brand-sub">PERSISTENT STRATEGY / ROLEPLAY / 4X PLAYER INTERFACE</div>
+      </div>
+      <nav class="primary-nav" aria-label="Primary">
+        <a href="home/"><span class="nav-index">01</span><span class="nav-label">HOME</span><span class="nav-arrow">›</span></a>
+        <a class="active" href="map/"><span class="nav-index">02</span><span class="nav-label">MAP</span><span class="nav-arrow">›</span></a>
+        <a href="politics/"><span class="nav-index">03</span><span class="nav-label">POLITICS</span><span class="nav-arrow">›</span></a>
+        <a href="exchange-markets/"><span class="nav-index">04</span><span class="nav-label">EXCHANGE MARKETS</span><span class="nav-arrow">›</span></a>
+        <a href="research/"><span class="nav-index">05</span><span class="nav-label">RESEARCH</span><span class="nav-arrow">›</span></a>
+        <a href="player-suite/"><span class="nav-index">06</span><span class="nav-label">PLAYER SUITE</span><span class="nav-arrow">›</span></a>
+        <a href="news/"><span class="nav-index">07</span><span class="nav-label">NEWS &amp; ABOUT</span><span class="nav-arrow">›</span></a>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="user-readout"><strong>SIGNED IN</strong><span data-user-email>Loading identity...</span></div>
+        <button class="signout-btn" type="button" data-signout>LOG OUT</button>
+      </div>
+    </aside>
+
+    <div class="main-frame">
+      <header class="topbar">
+        <div class="page-id"><span class="page-bracket"></span><div><strong>MAP / GALACTIC CARTOGRAPHY</strong><span>HEX TERRITORY // CHARACTER PRESENCE // HOLDINGS</span></div></div>
+        <div class="top-telemetry"><span><i class="status-dot"></i>MAP ONLINE</span><span data-system-time>--:--:--</span></div>
+      </header>
+
+      <main class="map-page">
+        <section class="map-hudbar">
+          <div class="map-hudbar-title">
+            <span class="section-code">GALACTIC CARTOGRAPHY</span>
+            <strong>STRATEGIC HEX MAP</strong>
+          </div>
+          <div class="map-hudbar-metrics">
+            <span>HEXES <b id="mapHexCount">--</b></span>
+            <span>CLAIMED <b id="mapClaimedCount">--</b></span>
+            <span>HOLDINGS <b id="mapFacilityCount">--</b></span>
+            <span>ZOOM <b id="mapZoomReadout">100%</b></span>
+          </div>
+        </section>
+
+        <section class="map-workspace map-workspace-unified">
+          <aside class="map-command-panel map-mobile-initial-collapsed">
+            <div class="map-command-head">
+              <div><span class="section-code">GALACTIC CARTOGRAPHY</span><strong>MAP COMMAND</strong></div>
+              <button class="map-panel-collapse" id="mapPanelCollapse" type="button" aria-label="Collapse map controls">‹</button>
+            </div>
+            <div class="map-command-tabs" data-map-tabs>
+              <button class="map-command-tab active" type="button" data-map-tab="map-tab-location">LOCATION</button>
+              <button class="map-command-tab" type="button" data-map-tab="map-tab-character">CHARACTER</button>
+              <button class="map-command-tab" type="button" data-map-tab="map-tab-military">MILITARY</button>
+              <button class="map-command-tab" type="button" data-map-tab="map-tab-build">BUILD</button>
+              <button class="map-command-tab" type="button" data-map-tab="map-tab-display">DISPLAY</button>
+            </div>
+            <div class="map-command-content">
+              <div class="map-command-page active" id="map-tab-location">
+              <div class="section-code">SELECTED / LOCATION</div>
+              <h2 id="selectedHexName">No Hex Selected</h2>
+              <div class="telemetry-stack">
+                <div class="telemetry-row"><span>Hex ID</span><strong id="selectedHexRef">--</strong></div>
+                <div class="telemetry-row"><span>Faction</span><strong id="selectedHexFaction">UNCLAIMED</strong></div>
+                <div class="telemetry-row"><span>System Type</span><strong id="selectedHexStatus">--</strong></div>
+                <div class="telemetry-row"><span>Production</span><strong id="selectedHexProduction">--</strong></div>
+                <div class="telemetry-row"><span>Facilities</span><strong id="selectedHexSlots">0 / 8</strong></div>
+                <div class="telemetry-row"><span>Population</span><strong id="selectedHexPopulation">--</strong></div>
+                <div class="telemetry-row"><span>Manpower</span><strong id="selectedHexManpower">--</strong></div>
+              </div>
+              <div class="section-code map-panel-divider">LOCAL RESOURCES</div>
+              <div id="selectedResourceList" class="stack"></div>
+              <div class="empty-state map-mini-empty" id="selectedResourceEmpty">NO KNOWN DEPOSITS.</div>
+              <div class="section-code map-panel-divider">LOCATION EFFECTS</div>
+              <div id="selectedModifierList" class="stack"></div>
+              <div class="empty-state map-mini-empty" id="selectedModifierEmpty">NO ACTIVE LOCATION EFFECTS.</div>
+            
+              <div class="section-code">SELECTED / HOLDINGS</div>
+              <h2>Facilities</h2>
+              <div id="selectedFacilityList" class="stack"></div>
+              <div class="empty-state map-mini-empty" id="selectedFacilityEmpty">NO VISIBLE HOLDINGS AT THIS LOCATION.</div>
+              <div id="selectedFacilityControls" class="stack" style="margin-top:12px"></div>
+            </div>
+              <div class="map-command-page" id="map-tab-character">
+              <div class="section-code">CHARACTER / LOCATION</div>
+              <h2 id="mapCharacterName">No Character</h2>
+              <div class="telemetry-stack">
+                <div class="telemetry-row"><span>Life Status</span><strong id="mapCharacterStatus">--</strong></div>
+                <div class="telemetry-row"><span>Current Location</span><strong id="mapCharacterLocation">--</strong></div>
+                <div class="telemetry-row"><span>Movement</span><strong id="mapCharacterMovement">--</strong></div>
+                <div class="telemetry-row"><span>Faction</span><strong id="mapCharacterFaction">--</strong></div>
+              </div>
+              <button class="hud-button amber" id="setInitialLocationBtn" type="button" hidden>SET INITIAL LOCATION HERE</button>
+              <div class="form-state" id="mapCharacterState"></div>
+            
+              <div class="section-code">CHARACTER / TRAVEL</div>
+              <h2>Move Character</h2>
+              <div class="telemetry-stack">
+                <div class="telemetry-row"><span>Distance</span><strong id="mapTravelDistance">--</strong></div>
+                <div class="telemetry-row"><span>Travel Time</span><strong id="mapTravelHours">--</strong></div>
+                <div class="telemetry-row"><span>Arrival</span><strong id="mapTravelArrival">--</strong></div>
+              </div>
+              <button class="hud-button" id="mapTravelBtn" type="button">TRAVEL TO SELECTED HEX</button>
+              <div class="form-state" id="mapTravelState"></div>
+            </div>
+              <div class="map-command-page" id="map-tab-military">
+              <div class="section-code">FACTION / MILITARY</div>
+              <h2>Army Orders</h2>
+              <label><span>Army</span><select id="mapArmySelect"></select></label>
+              <div class="telemetry-stack" style="margin-top:10px">
+                <div class="telemetry-row"><span>Strength</span><strong id="mapArmyStrength">--</strong></div>
+                <div class="telemetry-row"><span>Location</span><strong id="mapArmyLocation">--</strong></div>
+                <div class="telemetry-row"><span>Status</span><strong id="mapArmyStatus">--</strong></div>
+                <div class="telemetry-row"><span>Move Time</span><strong id="mapArmyTravelTime">--</strong></div>
+                <div class="telemetry-row"><span>ETA</span><strong id="mapArmyTravelArrival">--</strong></div>
+              </div>
+              <div class="map-button-grid" style="margin-top:10px">
+                <button class="hud-button secondary" id="mapArmyMoveBtn" type="button">MOVE ARMY</button>
+                <button class="hud-button secondary" id="mapRaidBtn" type="button">RAID</button>
+                <button class="hud-button secondary" id="mapConquestBtn" type="button">CONQUEST</button>
+              </div>
+              <div class="form-state" id="mapMilitaryState"></div>
+            </div>
+              <div class="map-command-page" id="map-tab-build">
+              <div class="hud-kicker amber">INDUSTRY</div>
+              <div class="section-code">STORED RESOURCES</div>
+              <div class="telemetry-stack" id="mapResourceStockpile"></div>
+              <div class="section-code" style="margin-top:16px">PRODUCTION / CYCLE</div>
+              <div class="telemetry-stack" id="mapProductionRates"></div>
+              <div class="hud-kicker amber" style="margin-top:18px">CONSTRUCT HOLDING</div>
+              <form id="mapBuildForm" class="form-shell">
+                <label><span>Facility</span><select name="facility_type_id" id="mapFacilityType" required></select></label>
+                <label><span>Name</span><input name="name" maxlength="160" placeholder="Optional holding name"></label>
+                <div class="telemetry-stack">
+                  <div class="telemetry-row"><span>Build Cost</span><strong id="mapBuildCost">--</strong></div>
+                  <div class="telemetry-row"><span>Upkeep / Day</span><strong id="mapBuildUpkeep">--</strong></div>
+                  <div class="telemetry-row"><span>Your Aureum</span><strong id="mapWalletBalance">--</strong></div>
+                </div>
+                <button class="hud-button amber" id="mapBuildBtn" type="submit">CONSTRUCT HERE</button>
+                <div class="form-state" id="mapBuildState"></div>
+              </form>
+              <div class="empty-state map-mini-empty" id="mapBuildLocked" hidden></div>
+            </div>
+              <div class="map-command-page" id="map-tab-display">
+              <div class="section-code">MAP / NAVIGATION</div>
+              <h2>Controls</h2>
+              <div class="map-button-grid">
+                <button class="hud-button secondary" id="mapCenterBtn" type="button">CENTER MAP</button>
+                <button class="hud-button secondary" id="mapCharacterBtn" type="button">MY CHARACTER</button>
+                <button class="hud-button secondary" id="mapRefreshBtn" type="button">REFRESH DATA</button>
+                <button class="hud-button secondary" id="mapCopyBtn" type="button">COPY HEX ID</button>
+              </div>
+              <div class="section-code map-help">DRAG TO PAN // SCROLL TO ZOOM // CLICK A HEX TO INSPECT</div>
+            
+              <div class="section-code">MAP / LAYERS</div>
+              <h2>Display</h2>
+              <label class="checkbox-line"><input id="layerTerritory" type="checkbox" checked><span>Faction territory</span></label>
+              <label class="checkbox-line"><input id="layerFacilities" type="checkbox" checked><span>Holdings</span></label>
+              <label class="checkbox-line"><input id="layerCharacter" type="checkbox" checked><span>Your character</span></label>
+              <label class="checkbox-line"><input id="layerModifiers" type="checkbox" checked><span>Location effects</span></label>
+            </div>
+            </div>
+          </aside>
+          <section class="map-canvas-shell">
+            <canvas id="galaxyMap" aria-label="Interactive Gradari Mireris galactic hex map"></canvas>
+            <div class="map-reticle" aria-hidden="true"></div>
+            <div class="map-canvas-readout">
+              <span id="mapSelectedReadout">SELECT A HEX</span>
+              <span id="mapCoordinateReadout">Q -- // R --</span>
+            </div>
+          </section>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <script src="auth.js"></script>
+  <script src="ui.js"></script>
+  <script src="player-data.js"></script>
+  <script src="map.js"></script>
+  <script src="game-chat.js"></script>
+</body>
+</html>
