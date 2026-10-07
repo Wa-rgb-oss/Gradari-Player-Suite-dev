@@ -335,7 +335,7 @@
     const modifier=Number(facility.production_modifier ?? 1);
     const outputs=[];
     if(code==="AGRI_COMPLEX") outputs.push({code:"food",quantity:360*modifier*health});
-    else if(code==="RESEARCH_SITE") outputs.push({code:"research_points",quantity:36*modifier*health});
+    else if(code==="RESEARCH_SITE") outputs.push({code:"research_points",quantity:1*modifier*health});
     else if(code==="MINE"){
       (state.resourceDeposits||[]).filter(d=>d.location_ref===facility.location_ref).forEach(d=>outputs.push({code:String(d.resource_code),quantity:360*Number(d.richness??1)*modifier*health}));
     }else if(code==="REFINERY"){
