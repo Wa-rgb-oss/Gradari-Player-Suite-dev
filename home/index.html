@@ -152,6 +152,7 @@
   <script src="auth.js"></script>
   <script src="ui.js"></script>
   <script src="player-data.js"></script>
+  <script src="about.js"></script>
   <script>
     (async () => {
       const session = await GMUI.initProtected();
@@ -251,9 +252,7 @@
         const newsRoot = document.getElementById("newsFeed");
         if (state.news.length) {
           document.getElementById("newsEmpty").hidden = true;
-          newsRoot.innerHTML = state.news.map(row =>
-            '<article class="notice"><strong style="color:var(--text)">' + GMUI.esc(row.title) + '</strong><div class="section-code">' + GMUI.esc(new Date(row.published_at).toLocaleDateString()) + '</div><div style="margin-top:8px">' + GMUI.esc(row.body) + '</div></article>'
-          ).join("");
+          GMNews.render(newsRoot,state.news);
         } else {
           newsRoot.innerHTML = "";
           document.getElementById("newsEmpty").hidden = false;
