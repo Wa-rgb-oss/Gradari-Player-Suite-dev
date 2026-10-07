@@ -1,0 +1,1 @@
+create policy daily_influence_no_client_access on private.character_daily_influence for all to anon,authenticated using(false) with check(false);
