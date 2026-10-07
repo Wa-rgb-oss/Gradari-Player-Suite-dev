@@ -49,6 +49,21 @@
           </form>
           <div class="auth-switch">Already registered? <button id="showLogin" type="button">RETURN TO SIGN IN</button></div>
         </section>
+
+        <div class="auth-legal-notice" aria-label="Legal agreement notice">
+          <div class="auth-legal-code">SERVICE ACCESS // LEGAL NOTICE</div>
+          <p>By selecting <strong>ENTER PLAYER SUITE</strong>, creating an account, or continuing to access or use Gradari Mireris, you agree to the <button type="button" class="auth-legal-link" data-legal-open="terms-of-use">Terms of Use</button> and acknowledge the <button type="button" class="auth-legal-link" data-legal-open="privacy-policy">Privacy Policy</button>. If you do not agree to the Terms of Use, do not access or use the Service.</p>
+        </div>
+
+        <dialog id="legalDialog" class="auth-legal-dialog" aria-labelledby="legalDialogTitle">
+          <div class="dialog-head">
+            <span id="legalDialogTitle">LEGAL INFORMATION</span>
+          </div>
+          <div class="dialog-body auth-legal-dialog-body" id="legalDialogBody">LOADING...</div>
+          <div class="dialog-foot">
+            <button class="hud-button auth-legal-close" type="button" id="legalDialogClose">CLOSE</button>
+          </div>
+        </dialog>
       </div>
     </section>
   </main>
@@ -123,6 +138,51 @@
         signupState.textContent = "ACCOUNT CREATION FAILED // " + error.message;
         button.disabled = false;
       }
+    });
+
+
+    const legalDialog = document.getElementById("legalDialog");
+    const legalDialogBody = document.getElementById("legalDialogBody");
+    const legalDialogTitle = document.getElementById("legalDialogTitle");
+    const legalDialogClose = document.getElementById("legalDialogClose");
+    let legalSourceDocument = null;
+
+    async function loadLegalSource() {
+      if (legalSourceDocument) return legalSourceDocument;
+      const response = await fetch("about.html", { cache: "no-store" });
+      if (!response.ok) throw new Error("Unable to load legal documents.");
+      const source = await response.text();
+      legalSourceDocument = new DOMParser().parseFromString(source, "text/html");
+      return legalSourceDocument;
+    }
+
+    async function openLegalDocument(key) {
+      const title = key === "privacy-policy" ? "PRIVACY POLICY" : "TERMS OF USE";
+      legalDialogTitle.textContent = title;
+      legalDialogBody.textContent = "LOADING " + title + "...";
+      legalDialog.showModal();
+
+      try {
+        const sourceDocument = await loadLegalSource();
+        const panel = sourceDocument.getElementById("info-" + key);
+        const policy = panel?.querySelector(".legal-policy");
+        if (!policy) throw new Error("Legal document not found.");
+
+        legalDialogBody.innerHTML = "";
+        legalDialogBody.appendChild(document.importNode(policy, true));
+        legalDialogBody.scrollTop = 0;
+      } catch (error) {
+        legalDialogBody.textContent = "LEGAL DOCUMENT ERROR // " + error.message;
+      }
+    }
+
+    document.querySelectorAll("[data-legal-open]").forEach(button => {
+      button.addEventListener("click", () => openLegalDocument(button.dataset.legalOpen));
+    });
+
+    legalDialogClose.addEventListener("click", () => legalDialog.close());
+    legalDialog.addEventListener("click", event => {
+      if (event.target === legalDialog) legalDialog.close();
     });
 
     GMAuth.redirectIfAuthenticated("dashboard.html");
