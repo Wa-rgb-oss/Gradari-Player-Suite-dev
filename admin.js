@@ -610,24 +610,6 @@
     }
   });
 
-  $("newsForm").addEventListener("submit", async event => {
-    event.preventDefault();
-    const form = event.currentTarget;
-    const d = Object.fromEntries(new FormData(form));
-    try {
-      await GMAuth.api("game_news", {method:"POST",headers:{Prefer:"return=minimal"},body:JSON.stringify({
-        title:d.title.trim(),
-        body:d.body.trim(),
-        visibility:d.visibility,
-        faction_id:d.faction_id || null
-      })});
-      form.reset();
-      setState($("newsState"), "NEWS PUBLISHED", "success");
-    } catch (error) {
-      setState($("newsState"), "NEWS PUBLISH FAILED // " + error.message, "error");
-    }
-  });
-
   (async () => {
     session = await GMAuth.getSession();
     if (!session?.user?.id) {
