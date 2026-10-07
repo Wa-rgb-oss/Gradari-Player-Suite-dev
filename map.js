@@ -1178,10 +1178,10 @@
         ? '<div class="status-chip amber" style="margin-top:8px">FREE RESOURCE STORAGE TO RESUME OUTPUT'+(Number(order?.output_remaining||0)>0?' // '+esc(fmt(order.output_remaining))+' REMAINING':'')+'</div>'
         : '';
       facilityControls += '<article class="notice"><strong>'+esc(factory.name || "Factory")+'</strong><div class="section-code">'+esc(statusLabel)+'</div>'+output+countdown+blocked+
-        '<select class="factory-recipe-select" data-factory="'+esc(factory.id)+'" style="margin-top:8px" '+(active?'disabled':'')+'>'+
+        '<select class="factory-recipe-select" data-factory="'+esc(factory.id)+'" style="margin-top:8px">'+
         '<option value="">Select production</option>'+
         (player.factoryRecipes || []).map(row=>'<option value="'+esc(row.code)+'" '+(order?.recipe_code===row.code?'selected':'')+'>'+esc(row.name)+'</option>').join("")+
-        '</select><button class="hud-button secondary factory-recipe-save" type="button" data-factory="'+esc(factory.id)+'" style="margin-top:8px" '+(active?'disabled':'')+'>BEGIN PRODUCTION</button></article>';
+        '</select><button class="hud-button secondary factory-recipe-save" type="button" data-factory="'+esc(factory.id)+'" style="margin-top:8px" data-active="'+active+'">'+(active?'CHANGE PRODUCTION':'BEGIN PRODUCTION')+'</button>'+(active?'<p>Changing production restarts the batch. Consumed inputs and unfinished or storage-blocked output are lost.</p>':'')+'</article>';
     });
 
   ownedShipyards.forEach(shipyard => {
@@ -1240,11 +1240,12 @@
     document.querySelectorAll(".factory-recipe-save").forEach(button=>button.addEventListener("click",async()=>{
       const select=document.querySelector('.factory-recipe-select[data-factory="'+button.dataset.factory+'"]');
       if(!select?.value) return;
+      if(button.dataset.active==='true'&&!await GMUI.confirmAction("Change this factory's production? The batch restarts, new inputs are charged, and unfinished or storage-blocked output is discarded. Consumed inputs are not refunded."))return;
       try{
         button.disabled=true;
         const recipeCode=select.value;
         const facilityId=button.dataset.factory;
-        const result=await GMAuth.api("rpc/queue_factory_production",{
+        const result=await GMAuth.api("rpc/"+(button.dataset.active==='true'?'change_factory_production':'queue_factory_production'),{
           method:"POST",
           body:JSON.stringify({p_facility_id:facilityId,p_recipe_code:recipeCode,p_quantity:1})
         });
