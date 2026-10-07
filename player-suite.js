@@ -49,6 +49,8 @@
       account:"suite-account",
       economy:"suite-economy",
       inventory:"suite-characters",
+      artifacts:"suite-characters",
+      character:"suite-characters",
       faction:"suite-faction",
       characters:"suite-characters",
       friends:"suite-friends",
