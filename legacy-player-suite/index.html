@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en"><head>
+  <base href="../"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Gradari Mireris Player Suite</title>
+<style>
+:root{--bg:#0b0d0f;--panel:#121519;--panel2:#171b20;--text:#e8e3d8;--muted:#9b9b96;--line:#30343a;--gold:#a9782b;--gold2:#d1a657;--red:#7d302c}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Georgia,"Times New Roman",serif}
+header{padding:28px 5vw 20px;border-bottom:1px solid var(--line);background:#0e1114;position:relative}header h1{margin:0;color:var(--gold2);letter-spacing:.08em;font-size:clamp(25px,4vw,42px)}
+header p{color:var(--muted);margin:8px 0 0}.tabs{display:flex;gap:5px;overflow-x:auto;padding:10px 5vw;background:#101317;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:3}
+.tab{white-space:nowrap;background:transparent;color:var(--muted);border:1px solid transparent;padding:10px 13px;cursor:pointer;font:inherit}.tab.active{color:var(--gold2);border-color:var(--gold);background:#17191b}.subtabs{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 22px}.subtab{font-size:.9rem;background:#121519;color:var(--muted);border:1px solid var(--line)}.subtab.active{color:var(--gold2);border-color:var(--gold)}.registration-section{display:none}.registration-section.active{display:block}
+main{max-width:1000px;margin:auto;padding:30px 5vw 60px}.panel{display:none}.panel.active{display:block}.card{background:var(--panel);border:1px solid var(--line);padding:22px;margin:0 0 18px}
+h2,h3{color:var(--gold2);letter-spacing:.04em}h2{margin-top:0}.lead{font-size:1.08rem;line-height:1.65}.muted,.hint{color:var(--muted);font-size:.92rem}
+label{display:block;margin:16px 0 6px;color:#d9c69d}input,textarea,select{width:100%;background:#0c0f12;color:var(--text);border:1px solid #3a3e44;padding:11px;font:inherit}textarea{min-height:100px;resize:vertical}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.check{display:flex;gap:10px;align-items:flex-start}.check input{width:auto;margin-top:4px}
+button{background:#20242a;color:var(--text);border:1px solid #454a52;padding:10px 14px;cursor:pointer;font:inherit}.primary{background:var(--gold);border-color:var(--gold2);color:#0a0a0a;font-weight:bold}.danger{border-color:var(--red)}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}.state{font-size:.85rem;color:var(--muted);margin:5px 0 14px}.step{border-left:2px solid var(--gold);padding-left:16px;margin:22px 0}.canonbox{white-space:pre-wrap;line-height:1.55;max-height:520px;overflow:auto;background:#0c0f12;border:1px solid var(--line);padding:18px}
+dialog{width:min(760px,94vw);background:#121519;color:var(--text);border:1px solid var(--gold);padding:0}.mh,.mf{padding:15px 18px;background:#171b20}.mb{padding:18px;white-space:pre-wrap;max-height:65vh;overflow:auto}.mf{text-align:right}
+.login-button{position:absolute;top:28px;right:5vw;background:transparent;color:var(--gold2);border:1px solid var(--gold);padding:9px 16px;text-decoration:none;font:inherit;cursor:pointer}.login-button:hover{background:#17191b}
+@media(max-width:650px){.login-button{top:18px;right:16px}.grid{grid-template-columns:1fr}.tabs{padding-left:10px;padding-right:10px}main{padding-left:16px;padding-right:16px}}
+</style></head><body>
+<header><h1>GRADARI MIRERIS</h1><a class="login-button" href="login/">LOGIN</a><p>PLAYER SUITE // Use the tabs below to join the game, create and manage records, reference the canon, and submit actions for Game Master review.</p></header>
+<nav class="tabs">
+<button class="tab active" data-tab="home">HOME</button><button class="tab" data-tab="newplayers">REGISTRATION</button><button class="tab" data-tab="actions">SUBMIT ACTIONS</button><button class="tab" data-tab="canon">CANON REFERENCE</button><button class="tab" type="button" onclick="window.location.href='admin/'">ADMIN</button>
+</nav><main>
+
+<section class="panel active" id="home">
+<div class="card"><h2>WELCOME TO GRADARI MIRERIS</h2>
+<p class="lead">Step into a universe shaped by doctrine, weighed by consequence, and scarred by centuries of war. Your choices can alter fleets, worlds, governments, and the relationships between powers.</p>
+<p>You do not need to know everything before you begin. Read enough of the canon to get a feel for the universe, find what interests you, and build your place within it.</p></div>
+<div class="step"><h3>1. Registration</h3><p>Use the <strong>REGISTRATION TAB</strong> to introduce yourself, your interests, and how you would like to play.</p></div>
+<div class="step"><h3>2. Build Your Place</h3><p>Register a character, or use the Faction, Colony, and Treaty records as they become relevant to your play.</p></div>
+<div class="step"><h3>3. Read the Canon</h3><p>The <strong>CANON REFERENCE</strong> tab contains a quick player reference. The full canon remains the authority when more detail is needed.</p></div>
+<div class="step"><h3>4. Submit Actions</h3><p>Use <strong>SUBMIT ACTIONS</strong> for formal attempts that require Game Master resolution. Meaningful outcomes become part of the continuing Record.</p></div>
+</section>
+
+<section class="panel" id="newplayers">
+<div class="card"><h2>REGISTRATION</h2><p>Use these forms to enter the game and establish your place in the universe. Begin with Player Registration, then complete additional records as they become relevant.</p></div>
+<section class="registration-section active" id="join"><div class="card"><h2>NEW PLAYER REGISTRATION</h2><p>Tell the Game Master who you are, what interests you, and where you might fit into Gradari Mireris. If you are already an established player, you do not need to complete this registration again.</p></div>
+<form data-kind="join">
+<div class="grid"><div><label>Discord Username *</label><input name="player" required></div><div><label>Preferred Name</label><input name="preferred"></div></div>
+<label>What interests you about Gradari Mireris? *</label><textarea name="interests" required></textarea>
+<label>Preferred Playstyle</label><textarea name="playstyle" placeholder="Politics, military strategy, diplomacy, roleplay, exploration, economics, worldbuilding, etc."></textarea>
+<label>Faction Preference</label><input name="faction" placeholder="If you already have one in mind">
+<label>Role You Might Like</label><input name="role">
+<label>What would you like to get out of the game?</label><textarea name="goals"></textarea>
+<label>Additional Notes</label><textarea name="notes"></textarea>
+<div class="actions"><button class="primary" type="submit">SUBMIT REGISTRATION</button><button type="button" data-preview>PREVIEW</button><button class="danger" type="button" data-clear>CLEAR</button></div><div class="state"></div></form></section>
+
+</section>
+
+<section class="panel" id="actions"><div class="card"><h2>ACTION SUBMISSION</h2><p>Submit a formal attempt for Game Master resolution. State what you are doing, how you are doing it, what you commit, and the result you intend.</p></div>
+<form data-kind="action">
+<div class="grid"><div><label>Player / Faction *</label><input name="player" required></div><div><label>Action Title *</label><input name="name" required></div></div>
+<div class="grid"><div><label>Action Category *</label><select name="category" required><option value="">Select</option><option>Political</option><option>Diplomatic</option><option>Economic</option><option>Military</option><option>Intelligence</option><option>Research</option><option>Expansion</option><option>Other</option></select></div><div><label>Target / Location</label><input name="target"></div></div>
+<label>Objective *</label><textarea name="objective" required></textarea><label>Method *</label><textarea name="method" required></textarea>
+<label>What are you committing? *</label><div id="commitList"></div><button type="button" id="addCommit">+ ADD COMMITMENT</button>
+<label>Intent *</label><textarea name="intent" required></textarea>
+<label class="check"><input type="checkbox" name="secret" id="secret"><span>Secret / Classified Action</span></label>
+<div id="coverWrap" style="display:none"><label>Public Cover Story</label><textarea name="cover"></textarea></div>
+<div id="ordersWrap" style="display:none"><label>Orders</label><textarea name="orders" placeholder="Operational orders, instructions, restrictions, priorities, or command intent."></textarea></div>
+<label>Additional Notes</label><textarea name="notes"></textarea>
+<div class="actions"><button class="primary" type="submit">SUBMIT ACTION</button><button type="button" data-preview>PREVIEW</button><button class="danger" type="button" data-clear>CLEAR</button></div><div class="state"></div></form></section>
+
+<section class="panel" id="canon"><div class="card"><h2>CANON REFERENCE</h2><p>This is a quick player reference, not a replacement for the full canon document. Use the full canon when exact doctrine, rank, history, or institutional detail matters.</p></div>
+<div class="canonbox"><strong>GRADARI MIRERIS: PLAYER REFERENCE</strong>
+
+<strong>THE GAME</strong>
+Gradari Mireris is a persistent strategy, roleplaying, and 4X game. Strategic play concerns factions, governments, economies, territories, fleets, armies, colonies, diplomacy, infrastructure, and research. Roleplaying concerns the individuals living inside those systems. Narrative play connects the two.
+
+<strong>CORE GAMEPLAY CYCLE</strong>
+OBSERVE → PLAN → ACT → RESOLVE → RECORD → ADAPT
+
+Players examine the situation, decide what they want to accomplish, act through roleplay or formal Actions, receive Game Master resolution, record meaningful consequences, and adapt to the resulting world. There is no permanent reset.
+
+<strong>PLAYER AGENCY</strong>
+Players are not limited to a fixed menu of actions. If something is reasonably possible within canon, it may be attempted. Greater ambitions normally require greater preparation, resources, authority, cooperation, or risk.
+
+<strong>CHARACTERS</strong>
+A player should normally maintain one Main Character and up to two active Side Characters. Each character remains limited by their own location, authority, knowledge, and responsibilities.
+
+<strong>WRITING AN ACTION</strong>
+A strong Action contains:
+Objective: What are you trying to accomplish?
+Method: How are you attempting it?
+Resources: What personnel, money, equipment, territory, authority, intelligence, or other assets are committed?
+Intent: What result do you actually want?
+
+<strong>THE RECORD</strong>
+Meaningful outcomes persist. Territory can change hands. Resources can be spent. Characters can gain authority or die. Treaties can become binding. Discoveries can permanently alter what factions know.
+
+<strong>GAME MASTER</strong>
+The Game Master resolves Actions, represents uncontrolled factions and characters, maintains hidden information and canon, and determines how the universe responds. The player determines the Action. The Game Master determines the response.
+
+<strong>MAJOR FACTIONS & POWERS</strong>
+
+<strong>Gradari Mireris Empire</strong>
+The dominant Imperial power and center of the known political order. Its government balances Martial, Civil, and Doctrinal authority through the Praetora, Pilea, and Ethrenari. Its vast territory contains Houses, institutions, military commands, corporations, and regional powers with interests of their own.
+
+<strong>Luminark Core</strong>
+A vast machine civilization in the eastern reaches of known space. It is governed by the Tri-Singularity of ARCH-LUX, VIRE-LUX, and TERA-LUX and pursues continuity through replication, reconstruction, archives, artificial populations, and controlled preservation.
+
+<strong>Accordant Spiral / Spiral Bloc</strong>
+A rebellious power and political movement resisting the stability and authority of the modern Empire. Rebellion within the Spiral Bloc is one of the major pressures upon the Era of Measured Equilibrium.
+
+<strong>Virelac Enclave</strong>
+An old and distinct non-Imperial civilization with its own interpretations of reality and the Immutable Laws. Its traditions include teachings radically different from those of the Ethrenari.
+
+<strong>Caelestis Concordat</strong>
+A solar-theocratic empire that treats starlight as divine law. Its Solar Mandate binds religion, government, and warfare together, regarding secrecy, doctrinal decay, and machine-born intellect as forms of heresy.
+
+<strong>Horizion Systems Compact</strong>
+A designed sovereignty built around continuity, competence, redundancy, and systemic stability. It maintains specialized systems, external trade, and security structures while preserving its independence.
+
+<strong>The Gilded Concord</strong>
+An established mercantile power organized around contracts, commerce, and the Ledger of Vows. Its influence is rooted in trade and negotiated obligation.
+
+<strong>The Aureum Order</strong>
+An unofficial political and financial bloc connected to elements of the Reserve Authority, merchant guilds, regional treasuries, House banks, and wealthy patrons. It uses debt, financial protection, and concealed influence to pursue its interests.</div>
+</section>
+
+</main><dialog id="preview"><div class="mh"><strong>RECORD PREVIEW</strong></div><div class="mb" id="previewText"></div><div class="mf"><button type="button" id="closePreview">CLOSE</button></div></dialog>
+<script>
+const SUPABASE_URL="https://tgszdvvitdijzkkbrlpl.supabase.co";
+const SUPABASE_KEY="sb_publishable_6GE5AFuO7AH1Ym7GU5qjoA_iUAoFAI2";
+const SUPABASE_ACTIONS_ENDPOINT=SUPABASE_URL+"/rest/v1/actions_tab";
+const SUPABASE_PLAYERS_ENDPOINT=SUPABASE_URL+"/rest/v1/players_tab";
+const tabs=document.querySelectorAll('.tab'),panels=document.querySelectorAll('.panel');
+tabs.forEach(b=>b.addEventListener('click',()=>{tabs.forEach(x=>x.classList.remove('active'));panels.forEach(x=>x.classList.remove('active'));b.classList.add('active');document.getElementById(b.dataset.tab).classList.add('active')}));
+const subtabs=document.querySelectorAll('.subtab'),regsections=document.querySelectorAll('.registration-section');
+subtabs.forEach(b=>b.addEventListener('click',()=>{subtabs.forEach(x=>x.classList.remove('active'));regsections.forEach(x=>x.classList.remove('active'));b.classList.add('active');document.getElementById(b.dataset.subtab).classList.add('active')}));
+
+const clean=s=>(s||'Record').replace(/[\\/:*?"<>|]+/g,'-').trim().replace(/\s+/g,'_').slice(0,60)||'Record';
+function formData(form){const o={};new FormData(form).forEach((v,k)=>o[k]=v);form.querySelectorAll('input[type=checkbox]').forEach(x=>o[x.name]=x.checked);if(form.dataset.kind==='action')o.commit=[...document.querySelectorAll('.commit-row')].map(r=>({item:r.querySelector('.ci').value,detail:r.querySelector('.cd').value})).filter(x=>x.item||x.detail);return o}
+function textFor(form){const d=formData(form),kind=form.dataset.kind,stamp=new Date().toLocaleString(),lines=[`GRADARI MIRERIS — ${kind.toUpperCase()} RECORD`,`Submitted: ${stamp}`];Object.entries(d).forEach(([k,v])=>{if(k==='commit'){lines.push('\\nCOMMITMENTS');v.forEach((x,i)=>lines.push(`${i+1}. ${x.item}${x.detail?' — '+x.detail:''}`));}else if(typeof v!=='boolean')lines.push(`\\n${k.replace(/_/g,' ').toUpperCase()}\\n${v||'Not specified'}`);else lines.push(`\\n${k.toUpperCase()}: ${v?'YES':'NO'}`)});return lines.join('\\n')}
+function saveLocal(form){localStorage.setItem('gm_suite_'+form.dataset.kind,JSON.stringify(formData(form)));const s=form.querySelector('.state');if(s)s.textContent='Draft saved locally • '+new Date().toLocaleTimeString()}
+function loadLocal(form){try{const d=JSON.parse(localStorage.getItem('gm_suite_'+form.dataset.kind));if(!d)return;Object.entries(d).forEach(([k,v])=>{if(k==='commit')return;const e=form.elements[k];if(!e)return;if(e.type==='checkbox')e.checked=!!v;else e.value=v})}catch(e){}}
+document.querySelectorAll('form[data-kind]').forEach(form=>{loadLocal(form);form.addEventListener('input',()=>saveLocal(form));form.addEventListener('change',()=>saveLocal(form));form.addEventListener('submit',async e=>{e.preventDefault();if(!form.reportValidity())return;const d=formData(form);if(form.dataset.kind==='join'){const state=form.querySelector('.state');const accessToken=localStorage.getItem('gm_access_token');const authUser=JSON.parse(localStorage.getItem('gm_auth_user')||'null');if(!accessToken||!authUser?.id){state.textContent='You must create an account and log in before submitting Player Registration.';return;}state.textContent='Submitting registration...';const payload={user_id:authUser.id,player:d.player||null,preferred:d.preferred||null,interests:d.interests||null,playstyle:d.playstyle||null,faction:d.faction||null,role:d.role||null,goals:d.goals||null,notes:d.notes||null};try{const response=await fetch(SUPABASE_PLAYERS_ENDPOINT,{method:'POST',headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+accessToken,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify(payload)});if(!response.ok){const detail=await response.text();console.error('Supabase HTTP '+response.status,detail);state.textContent='Registration failed: HTTP '+response.status+(detail?' • '+detail:'');return;}state.textContent='Player registration submitted successfully to the Game Master.';}catch(error){console.error(error);state.textContent='Registration failed: Network error • '+error.message;return;}localStorage.removeItem('gm_suite_join');form.reset();return;}if(form.dataset.kind==='action'){const state=form.querySelector('.state');state.textContent='Submitting action...';const payload={player:d.player||null,action_title:d.name||null,category:d.category||null,target:d.target||null,objective:d.objective||null,method:d.method||null,commitments:JSON.stringify(d.commit||[]),intent:d.intent||null,secret:!!d.secret,cover_story:d.cover||null,orders:d.orders||null,notes:d.notes||null};try{const response=await fetch(SUPABASE_ACTIONS_ENDPOINT,{method:'POST',headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify(payload)});if(!response.ok){const detail=await response.text();console.error('Supabase HTTP '+response.status,detail);state.textContent='Submission failed: HTTP '+response.status+(detail?' • '+detail:'');return;}state.textContent='Action submitted successfully to the Game Master.';}catch(error){console.error(error);state.textContent='Submission failed: Network error • '+error.message;return;}localStorage.removeItem('gm_suite_action');form.reset();document.getElementById('commitList').innerHTML='';addCommit();conditional();return;}const title=d.name||d.player||form.dataset.kind,blob=new Blob([textFor(form)],{type:'text/plain;charset=utf-8'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='GM_'+form.dataset.kind.toUpperCase()+'_'+clean(title)+'.txt';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)});form.querySelector('[data-preview]').addEventListener('click',()=>{document.getElementById('previewText').textContent=textFor(form);document.getElementById('preview').showModal()});form.querySelector('[data-clear]').addEventListener('click',()=>{if(confirm('Clear this draft?')){form.reset();localStorage.removeItem('gm_suite_'+form.dataset.kind);if(form.dataset.kind==='action'){document.getElementById('commitList').innerHTML='';addCommit()}form.querySelector('.state').textContent='Draft cleared.'}})});
+document.getElementById('closePreview').addEventListener('click',()=>document.getElementById('preview').close());
+function addCommit(item='',detail=''){const row=document.createElement('div');row.className='grid commit-row';row.style.marginBottom='8px';row.innerHTML='<input class="ci" placeholder="Asset / resource / personnel"><div style="display:flex;gap:6px"><input class="cd" placeholder="Amount / detail"><button type="button" class="danger">REMOVE</button></div>';row.querySelector('.ci').value=item;row.querySelector('.cd').value=detail;row.querySelector('button').addEventListener('click',()=>{row.remove();saveLocal(document.querySelector('form[data-kind=action]'))});row.addEventListener('input',()=>saveLocal(document.querySelector('form[data-kind=action]')));document.getElementById('commitList').appendChild(row)}
+document.getElementById('addCommit').addEventListener('click',()=>addCommit());addCommit();
+const af=document.querySelector('form[data-kind=action]'),secret=document.getElementById('secret'),category=af.elements.category;
+function conditional(){document.getElementById('coverWrap').style.display=secret.checked?'block':'none';document.getElementById('ordersWrap').style.display=category.value==='Military'?'block':'none'}secret.addEventListener('change',conditional);category.addEventListener('change',conditional);conditional();
+</script>
+<script>
+(function(){
+  const token=localStorage.getItem('gm_access_token');
+  const user=JSON.parse(localStorage.getItem('gm_auth_user')||'null');
+  const dash=document.getElementById('dashboardTab');
+  const login=[...document.querySelectorAll('a')].find(a=>a.textContent.trim()==='LOGIN');
+  if(token && user && user.id){
+    if(dash) dash.style.display='';
+    if(login){ login.textContent='ACCOUNT'; login.href='home/'; }
+  } else {
+    if(dash) dash.style.display='none';
+  }
+})();
+</script>
+
+</body></html>
