@@ -3300,7 +3300,10 @@ dialog::backdrop{background:rgba(0,0,0,.72);backdrop-filter:blur(2px)}
 .sidebar-footer .notification-btn{
   display:inline-grid;
   vertical-align:top;
+  height:36px;
+  padding:7px;
 }
+.sidebar-footer .signout-btn{height:36px}
 .sidebar-footer .notification-btn + .signout-btn{
   display:inline-block;
   width:calc(100% - 55px);
@@ -3551,4 +3554,15 @@ dialog::backdrop{background:rgba(0,0,0,.72);backdrop-filter:blur(2px)}
   .build-status{gap:6px;padding:4px 7px}
   .build-status span{font-size:0}
   .build-status span::after{content:"ALPHA";font-size:.55rem}
+}
+
+/* Reserve header space for the fixed phone account controls. */
+@media(max-width:760px){
+  .topbar{padding-right:120px!important}
+  .page-id{flex:1 1 0;width:auto;min-width:0}
+  .page-id>div{min-width:0}
+  .page-id strong{max-width:100%}
+  .sidebar-footer .notification-btn,
+  .sidebar-footer .signout-btn{height:34px;min-height:34px}
+  .sidebar-footer .notification-btn{width:34px;padding:6px}
 }
