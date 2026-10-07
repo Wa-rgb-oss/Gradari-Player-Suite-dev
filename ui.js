@@ -1,4 +1,7 @@
 (() => {
+  const RELEASE_STAGE = "ALPHA";
+  const RELEASE_VERSION = "0.02";
+
   const esc = value => String(value ?? "").replace(/[&<>"']/g, ch => ({
     "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
   }[ch]));
@@ -61,6 +64,21 @@
 
   const confirmAction=(message,options={})=>modal({...options,message});
   const promptAction=(message,defaultValue="",options={})=>modal({...options,message,input:true,defaultValue});
+
+
+  function initBuildBadge() {
+    document.querySelectorAll(".topbar").forEach(topbar => {
+      if (topbar.querySelector("[data-build-status]")) return;
+      const badge = document.createElement("div");
+      badge.className = "build-status";
+      badge.dataset.buildStatus = "";
+      badge.setAttribute("aria-label", RELEASE_STAGE + " version " + RELEASE_VERSION);
+      badge.innerHTML = '<span>' + esc(RELEASE_STAGE + " BUILD") + '</span><strong>v' + esc(RELEASE_VERSION) + '</strong>';
+      const telemetry = topbar.querySelector(".top-telemetry");
+      if (telemetry) topbar.insertBefore(badge, telemetry);
+      else topbar.appendChild(badge);
+    });
+  }
 
   function startClock() {
     const targets = document.querySelectorAll("[data-system-time]");
@@ -259,6 +277,7 @@
       });
     });
 
+    initBuildBadge();
     startClock();
     startWorldClock();
     initNotifications(session);
@@ -266,5 +285,5 @@
     return session;
   }
 
-  window.GMUI = { esc, setState, modal, confirmAction, promptAction, startClock, startWorldClock, initTabs, initProtected };
+  window.GMUI = { esc, setState, modal, confirmAction, promptAction, startClock, startWorldClock, initTabs, initBuildBadge, initProtected };
 })();
