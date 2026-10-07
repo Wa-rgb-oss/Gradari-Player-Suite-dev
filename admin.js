@@ -67,7 +67,7 @@
   const setState = (el, message, type="") => GMUI.setState(el, message, type);
 
   async function isAdmin() {
-    const result = await GMAuth.api("rpc/is_admin", {method:"POST", body:"{}"});
+    const result = await GMAuth.api("rpc/record_admin_access_attempt", {method:"POST", body:"{}"});
     return result === true;
   }
 
@@ -534,13 +534,11 @@
     try {
       session = await GMAuth.signIn($("email").value.trim(), $("password").value);
       if (!await isAdmin()) {
-        await GMAuth.recordAuthActivity("admin_access_denied",{surface:"admin"});
         await GMAuth.signOut({surface:"admin"});
         session = null;
         showLogin("ACCESS DENIED // THIS ACCOUNT IS NOT AN AUTHORIZED GAME MASTER");
         return;
       }
-      await GMAuth.recordAuthActivity("admin_access_granted",{surface:"admin"});
       showDashboard();
       await refreshData("ADMIN SESSION READY");
     } catch (error) {
@@ -692,11 +690,9 @@
     }
     try {
       if (!await isAdmin()) {
-        await GMAuth.recordAuthActivity("admin_access_denied",{surface:"admin"});
         showLogin("CURRENT ACCOUNT IS NOT AUTHORIZED FOR GAME MASTER ACCESS");
         return;
       }
-      await GMAuth.recordAuthActivity("admin_access_granted",{surface:"admin"});
       showDashboard();
       await refreshData("ADMIN SESSION READY");
     } catch (error) {
