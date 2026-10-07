@@ -33,6 +33,34 @@
     return opening.slice(0,240).replace(/\s+\S*$/,"").trimEnd()+"…";
   }
 
+  function renderNewsFeed(root,rows){
+      root.innerHTML=rows.map((row,index)=>
+        '<article class="notice info-news-card">'+
+          '<div class="info-news-month">'+esc(formatMonth(row.published_at))+'</div>'+
+          '<h2>'+esc(row.title||"Untitled Bulletin")+'</h2>'+
+          '<p class="info-news-preview">'+esc(previewText(row))+'</p>'+
+          '<div class="info-news-content" id="newsContent-'+esc(root.id)+'-'+index+'" hidden>'+renderSections(row)+'</div>'+
+          '<button class="hud-button secondary info-news-toggle" type="button" aria-expanded="false" aria-controls="newsContent-'+esc(root.id)+'-'+index+'" style="margin-top:14px">Read more</button>'+
+        '</article>'
+      ).join("");
+      root.querySelectorAll(".info-news-toggle").forEach(button=>{
+        button.addEventListener("click",()=>{
+          const card=button.closest(".info-news-card");
+          const content=card.querySelector(".info-news-content");
+          const expanded=button.getAttribute("aria-expanded")!=="true";
+          content.hidden=!expanded;
+          card.querySelector(".info-news-preview").hidden=expanded;
+          button.setAttribute("aria-expanded",String(expanded));
+          button.textContent=expanded?"Show less":"Read more";
+          if(!expanded && card.getBoundingClientRect().top<0){
+            card.scrollIntoView({block:"start"});
+          }
+        });
+      });
+  }
+
+  window.GMNews={render:renderNewsFeed};
+
   async function loadNews(){
     const root=$("infoNewsFeed");
     const empty=$("infoNewsEmpty");
@@ -50,29 +78,7 @@
       }
 
       empty.hidden=true;
-      root.innerHTML=rows.map((row,index)=>
-        '<article class="notice info-news-card">'+
-          '<div class="info-news-month">'+esc(formatMonth(row.published_at))+'</div>'+
-          '<h2>'+esc(row.title||"Untitled Bulletin")+'</h2>'+
-          '<p class="info-news-preview">'+esc(previewText(row))+'</p>'+
-          '<div class="info-news-content" id="infoNewsContent-'+index+'" hidden>'+renderSections(row)+'</div>'+
-          '<button class="hud-button secondary info-news-toggle" type="button" aria-expanded="false" aria-controls="infoNewsContent-'+index+'" style="margin-top:14px">Read more</button>'+
-        '</article>'
-      ).join("");
-      root.querySelectorAll(".info-news-toggle").forEach(button=>{
-        button.addEventListener("click",()=>{
-          const card=button.closest(".info-news-card");
-          const content=card.querySelector(".info-news-content");
-          const expanded=button.getAttribute("aria-expanded")!=="true";
-          content.hidden=!expanded;
-          card.querySelector(".info-news-preview").hidden=expanded;
-          button.setAttribute("aria-expanded",String(expanded));
-          button.textContent=expanded?"Show less":"Read more";
-          if(!expanded && card.getBoundingClientRect().top<0){
-            card.scrollIntoView({block:"start"});
-          }
-        });
-      });
+      renderNewsFeed(root,rows);
       state.textContent="";
     }catch(error){
       root.innerHTML="";
@@ -93,6 +99,7 @@
   }
 
   async function init(){
+    if(!$("infoNewsFeed")) return;
     const session=await GMUI.initProtected();
     if(!session) return;
 
