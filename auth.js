@@ -1,7 +1,8 @@
 (() => {
   const CONFIG = {
     url: "https://tgszdvvitdijzkkbrlpl.supabase.co",
-    key: "sb_publishable_6GE5AFuO7AH1Ym7GU5qjoA_iUAoFAI2"
+    key: "sb_publishable_6GE5AFuO7AH1Ym7GU5qjoA_iUAoFAI2",
+    siteUrl: "https://gradarimireris.com/"
   };
 
   const KEYS = {
@@ -90,13 +91,39 @@
   }
 
   async function signUp(email, password) {
-    const redirectTo = siteHref("login/");
+    const redirectTo = new URL("login/", CONFIG.siteUrl).href;
     const data = await request("/auth/v1/signup?redirect_to=" + encodeURIComponent(redirectTo), {
       method: "POST",
       body: JSON.stringify({ email, password })
     });
+
+    if (Array.isArray(data?.user?.identities) && data.user.identities.length === 0) {
+      const error = new Error("An account already exists with this email. Use Sign In instead.");
+      error.code = "account_exists";
+      throw error;
+    }
+
     if (data?.access_token) saveSession(data);
     return data;
+  }
+
+  function consumeAuthRedirect() {
+    if (!window.location.hash || window.location.hash.length < 2) return null;
+
+    const params = new URLSearchParams(window.location.hash.slice(1));
+    const accessToken = params.get("access_token");
+    const refreshToken = params.get("refresh_token");
+    if (!accessToken || !refreshToken) return null;
+
+    const session = saveSession({
+      access_token: accessToken,
+      refresh_token: refreshToken,
+      expires_in: Number(params.get("expires_in") || 0),
+      expires_at: Number(params.get("expires_at") || 0)
+    });
+
+    history.replaceState(null, "", window.location.pathname + window.location.search);
+    return session;
   }
 
   async function refreshSession() {
@@ -123,6 +150,7 @@
   }
 
   async function getSession() {
+    consumeAuthRedirect();
     let stored = getStored();
     if (!stored.access_token || !stored.refresh_token) return null;
 
@@ -242,6 +270,7 @@
     clearSession,
     signIn,
     signUp,
+    consumeAuthRedirect,
     signOut,
     refreshSession,
     getSession,
