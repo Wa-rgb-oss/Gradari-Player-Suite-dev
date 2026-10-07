@@ -2,10 +2,28 @@
   const esc=value=>GMUI.esc(value);
   const $=id=>document.getElementById(id);
 
-  function formatDate(value){
+  function formatMonth(value){
     const date=new Date(value);
-    if(Number.isNaN(date.getTime())) return "DATE UNAVAILABLE";
-    return date.toLocaleDateString(undefined,{year:"numeric",month:"short",day:"numeric"});
+    if(Number.isNaN(date.getTime())) return "Unknown";
+    return date.toLocaleDateString(undefined,{month:"long"});
+  }
+
+  function normalizeSections(row){
+    const source=Array.isArray(row?.content_sections)?row.content_sections:[];
+    const clean=source.map(item=>({
+      type:String(item?.type||"body").toLowerCase()==="header"?"header":"body",
+      text:String(item?.text||"").trim()
+    })).filter(item=>item.text);
+    if(clean.length) return clean;
+    const fallback=String(row?.body||"").trim();
+    return fallback?[{type:"body",text:fallback}]:[];
+  }
+
+  function renderSections(row){
+    return normalizeSections(row).map(section=>{
+      if(section.type==="header") return '<h3 class="info-news-section-header">'+esc(section.text)+'</h3>';
+      return '<p class="info-news-section-body">'+esc(section.text)+'</p>';
+    }).join("");
   }
 
   async function loadNews(){
@@ -16,7 +34,7 @@
 
     state.textContent="LOADING NEWS...";
     try{
-      const rows=await GMAuth.api("game_news?select=id,title,body,visibility,faction_id,published_at&order=published_at.desc&limit=50");
+      const rows=await GMAuth.api("game_news?select=id,title,body,content_sections,published_at&order=published_at.desc&limit=50");
       if(!rows?.length){
         root.innerHTML="";
         empty.hidden=false;
@@ -25,14 +43,13 @@
       }
 
       empty.hidden=true;
-      root.innerHTML=rows.map(row=>{
-        const visibility=String(row.visibility||"public").toUpperCase();
-        return '<article class="notice info-news-card">'+
-          '<div class="info-news-meta"><span class="section-code">'+esc(visibility)+'</span><time>'+esc(formatDate(row.published_at))+'</time></div>'+
+      root.innerHTML=rows.map(row=>
+        '<article class="notice info-news-card">'+
+          '<div class="info-news-month">'+esc(formatMonth(row.published_at))+'</div>'+
           '<h2>'+esc(row.title||"Untitled Bulletin")+'</h2>'+
-          '<p>'+esc(row.body||"")+'</p>'+
-        '</article>';
-      }).join("");
+          '<div class="info-news-content">'+renderSections(row)+'</div>'+
+        '</article>'
+      ).join("");
       state.textContent="";
     }catch(error){
       root.innerHTML="";
