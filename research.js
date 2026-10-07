@@ -20,7 +20,7 @@
     const active=sites.filter(row=>String(row.status||"active").toLowerCase()==="active");
     const daily=active.reduce((sum,row)=>{
       const type=typeMap.get(row.facility_type_id);
-      const perDay=Math.max(0,Number(type?.output_per_cycle||36));
+      const perDay=Math.max(0,Number(type?.output_per_cycle||1));
       return sum+(perDay*Number(row.production_modifier??1)*healthMultiplier(row));
     },0);
 
@@ -38,7 +38,7 @@
     root.innerHTML=sites.map(row=>{
       const type=typeMap.get(row.facility_type_id);
       const activeStatus=String(row.status||"active").toLowerCase()==="active";
-      const perDay=Math.max(0,Number(type?.output_per_cycle||36))*Number(row.production_modifier??1)*healthMultiplier(row);
+      const perDay=Math.max(0,Number(type?.output_per_cycle||1))*Number(row.production_modifier??1)*healthMultiplier(row);
       const clock=(clocks||[]).find(item=>item.facility_id===row.id);
       return '<article class="notice research-site-row">'+
         '<div><strong>'+esc(row.name||"Research Site")+'</strong>'+
