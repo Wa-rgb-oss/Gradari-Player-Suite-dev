@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#050a0e">
   <meta name="robots" content="noindex,nofollow">
-  <title>About | Gradari Mireris</title>
+  <title>News &amp; About | Gradari Mireris</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body class="auth-pending">
@@ -22,7 +22,7 @@
         <a href="exchange-markets.html"><span class="nav-index">04</span><span class="nav-label">EXCHANGE MARKETS</span><span class="nav-arrow">›</span></a>
         <a href="research.html"><span class="nav-index">05</span><span class="nav-label">RESEARCH</span><span class="nav-arrow">›</span></a>
         <a href="player-suite.html"><span class="nav-index">06</span><span class="nav-label">PLAYER SUITE</span><span class="nav-arrow">›</span></a>
-        <a class="active" href="about.html"><span class="nav-index">07</span><span class="nav-label">ABOUT</span><span class="nav-arrow">›</span></a>
+        <a class="active" href="about.html"><span class="nav-index">07</span><span class="nav-label">NEWS &amp; ABOUT</span><span class="nav-arrow">›</span></a>
       </nav>
       <div class="sidebar-footer">
         <div class="user-readout"><strong>SIGNED IN</strong><span data-user-email>Loading identity...</span></div>
@@ -32,12 +32,38 @@
 
     <div class="main-frame">
       <header class="topbar">
-        <div class="page-id"><span class="page-bracket"></span><div><strong>ABOUT / PROJECT BRIEF</strong><span>GRADARI MIRERIS OVERVIEW</span></div></div>
+        <div class="page-id"><span class="page-bracket"></span><div><strong>NEWS &amp; ABOUT / INFORMATION</strong><span>NEWS // PROJECT BRIEF // HOW TO PLAY</span></div></div>
         <div class="top-telemetry"><span><i class="status-dot"></i>REFERENCE ONLINE</span><span data-system-time>--:--:--</span></div>
       </header>
 
-      <main class="page-content">
-        <section>
+      <main class="page-content" data-tab-scope>
+        <div class="tabs info-hub-tabs" data-tabs>
+          <button class="tab active" type="button" data-tab-target="info-news" data-info-hash="news">NEWS</button>
+          <button class="tab" type="button" data-tab-target="info-about" data-info-hash="about">ABOUT</button>
+          <button class="tab" type="button" data-tab-target="info-how-to-play" data-info-hash="how-to-play">HOW TO PLAY</button>
+        </div>
+
+
+        <section class="panel active" id="info-news" data-tab-panel>
+          <article class="hud-panel">
+            <div class="hud-kicker">NEWS // IMPERIAL BULLETINS</div>
+            <h1 class="hero-title"><small>CURRENT RECORD</small>LATEST<br>NEWS</h1>
+            <p class="hero-copy">Current player-visible bulletins, reports, announcements, and developments from across the continuing Record.</p>
+          </article>
+          <section class="hud-panel compact info-news-panel">
+            <div class="section-head">
+              <div><div class="section-code">NEWS / LATEST UPDATES</div><h2>Imperial Bulletins</h2></div>
+              <p>NEWEST FIRST</p>
+            </div>
+            <div id="infoNewsFeed" class="info-news-feed"></div>
+            <div class="empty-state" id="infoNewsEmpty" hidden>NO PLAYER-VISIBLE NEWS HAS BEEN PUBLISHED.</div>
+            <div class="form-state" id="infoNewsState"></div>
+          </section>
+        </section>
+
+
+        <section class="panel" id="info-about" data-tab-panel>
+<section>
           <article class="hud-panel">
             <div class="hud-kicker">PROJECT BRIEF // GRADARI MIRERIS</div>
             <h1 class="hero-title"><small>PERSISTENT SCI-FI STRATEGY + ROLEPLAY</small>THE LIVING<br>RECORD</h1>
@@ -150,12 +176,111 @@
 
           
         </section>
+        </section>
+
+
+        <section class="panel" id="info-how-to-play" data-tab-panel>
+
+          <article class="hud-panel">
+            <div class="hud-kicker">PLAYER GUIDE // HOW TO PLAY</div>
+            <h1 class="hero-title"><small>PERSISTENT STRATEGY + ROLEPLAY</small>HOW TO<br>PLAY</h1>
+            <p class="hero-copy">Gradari Mireris is played by making decisions inside a persistent world. The systems establish resources, limits, authority, time, and consequences. Players decide what they attempt, and the world responds.</p>
+          </article>
+
+          <section class="about-core-simple">
+            <article class="hud-panel prose">
+              <div class="section-code">HOW TO PLAY / INTRODUCTION</div>
+              <h2>The Three Scales of Play</h2>
+              <p><strong>Strategic Play</strong> concerns governments, factions, economies, territories, fleets, armies, colonies, diplomacy, infrastructure, research, and the movement of power across the galaxy. Decisions at this scale can alter entire systems.</p>
+              <p><strong>Roleplaying Play</strong> concerns the individuals who live inside those systems. Commanders, governors, soldiers, diplomats, investigators, merchants, scientists, officials, and other characters may negotiate, investigate, fight, explore, form relationships, or pursue ambitions of their own.</p>
+              <p><strong>Narrative Play</strong> connects the two. Political decisions can create wars. Wars can create shortages, scandals, heroes, political crises, and new opportunities. A conversation between two characters may eventually alter Imperial policy. A failed expedition may expose something capable of changing the balance of a region.</p>
+              <p>No scale exists entirely separate from the others.</p>
+
+              <h2>The Core Gameplay Cycle</h2>
+              <p>Most play begins with the current state of the world. Players examine what is happening, decide what they want to accomplish, determine what resources or authority they can use, and act through the game systems, roleplay, diplomacy, or a formal Action.</p>
+              <p>Some results are handled automatically by the site. Others require the Game Master to determine what happens. Once an outcome is established, meaningful changes become part of the continuing Record and affect what is possible next.</p>
+              <p>There is no permanent reset between sessions. The consequences of play accumulate.</p>
+
+              <h2>Player Agency</h2>
+              <p>Players are not limited to a menu of predetermined actions. If something is reasonably possible within the setting, a player may attempt it.</p>
+              <p>You may establish industries, negotiate agreements, conduct espionage, investigate events, organize political movements, build infrastructure, move military forces, sponsor research, influence markets, establish colonies, pursue office, or attempt something that the game has never encountered before.</p>
+              <p>The existence of an action does not guarantee its success. Larger ambitions usually require greater preparation, resources, authority, cooperation, time, or risk. The rules define consequences more often than they define permission.</p>
+
+              <h2>There Is No Protected Story</h2>
+              <p>Gradari Mireris does not follow a predetermined script. Important characters may die. Political institutions may collapse. Wars may be lost. Alliances may fracture. Research may create consequences that were never anticipated.</p>
+              <p>Canon establishes the setting that exists when play begins. Player decisions and Game Master resolutions determine what becomes true afterward.</p>
+
+              <h2>Players, Characters, and Factions</h2>
+              <p>Every player exists within the wider political world of the Gradari Mireris Empire. A player may also belong to a faction, participate in an institution, pursue independent economic interests, hold political authority, or focus primarily on a character.</p>
+              <p>A faction is an organized power capable of pursuing objectives inside the game world. Factions may control territory, maintain shared resources, participate in politics, conduct diplomacy, organize military forces, develop infrastructure, and compete for influence.</p>
+              <p>A player does not directly control every person inside an organization. Authority allows the player or character to issue decisions, but logistics, information, subordinate personnel, opposition, morale, politics, and circumstance still influence the result.</p>
+
+              <h2>Characters</h2>
+              <p>Each player maintains <strong>one active living character at a time</strong>. That character is the player's direct personal presence in the setting and remains limited by their location, authority, knowledge, relationships, and responsibilities.</p>
+              <p>Players may know more than their characters know. Information discovered elsewhere does not automatically become character knowledge. Classified intelligence, private conversations, distant events, and hidden developments must reach the character through a believable path before they can act upon them.</p>
+              <p>Characters can die. A deceased character remains part of the Record, and the player may create a new character afterward. The new character enters play with their own position, relationships, knowledge, and circumstances.</p>
+
+              <h2>Actions and Orders</h2>
+              <p>The primary method for attempting something that requires Game Master resolution is a formal Action. Actions can be personal, political, economic, military, diplomatic, investigative, or strategic.</p>
+              <p>A character might question a prisoner, arrange a private meeting, investigate an installation, negotiate with another official, or attempt to escape an ambush. A larger Action might establish a colony, deploy a fleet, begin a research project, impose sanctions, conduct an intelligence operation, fortify a system, or prepare an invasion.</p>
+
+              <h2>Writing an Action</h2>
+              <p>A strong Action normally explains four things.</p>
+              <p><strong>Objective:</strong> What are you trying to accomplish?</p>
+              <p><strong>Method:</strong> How are you attempting to accomplish it?</p>
+              <p><strong>Resources:</strong> What personnel, Aureum, equipment, territory, political authority, intelligence, infrastructure, or other assets are being committed?</p>
+              <p><strong>Intent:</strong> What result do you actually want from the attempt?</p>
+              <p>Preparation matters. Intelligence gathered before an operation, infrastructure built earlier, political relationships developed over time, available technology, logistics, and previous decisions can all change the likelihood and consequences of an Action.</p>
+              <p>The scale of the Action should match the scale of the change being attempted. A player can pursue an enormous goal, but a goal such as conquering a major region may require a series of military, political, logistical, and economic decisions rather than resolving through a single submission.</p>
+
+              <h2>Action Resolution</h2>
+              <p>The Game Master resolves an Action from the conditions that actually exist at the time of the attempt. Resources, preparation, technology, terrain, information, leadership, timing, opposition, and previous decisions may all influence the result.</p>
+              <p>An Action may succeed, partially succeed, fail, succeed at a cost, reveal information, produce an unexpected consequence, or create another situation that requires a decision.</p>
+              <p>The purpose of resolution is not to reward or punish a player. It is to determine how the world reasonably responds to what was attempted.</p>
+
+              <h2>Economy and Aureum</h2>
+              <p>Aureum is the primary currency used to support player activity. It represents the financial capacity to maintain infrastructure, fund construction, operate institutions, trade, expand industry, support military forces, and pursue other objectives.</p>
+              <p>Players can earn and spend Aureum through the systems available to them. Facilities can produce resources, refineries and factories can develop those resources further, and the Guilded Concord Exchange provides a market for buying and selling goods.</p>
+              <p>Economic decisions create obligations. Facilities have construction costs and upkeep. Production requires storage. Expanding too quickly can create dependencies or leave a player unable to support everything they have built.</p>
+
+              <h2>Expansion and Development</h2>
+              <p>Players and factions may develop systems through facilities, infrastructure, industry, research, population growth, political investment, military construction, and other persistent assets.</p>
+              <p>Expansion is not limited to claiming new territory. Strengthening an existing system, creating an industrial center, improving logistics, establishing research infrastructure, or fortifying a strategically important location can be just as important.</p>
+
+              <h2>Diplomacy and Politics</h2>
+              <p>Players may negotiate alliances, trade arrangements, territorial settlements, political coalitions, guarantees, ceasefires, research partnerships, intelligence agreements, and other arrangements that make sense within the setting.</p>
+              <p>Imperial politics also operate through Senate representation, political offices, legislation, Influence, taxation, relationships, and the authority of individual characters. Political power and economic power are related, but they are not the same thing.</p>
+
+              <h2>Warfare</h2>
+              <p>Warfare depends on more than the number of military units involved. Fleets, armies, defensive positions, supply, infrastructure, technology, leadership, intelligence, geography, timing, and political objectives all matter.</p>
+              <p>Capturing territory does not automatically make that territory secure. Military victories can create occupation problems, economic disruption, political instability, resistance, diplomatic consequences, and new strategic obligations.</p>
+
+              <h2>Technology and Research</h2>
+              <p>Research Sites generate Research Points that can be invested into the Research Network. Research advances are connected by prerequisites, so higher tier advancements require the linked research beneath them to be unlocked first.</p>
+              <p>Research can improve industry, logistics, storage, agriculture, manufacturing, scientific development, military technology, or other systems as the network expands. Specialization allows different players to develop different long term strengths.</p>
+
+              <h2>Time and the Record</h2>
+              <p>Gradari Mireris uses the Aevum Calendar and a persistent world clock. One real world hour corresponds to five in-universe hours. One in-game day contains thirty-six hours.</p>
+              <p>Construction, research, production, travel, politics, warfare, and other systems can continue as time advances. Important events become part of the Record so later decisions can be resolved against a consistent history.</p>
+              <p>What happened remains true until something within the game changes it.</p>
+
+              <h2>The Game Master</h2>
+              <p>The Game Master maintains everything beyond direct player control. This includes uncontrolled factions and characters, hidden information, world events, canon, and the consequences of Actions.</p>
+              <p>The Game Master does not determine the story players must follow. Players decide what they attempt. The Game Master determines how the setting responds.</p>
+
+              <h2>Beginning Play</h2>
+              <p>Start by understanding your character, your available resources, your current location, the political situation around you, and the systems you can meaningfully influence. You do not need to understand every part of the galaxy before taking part.</p>
+              <p>Read the current news and world state, examine the Map and Player Suite, decide what your character or organization wants, and begin making decisions. Some goals can be pursued directly through the site. Others can be handled through roleplay or submitted as formal Actions.</p>
+              <p>The campaign should begin with enough information to make meaningful decisions, not with months of preparation before anyone is allowed to act.</p>
+            </article>
+          </section>
+        </section>
       </main>
     </div>
   </div>
   <script src="auth.js"></script>
   <script src="ui.js"></script>
-  <script>GMUI.initProtected();</script>
+  <script src="about.js"></script>
   <script src="game-chat.js"></script>
 </body>
 </html>
