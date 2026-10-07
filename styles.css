@@ -3454,3 +3454,60 @@ dialog::backdrop{background:rgba(0,0,0,.72);backdrop-filter:blur(2px)}
   .legal-policy ol{margin-left:1.05rem;font-size:.96rem}
   .legal-policy .legal-caps{font-size:.78rem}
 }
+
+
+/* PLAYER ACCESS // LEGAL NOTICE */
+.auth-legal-notice{
+  margin-top:22px;
+  padding:13px 14px;
+  border:1px solid rgba(134,215,232,.18);
+  border-left:2px solid var(--cyan2);
+  background:rgba(64,139,162,.055);
+}
+.auth-legal-code{
+  margin-bottom:7px;
+  color:var(--cyan);
+  font:600 .61rem/1.3 var(--mono);
+  letter-spacing:.12em;
+  text-transform:uppercase;
+}
+.auth-legal-notice p{
+  margin:0;
+  color:#8fa2a8;
+  font:400 .66rem/1.65 var(--mono);
+}
+.auth-legal-notice strong{color:#bccbd0;font-weight:600}
+.auth-legal-link{
+  display:inline;
+  border:0;
+  padding:0;
+  background:transparent;
+  color:var(--cyan);
+  font:inherit;
+  text-decoration:underline;
+  text-underline-offset:2px;
+  cursor:pointer;
+}
+.auth-legal-link:hover{color:var(--text)}
+.auth-legal-dialog{width:min(940px,94vw)}
+.auth-legal-dialog-body{
+  max-height:72vh;
+  padding:0;
+  white-space:normal;
+  font-family:var(--ui);
+}
+.auth-legal-dialog-body>.legal-policy{
+  max-width:none;
+  margin:0;
+  border:0;
+  box-shadow:none;
+  clip-path:none;
+}
+.auth-legal-dialog-body>.legal-policy::before{display:none}
+.auth-legal-close{min-width:110px}
+@media(max-width:620px){
+  .auth-legal-notice{margin-top:17px;padding:11px 12px}
+  .auth-legal-notice p{font-size:.62rem}
+  .auth-legal-dialog{width:96vw}
+  .auth-legal-dialog-body{max-height:74vh}
+}
