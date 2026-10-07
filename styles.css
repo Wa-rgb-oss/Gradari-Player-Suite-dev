@@ -499,6 +499,7 @@ legend{padding:0 6px}
 .auth-switch{margin-top:18px;color:var(--muted);font:400 .74rem var(--mono);text-align:center}
 .auth-switch button{border:0;background:none;color:var(--cyan);font:inherit;padding:0}
 .auth-status{min-height:38px;margin-top:16px;color:var(--muted);font:400 .73rem/1.45 var(--mono)}
+.auth-status:empty{display:none}
 .auth-status.error{color:#df8880}
 .auth-status.success{color:var(--green)}
 
