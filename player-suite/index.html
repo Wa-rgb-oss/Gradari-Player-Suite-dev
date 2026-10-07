@@ -7,7 +7,7 @@
   <meta name="theme-color" content="#050a0e">
   <meta name="robots" content="noindex,nofollow">
   <title>Player Suite | Gradari Mireris</title>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css?v=artifacts-20261007">
 </head>
 <body class="auth-pending">
   <div class="app-shell protected-page">
@@ -49,7 +49,7 @@
           <button class="tab active" type="button" data-tab-target="suite-account">ACCOUNT</button>
           <button class="tab" type="button" data-tab-target="suite-economy">ECONOMY &amp; FACILITIES</button>
           <button class="tab" type="button" data-tab-target="suite-faction">FACTION</button>
-          <button class="tab" type="button" data-tab-target="suite-characters">CHARACTER & INVENTORY</button>
+          <button class="tab" type="button" data-tab-target="suite-characters">CHARACTER &amp; ARTIFACTS</button>
           <button class="tab" type="button" data-tab-target="suite-friends">FRIENDS</button>
           <button class="tab" type="button" data-tab-target="suite-actions">ACTIONS</button>
           <button class="tab" type="button" data-tab-target="suite-canon">CANON</button>
@@ -353,9 +353,12 @@
             </div>
 
             <article class="hud-panel character-inventory-panel">
-        <div class="section-head"><div><div class="section-code">CHARACTER / INVENTORY</div><h2>Inventory</h2></div><p>ACCOUNT HOLDINGS</p></div>
-        <div class="inventory-grid-shell"><div class="inventory-slot-grid" id="playerAssetList"></div></div>
-        <div class="empty-state" id="playerAssetEmpty" hidden>NO PLAYER ASSETS OR RESOURCES ASSIGNED.</div>
+        <div class="section-head"><div><div class="section-code">CHARACTER / ARTIFACTS</div><h2>Artifacts</h2></div><p>CHARACTER POSSESSIONS</p></div>
+        <p class="hero-copy">Relics, enchanted garments, and rare objects that grant your character bonuses and abilities. Equip an artifact to activate its effects. Replacing an artifact in the same slot removes the previous one.</p>
+        <p class="artifact-effects" id="artifactBonusSummary">Loading artifact effects...</p>
+        <div class="artifact-grid" id="characterArtifactList"></div>
+        <div class="form-state" id="characterArtifactState" role="status" aria-live="polite"></div>
+        <div hidden><div id="playerAssetList"></div><div id="playerAssetEmpty"></div></div>
       </article>
       <article class="hud-panel compact character-record-panel">
               <div class="section-head"><div><div class="section-code">CHARACTER / RECORD</div><h2>Character Record</h2></div></div>
@@ -439,6 +442,7 @@
   <script src="ui.js"></script>
   <script src="player-data.js"></script>
   <script src="player-suite.js"></script>
+  <script src="artifacts.js"></script>
   <script src="player-systems.js"></script>
   <script src="game-chat.js"></script>
 </body>
