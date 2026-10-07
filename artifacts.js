@@ -2,7 +2,7 @@
   const esc=v=>GMUI.esc(v), api=(p,o)=>GMAuth.api(p,o);
   let state=null, request=0;
   const fmt=v=>Number(v||0).toLocaleString(undefined,{maximumFractionDigits:2});
-  const effects=a=>[a.influence_bonus_percent>0?'+'+fmt(a.influence_bonus_percent)+'% Influence from political activities':'',a.ability_influence>0?a.ability_name+': +'+fmt(a.ability_influence)+' Influence; '+fmt(a.cooldown_world_hours)+' world-hour cooldown':''].filter(Boolean).join(' · ')||'No mechanical effects configured.';
+  const effects=a=>[a.influence_bonus_percent>0?'+'+fmt(a.influence_bonus_percent)+'% daily and political activity Influence':'',a.ability_influence>0?a.ability_name+': +'+fmt(a.ability_influence)+' Influence; '+fmt(a.cooldown_world_hours)+' world-hour cooldown':''].filter(Boolean).join(' · ')||'No mechanical effects configured.';
   async function render(){
     const root=document.getElementById('characterArtifactList');if(!root||!state)return;
     const n=++request, character=state.characters.find(c=>c.status==='active'&&c.life_status==='alive');
@@ -13,7 +13,7 @@
       if(n!==request)return;
       const map=new Map(catalog.map(a=>[a.id,a]));
       const bonus=Math.min(100,holdings.reduce((sum,h)=>sum+(h.equipped_slot&&map.get(h.artifact_id)?.slot===h.equipped_slot?Number(map.get(h.artifact_id)?.influence_bonus_percent||0):0),0));
-      document.getElementById('artifactBonusSummary').textContent='Active bonus: +'+fmt(bonus)+'% Influence from political activities. One artifact per slot: cloak, signet, relic. Bonuses add together, up to 100%.';
+      document.getElementById('artifactBonusSummary').textContent='Daily Influence: '+fmt(5*(1+bonus/100))+' per in-game day (base 5). Earned automatically, including offline. Active bonus: +'+fmt(bonus)+'% daily and political activity Influence. One artifact per slot: cloak, signet, relic. Bonuses add together, up to 100%.';
       root.innerHTML=holdings.map(h=>{
         const a=map.get(h.artifact_id);if(!a)return '<article class="artifact-card"><h3>Unavailable Artifact</h3><p>This artifact has been retired.</p>'+(h.equipped_slot?'<button type="button" class="hud-button secondary" data-artifact-equip="'+esc(h.id)+'" data-equipped="true">Unequip</button>':'')+'</article>';
         const remaining=Math.max(0,Number(h.next_use_world_hour)-Number(clock.total_world_hours));
