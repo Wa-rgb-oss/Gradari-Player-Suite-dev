@@ -17,7 +17,7 @@
   <main class="auth-layout">
     <section class="auth-visual" aria-label="Gradari Mireris player access">
       <div class="auth-wordmark">
-        <div class="system-label">GRADARI MIRERIS // PLAYER NETWORK</div>
+        <a href="/" class="system-label">GRADARI MIRERIS // RETURN TO SITE</a>
         <h1>GRADARI<span>MIRERIS</span></h1>
       </div>
       <div class="auth-visual-copy">
@@ -190,6 +190,14 @@
       if (event.target === legalDialog) legalDialog.close();
     });
 
+    function applyAccessHash() {
+      const key = window.location.hash.slice(1);
+      if (key === "signup") swap(true);
+      else if (key === "login") swap(false);
+      else if (key === "terms-of-use" || key === "privacy-policy") openLegalDocument(key);
+    }
+    window.addEventListener("hashchange", applyAccessHash);
+    applyAccessHash();
     GMAuth.redirectIfAuthenticated("home/");
   </script>
 </body>
