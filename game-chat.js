@@ -1,5 +1,5 @@
 (() => {
-  let session=null, mode="global", friendId=null, friends=[], profiles=new Map(), timer=null, messageRequest=0;
+  let session=null, mode="global", friendId=null, friends=[], profiles=new Map(), timer=null, messageRequest=0, targetMessageId=null;
   const esc=v=>GMUI.esc(v);
   const api=(p,o)=>GMAuth.api(p,o);
   function shell(){
@@ -45,8 +45,16 @@
       rows=await api("game_chat_messages?channel=eq.direct&or=(and(sender_user_id.eq."+uid+",recipient_user_id.eq."+requestedFriend+"),and(sender_user_id.eq."+requestedFriend+",recipient_user_id.eq."+uid+"))&select=*&order=created_at.desc&limit=100");
     }
     if(!current()) return;
-    log.innerHTML=(requestedMode==="direct"?(rows||[]).slice().reverse():(rows||[])).map(m=>{const sent=new Date(m.created_at);const stamp=sent.toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"})+" · "+sent.toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"});return '<div class="game-chat-line"><div class="game-chat-meta"><b>'+esc(profiles.get(m.sender_user_id)||(m.sender_user_id===session.user.id?"YOU":"PLAYER"))+'</b><small>'+esc(stamp)+'</small></div><span>'+esc(m.body)+'</span></div>'}).join("") || '<div class="game-chat-empty">'+(mode==="global"?"NO ACTIVE GLOBAL MESSAGES.":(requestedFriend?"NO MESSAGES YET. START THE CONVERSATION.":"ADD A FRIEND TO OPEN DIRECT COMMS."))+'</div>';
+    log.innerHTML=(requestedMode==="direct"?(rows||[]).slice().reverse():(rows||[])).map(m=>{const sent=new Date(m.created_at);const stamp=sent.toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"})+" · "+sent.toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"});return '<div class="game-chat-line" data-message-id="'+esc(m.id)+'"><div class="game-chat-meta"><b>'+esc(profiles.get(m.sender_user_id)||(m.sender_user_id===session.user.id?"YOU":"PLAYER"))+'</b><small>'+esc(stamp)+'</small></div><span>'+esc(m.body)+'</span></div>'}).join("") || '<div class="game-chat-empty">'+(mode==="global"?"NO ACTIVE GLOBAL MESSAGES.":(requestedFriend?"NO MESSAGES YET. START THE CONVERSATION.":"ADD A FRIEND TO OPEN DIRECT COMMS."))+'</div>';
     log.scrollTop=log.scrollHeight;
+    if(targetMessageId && requestedMode==="direct"){
+      const target=Array.from(log.querySelectorAll("[data-message-id]")).find(line=>line.dataset.messageId===String(targetMessageId));
+      if(target){
+        target.scrollIntoView({block:"nearest"});
+        if(target.animate) target.animate([{backgroundColor:"rgba(92,211,232,.3)"},{backgroundColor:"transparent"}],{duration:2500});
+        targetMessageId=null;
+      }
+    }
   }
   function setMode(next){
     mode=next;
@@ -96,6 +104,7 @@
     window.addEventListener("gm:open-chat",event=>{
       const sender=event.detail?.friendId;
       if(sender && friends.includes(sender)){
+        targetMessageId=event.detail?.messageId||null;
         friendId=sender;
         document.getElementById("gmChatFriend").value=sender;
         setMode("direct");
