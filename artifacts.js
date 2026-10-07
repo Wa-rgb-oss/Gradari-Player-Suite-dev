@@ -10,14 +10,12 @@
     if(!character){
       root.innerHTML='<div class="empty-state">CREATE A LIVING CHARACTER TO COLLECT ARTIFACTS.</div>';
       slots.innerHTML=[1,2,3].map(i=>'<article class="artifact-slot is-empty"><div class="section-code">ARTIFACT SLOT '+i+'</div><h3>Empty slot</h3><p>Create a living character to equip artifacts.</p></article>').join('');
-      $('artifactBonusSummary').textContent='No active character.';return;
+      return;
     }
     try{
       const [catalog,holdings,clock]=await Promise.all([api('artifact_catalog?select=*&order=name.asc'),api('character_artifacts?character_id=eq.'+encodeURIComponent(character.id)+'&select=*&order=granted_at.asc'),api('rpc/get_world_clock',{method:'POST',body:'{}'})]);
       if(n!==request)return;
       const map=new Map(catalog.filter(a=>a.active).map(a=>[a.id,a]));
-      const bonus=Math.min(100,holdings.reduce((sum,h)=>sum+(/^slot_[123]$/.test(h.equipped_slot)&&map.has(h.artifact_id)?Number(map.get(h.artifact_id).influence_bonus_percent||0):0),0));
-      $('artifactBonusSummary').textContent='Daily Influence: '+fmt(5*(1+bonus/100))+' · Artifact bonus: +'+fmt(bonus)+'%';
       root.innerHTML=holdings.map(h=>{
         const a=map.get(h.artifact_id);
         return '<article class="artifact-owned-item"><div class="artifact-item-heading"><h3>'+esc(a?.name||'Unavailable Artifact')+'</h3><span class="status-chip">'+esc(h.equipped_slot?'EQUIPPED / '+slotName(h.equipped_slot):'UNEQUIPPED')+'</span></div>'+(a?'<p>'+esc(a.description)+'</p><p class="artifact-effects">'+esc(effects(a))+'</p>'+(a.ability_description?'<p>'+esc(a.ability_description)+'</p>':''):'<p>This artifact has been retired.</p>')+'</article>';
