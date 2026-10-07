@@ -57,7 +57,8 @@
     tradeStationResources: [],
     shipBlueprints: [],
     ships: [],
-    shipyardOrders: []
+    shipyardOrders: [],
+    authLog: []
   };
 
   const $ = id => document.getElementById(id);
@@ -387,7 +388,8 @@
       GMAuth.api("trade_station_resource_listings?select=*&order=resource_code.asc").catch(()=>[]),
       GMAuth.api("ship_blueprints?select=*&order=name.asc").catch(()=>[]),
       GMAuth.api("ships?select=*&order=created_at.desc").catch(()=>[]),
-      GMAuth.api("shipyard_orders?select=*&order=created_at.desc").catch(()=>[])
+      GMAuth.api("shipyard_orders?select=*&order=created_at.desc").catch(()=>[]),
+      GMAuth.api("rpc/admin_auth_log",{method:"POST",body:JSON.stringify({p_limit:500})}).catch(()=>[])
     ]);
     [
       data.profiles,data.registrations,data.wallets,data.factions,data.memberships,
@@ -405,7 +407,7 @@
       data.mapHexes,data.mapLabels,
       data.resourceCatalog,data.factionResources,data.systemEconomies,data.resourceDeposits,
       data.facilityConnections,data.factoryRecipes,data.factoryOrders,data.tradeStations,data.tradeStationResources,
-      data.shipBlueprints,data.ships,data.shipyardOrders
+      data.shipBlueprints,data.ships,data.shipyardOrders,data.authLog
     ] = results;
   }
 
@@ -431,6 +433,73 @@
     $("gmOpsSnapshot").innerHTML='<div class="telemetry-row"><span>Players</span><strong>'+data.profiles.length+'</strong></div><div class="telemetry-row"><span>Factions</span><strong>'+data.factions.length+'</strong></div><div class="telemetry-row"><span>Active Facilities</span><strong>'+activeFacilities+'</strong></div><div class="telemetry-row"><span>Damaged Facilities</span><strong>'+damaged+'</strong></div><div class="telemetry-row"><span>Active Production</span><strong>'+orders.length+'</strong></div><div class="telemetry-row"><span>Pending Actions</span><strong>'+data.actions.filter(x=>(x.status||"Pending")==="Pending").length+'</strong></div>';
   }
 
+  function renderAuthLog() {
+    const rows = Array.isArray(data.authLog) ? data.authLog : [];
+    const actionFilter = $("authLogActionFilter")?.value || "";
+    const search = ($("authLogSearch")?.value || "").trim().toLowerCase();
+    const now = Date.now();
+    const dayMs = 24 * 60 * 60 * 1000;
+    const monthMs = 30 * dayMs;
+
+    if ($("authLogTotal")) $("authLogTotal").textContent = rows.length;
+    if ($("authLog24h")) $("authLog24h").textContent = rows.filter(row => now - new Date(row.occurred_at).getTime() <= dayMs).length;
+    if ($("authLogAccounts30d")) $("authLogAccounts30d").textContent = rows.filter(row => row.action === "account_created" && now - new Date(row.occurred_at).getTime() <= monthMs).length;
+    if ($("authLogAdmin30d")) $("authLogAdmin30d").textContent = rows.filter(row => row.is_admin && now - new Date(row.occurred_at).getTime() <= monthMs).length;
+
+    const labels = {
+      login:"LOGIN",
+      logout:"LOGOUT",
+      account_created:"NEW ACCOUNT",
+      account_deleted:"ACCOUNT DELETED",
+      email_confirmation_requested:"CONFIRMATION SENT",
+      email_confirmed:"EMAIL CONFIRMED",
+      password_recovery_requested:"PASSWORD RECOVERY",
+      password_changed:"PASSWORD CHANGED",
+      email_changed:"EMAIL CHANGED",
+      admin_access_granted:"GM ACCESS GRANTED",
+      admin_access_denied:"GM ACCESS DENIED"
+    };
+
+    const filtered = rows.filter(row => {
+      if (actionFilter && row.action !== actionFilter) return false;
+      if (!search) return true;
+      const haystack = [
+        row.email || "",
+        row.action || "",
+        row.user_id || "",
+        row.source || "",
+        JSON.stringify(row.metadata || {})
+      ].join(" ").toLowerCase();
+      return haystack.includes(search);
+    });
+
+    const body = $("authLogRows");
+    if (!body) return;
+
+    body.innerHTML = filtered.map(row => {
+      const meta = row.metadata && typeof row.metadata === "object" ? row.metadata : {};
+      const detailParts = [];
+      if (meta.previous_email) detailParts.push("Previous: " + meta.previous_email);
+      if (meta.surface) detailParts.push("Surface: " + meta.surface);
+      if (meta.scope === "last_known_login") detailParts.push("Historical last known login");
+      if (meta.historical) detailParts.push("Historical record");
+      const detail = detailParts.join(" // ") || row.source || "AUTH";
+      const actionClass = row.action === "admin_access_denied" || row.action === "account_deleted"
+        ? "amber"
+        : row.is_admin
+          ? "amber"
+          : "";
+
+      return `<tr>
+        <td style="white-space:nowrap">${esc(new Date(row.occurred_at).toLocaleString())}</td>
+        <td><span class="status-chip ${actionClass}">${esc(labels[row.action] || String(row.action || "EVENT").replaceAll("_"," ").toUpperCase())}</span></td>
+        <td><strong>${esc(row.email || "UNKNOWN ACCOUNT")}</strong><div class="section-code" style="margin-top:4px">${esc(row.user_id || "NO USER ID")}</div></td>
+        <td>${row.is_admin ? '<span class="status-chip amber">GAME MASTER</span>' : '<span class="status-chip muted">PLAYER</span>'}</td>
+        <td>${esc(detail)}</td>
+      </tr>`;
+    }).join("") || '<tr><td colspan="5">NO AUTHENTICATION EVENTS MATCH THIS FILTER.</td></tr>';
+  }
+
   function renderAll() {
     fillSelects();
     renderOverview();
@@ -441,6 +510,7 @@
     renderGMTools();
     renderActions();
     renderWorld();
+    renderAuthLog();
     window.GMAdminData = data;
     document.dispatchEvent(new CustomEvent("gm:admin-state",{detail:data}));
   }
@@ -464,11 +534,13 @@
     try {
       session = await GMAuth.signIn($("email").value.trim(), $("password").value);
       if (!await isAdmin()) {
-        await GMAuth.signOut();
+        await GMAuth.recordAuthActivity("admin_access_denied",{surface:"admin"});
+        await GMAuth.signOut({surface:"admin"});
         session = null;
         showLogin("ACCESS DENIED // THIS ACCOUNT IS NOT AN AUTHORIZED GAME MASTER");
         return;
       }
+      await GMAuth.recordAuthActivity("admin_access_granted",{surface:"admin"});
       showDashboard();
       await refreshData("ADMIN SESSION READY");
     } catch (error) {
@@ -494,11 +566,13 @@
 
   $("refreshAdmin").addEventListener("click", () => refreshData());
   $("adminLogout").addEventListener("click", async () => {
-    await GMAuth.signOut();
+    await GMAuth.signOut({surface:"admin"});
     session = null;
     showLogin();
   });
   $("statusFilter").addEventListener("change", renderActions);
+  $("authLogActionFilter")?.addEventListener("change", renderAuthLog);
+  $("authLogSearch")?.addEventListener("input", renderAuthLog);
 
   $("gmPlayerResourceForm").addEventListener("submit",async event=>{event.preventDefault();const d=Object.fromEntries(new FormData(event.currentTarget));try{const n=await GMAuth.api("rpc/admin_adjust_player_resource",{method:"POST",body:JSON.stringify({p_user_id:d.user_id,p_resource_code:d.resource_code,p_mode:d.mode,p_amount:Number(d.amount)})});setState($("gmPlayerResourceState"),"PLAYER RESOURCE UPDATED // "+fmt(n),"success");await refreshData()}catch(e){setState($("gmPlayerResourceState"),"PLAYER RESOURCE UPDATE FAILED // "+e.message,"error")}});
   document.querySelector("#gmPlayerResourceForm [name=user_id]").addEventListener("change",renderGMTools);
@@ -618,9 +692,11 @@
     }
     try {
       if (!await isAdmin()) {
+        await GMAuth.recordAuthActivity("admin_access_denied",{surface:"admin"});
         showLogin("CURRENT ACCOUNT IS NOT AUTHORIZED FOR GAME MASTER ACCESS");
         return;
       }
+      await GMAuth.recordAuthActivity("admin_access_granted",{surface:"admin"});
       showDashboard();
       await refreshData("ADMIN SESSION READY");
     } catch (error) {
