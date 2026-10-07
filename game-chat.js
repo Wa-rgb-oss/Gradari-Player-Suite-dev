@@ -1,5 +1,5 @@
 (() => {
-  let session=null, mode="global", friendId=null, friends=[], profiles=new Map(), timer=null;
+  let session=null, mode="global", friendId=null, friends=[], profiles=new Map(), timer=null, messageRequest=0;
   const esc=v=>GMUI.esc(v);
   const api=(p,o)=>GMAuth.api(p,o);
   function shell(){
@@ -23,17 +23,29 @@
     friends=(links||[]).map(f=>f.user_a===uid?f.user_b:f.user_a);
     const sel=document.getElementById("gmChatFriend");
     sel.innerHTML='<option value="">SELECT FRIEND</option>'+friends.map(id=>'<option value="'+esc(id)+'">'+esc(profiles.get(id)||"PLAYER")+'</option>').join("");
-    if(friendId && friends.includes(friendId)) sel.value=friendId;
+    if(friendId && !friends.includes(friendId)) friendId=null;
+    sel.value=friendId||"";
   }
   async function loadMessages(){
     const log=document.getElementById("gmChatLog"); if(!log) return;
-    let rows=[];
-    if(mode==="global") rows=await api("game_chat_messages?channel=eq.global&expires_at=gt."+encodeURIComponent(new Date().toISOString())+"&select=*&order=created_at.asc&limit=80");
-    else if(friendId){
+    const request=++messageRequest, requestedMode=mode;
+    let requestedFriend=friendId, rows=[];
+    const current=()=>request===messageRequest && mode===requestedMode && friendId===requestedFriend;
+    if(requestedMode==="direct" && !requestedFriend){
       const uid=session.user.id;
-      rows=await api("game_chat_messages?channel=eq.direct&or=(and(sender_user_id.eq."+uid+",recipient_user_id.eq."+friendId+"),and(sender_user_id.eq."+friendId+",recipient_user_id.eq."+uid+"))&select=*&order=created_at.asc&limit=100");
+      const recent=await api("game_chat_messages?channel=eq.direct&or=(sender_user_id.eq."+uid+",recipient_user_id.eq."+uid+")&select=sender_user_id,recipient_user_id&order=created_at.desc&limit=100");
+      if(!current()) return;
+      const last=(recent||[]).find(m=>friends.includes(m.sender_user_id===uid?m.recipient_user_id:m.sender_user_id));
+      friendId=requestedFriend=last?(last.sender_user_id===uid?last.recipient_user_id:last.sender_user_id):(friends[0]||null);
+      document.getElementById("gmChatFriend").value=friendId||"";
     }
-    log.innerHTML=(rows||[]).map(m=>{const sent=new Date(m.created_at);const stamp=sent.toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"})+" · "+sent.toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"});return '<div class="game-chat-line"><div class="game-chat-meta"><b>'+esc(profiles.get(m.sender_user_id)||(m.sender_user_id===session.user.id?"YOU":"PLAYER"))+'</b><small>'+esc(stamp)+'</small></div><span>'+esc(m.body)+'</span></div>'}).join("") || '<div class="game-chat-empty">'+(mode==="global"?"NO ACTIVE GLOBAL MESSAGES.":"SELECT A FRIEND TO OPEN DIRECT COMMS.")+'</div>';
+    if(requestedMode==="global") rows=await api("game_chat_messages?channel=eq.global&expires_at=gt."+encodeURIComponent(new Date().toISOString())+"&select=*&order=created_at.asc&limit=80");
+    else if(requestedFriend){
+      const uid=session.user.id;
+      rows=await api("game_chat_messages?channel=eq.direct&or=(and(sender_user_id.eq."+uid+",recipient_user_id.eq."+requestedFriend+"),and(sender_user_id.eq."+requestedFriend+",recipient_user_id.eq."+uid+"))&select=*&order=created_at.desc&limit=100");
+    }
+    if(!current()) return;
+    log.innerHTML=(requestedMode==="direct"?(rows||[]).slice().reverse():(rows||[])).map(m=>{const sent=new Date(m.created_at);const stamp=sent.toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"})+" · "+sent.toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"});return '<div class="game-chat-line"><div class="game-chat-meta"><b>'+esc(profiles.get(m.sender_user_id)||(m.sender_user_id===session.user.id?"YOU":"PLAYER"))+'</b><small>'+esc(stamp)+'</small></div><span>'+esc(m.body)+'</span></div>'}).join("") || '<div class="game-chat-empty">'+(mode==="global"?"NO ACTIVE GLOBAL MESSAGES.":(requestedFriend?"NO MESSAGES YET. START THE CONVERSATION.":"ADD A FRIEND TO OPEN DIRECT COMMS."))+'</div>';
     log.scrollTop=log.scrollHeight;
   }
   function setMode(next){
@@ -72,6 +84,7 @@
     });
     document.getElementById("gmChatForm").addEventListener("submit",async e=>{
       e.preventDefault(); const input=document.getElementById("gmChatInput"),body=input.value.trim(); if(!body)return;
+      if(mode==="direct" && !friendId){input.placeholder="Select a friend before sending.";return;}
       try{await api("rpc/send_game_chat_message",{method:"POST",body:JSON.stringify({p_channel:mode,p_body:body,p_recipient_user_id:mode==="direct"?friendId:null})});input.value="";await loadMessages()}catch(err){input.placeholder=err.message}
     });
     document.addEventListener("keydown",e=>{
@@ -80,7 +93,15 @@
       if(window.matchMedia("(max-width:760px)").matches) return;
       if((e.key==="t"||e.key==="T"||e.key==="Enter")&&!typing&&!["INPUT","TEXTAREA","SELECT"].includes(document.activeElement?.tagName)){e.preventDefault();focusChat()}
     });
-    window.addEventListener("gm:open-chat",()=>{ setMinimized(false); loadMessages().catch(()=>{}); });
+    window.addEventListener("gm:open-chat",event=>{
+      const sender=event.detail?.friendId;
+      if(sender && friends.includes(sender)){
+        friendId=sender;
+        document.getElementById("gmChatFriend").value=sender;
+        setMode("direct");
+      }
+      setMinimized(false);
+    });
     document.addEventListener("gm:friends-updated",()=>loadFriends().then(loadMessages));
     timer=setInterval(()=>{
       const chat=document.getElementById("gmGameChat");
