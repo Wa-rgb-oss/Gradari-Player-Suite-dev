@@ -153,7 +153,7 @@
     const panel=document.createElement("aside");
     panel.id="gmNotifications"; panel.className="notifications-panel"; panel.hidden=true;
     panel.innerHTML='<div class="notifications-head"><div><div class="section-code">COMMAND / NOTIFICATIONS</div><strong>INFORMATION FEED</strong></div><button type="button" class="notifications-close" id="gmNotificationsClose" aria-label="Close notifications">×</button></div>'+
-      '<div class="notifications-toolbar"><div class="notifications-tabs"><button type="button" class="active" data-notification-filter="all">ALL</button><button type="button" data-notification-filter="message">MESSAGES</button><button type="button" data-notification-filter="event">EVENTS</button><button type="button" data-notification-filter="world">WORLD</button></div><button type="button" class="notifications-mark-read" id="gmNotificationsMarkRead">MARK ALL READ</button></div>'+
+      '<div class="notifications-toolbar"><div class="notifications-tabs"><button type="button" class="active" data-notification-filter="all">ALL</button><button type="button" data-notification-filter="message">MESSAGES</button><button type="button" data-notification-filter="event">EVENTS</button><button type="button" data-notification-filter="news">NEWS</button><button type="button" data-notification-filter="world">WORLD</button></div><button type="button" class="notifications-mark-read" id="gmNotificationsMarkRead">MARK ALL READ</button></div>'+
       '<div class="notifications-list" id="gmNotificationsList"></div><div class="notifications-empty" id="gmNotificationsEmpty" hidden>NO NEW INFORMATION.</div>';
     document.body.appendChild(panel);
 
@@ -192,7 +192,7 @@
           ...(messages||[]).map(row=>({type:"message",id:row.id,title:names.get(row.sender_user_id)||"DIRECT MESSAGE",summary:String(row.body||"").slice(0,120),date:row.created_at})),
           ...(friendRequests||[]).map(row=>({type:"friend_request",id:row.id,title:"FRIEND REQUEST",summary:(names.get(row.sender_user_id)||"PLAYER")+" sent you a friend request.",date:row.created_at})),
           ...(events||[]).map(row=>({type:"event",id:row.id,title:row.title||"NEW EVENT",summary:row.description||String(row.event_type||"EVENT").toUpperCase(),date:row.created_at})),
-          ...(news||[]).map(row=>({type:"news",id:row.id,title:row.title||"ADMIN BULLETIN",summary:row.body||"NEW WORLD BULLETIN",date:row.published_at||row.created_at})),
+          ...(news||[]).map(row=>({type:"news",id:row.id,title:row.title||"ADMIN BULLETIN",summary:String(row.body||"NEW WORLD BULLETIN").slice(0,120),date:row.published_at||row.created_at})),
           ...(world||[]).filter(row=>row.updated_at && Date.now()-new Date(row.updated_at).getTime()<1000*60*60*24*14).map(row=>({type:"world",id:String(row.key)+"::"+String(row.updated_at),title:row.label||"WORLD STATE UPDATED",summary:typeof row.value==="string"?row.value:"MACRO WORLD STATE UPDATED",date:row.updated_at}))
         ].sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,60).map(item=>({...item,read:readSet.has(readKey(item))}));
         render();
@@ -215,7 +215,8 @@
       await markRead([selected]);
       if(selected.type==="message"){window.dispatchEvent(new CustomEvent("gm:open-chat"));setOpen(false);}
       else if(selected.type==="friend_request") window.location.href="player-suite.html#friends";
-      else if(selected.type==="event"||selected.type==="news"||selected.type==="world") window.location.href="dashboard.html";
+      else if(selected.type==="news") window.location.href="about.html#news";
+      else if(selected.type==="event"||selected.type==="world") window.location.href="dashboard.html";
     });
     document.addEventListener("click",e=>{if(!panel.hidden&&!panel.contains(e.target)&&e.target!==button&&!button.contains(e.target))setOpen(false);});
     refresh(); refreshTimer=setInterval(refresh,30000);
