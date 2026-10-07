@@ -3396,3 +3396,25 @@ dialog::backdrop{background:rgba(0,0,0,.72);backdrop-filter:blur(2px)}
   .info-hub-tabs .tab{min-width:0}
   .info-news-card{padding:15px}
 }
+
+
+/* ADMIN NEWS EDITOR */
+.admin-news-grid{align-items:start}
+.admin-news-sections{display:grid;gap:12px}
+.admin-news-section{padding:12px;border:1px solid rgba(134,215,232,.14);background:rgba(4,12,16,.46)}
+.admin-news-section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px}
+.admin-news-remove{border:0;background:transparent;color:var(--dim);font:600 .58rem var(--mono);letter-spacing:.08em;cursor:pointer}
+.admin-news-remove:hover{color:var(--danger,#ef7d7d)}
+.admin-news-section textarea{min-height:130px}
+.admin-news-builder-actions{margin-top:2px;flex-wrap:wrap}
+.admin-news-post p{margin:10px 0 0;color:var(--muted);line-height:1.5;font-size:.78rem}
+
+/* PLAYER NEWS */
+.info-news-month{font:700 .72rem var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--cyan);margin-bottom:8px}
+.info-news-content{display:grid;gap:10px}
+.info-news-section-header{margin:12px 0 0;font-size:1rem;text-transform:uppercase;letter-spacing:.05em;color:var(--text)}
+.info-news-section-body{margin:0;color:var(--muted);font-size:.96rem;line-height:1.7;white-space:pre-wrap}
+.info-news-card>h2{margin:0 0 14px}
+@media(max-width:720px){
+  .admin-news-builder-actions .hud-button{width:100%}
+}
