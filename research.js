@@ -20,8 +20,8 @@
     const active=sites.filter(row=>String(row.status||"active").toLowerCase()==="active");
     const daily=active.reduce((sum,row)=>{
       const type=typeMap.get(row.facility_type_id);
-      const hourly=Math.max(0,Number(type?.output_per_cycle||1));
-      return sum+(hourly*36*Number(row.production_modifier??1)*healthMultiplier(row));
+      const perDay=Math.max(0,Number(type?.output_per_cycle||36));
+      return sum+(perDay*Number(row.production_modifier??1)*healthMultiplier(row));
     },0);
 
     $("researchSiteCount").textContent=active.length+"/"+sites.length;
@@ -38,12 +38,12 @@
     root.innerHTML=sites.map(row=>{
       const type=typeMap.get(row.facility_type_id);
       const activeStatus=String(row.status||"active").toLowerCase()==="active";
-      const hourly=Math.max(0,Number(type?.output_per_cycle||1))*Number(row.production_modifier??1)*healthMultiplier(row);
+      const perDay=Math.max(0,Number(type?.output_per_cycle||36))*Number(row.production_modifier??1)*healthMultiplier(row);
       const clock=(clocks||[]).find(item=>item.facility_id===row.id);
       return '<article class="notice research-site-row">'+
         '<div><strong>'+esc(row.name||"Research Site")+'</strong>'+
         '<div class="section-code">RESEARCH SITE // '+esc(row.location_ref||"LOCATION UNSET")+'</div>'+
-        '<div class="section-code">OUTPUT // +'+esc(fmt(hourly))+' RP / WORLD HOUR // +'+esc(fmt(hourly*36))+' RP / DAY</div></div>'+
+        '<div class="section-code">OUTPUT // +'+esc(fmt(perDay))+' RP / IN-GAME DAY</div></div>'+
         '<div class="research-site-meta"><span class="status-chip '+(activeStatus?"":"muted")+'">'+esc(String(row.status||"active").toUpperCase())+'</span>'+
         (activeStatus&&clock?.next_production_at?'<span class="section-code">NEXT OUTPUT // <span data-research-countdown="'+esc(clock.next_production_at)+'">--:--:--</span></span>':'')+
         '</div></article>';
@@ -57,9 +57,10 @@
       if(!Number.isFinite(ms)){el.textContent="--:--";return;}
       if(ms<=0){el.textContent="PROCESSING";return;}
       const sec=Math.ceil(ms/1000);
-      const min=Math.floor(sec/60);
+      const h=Math.floor(sec/3600);
+      const min=Math.floor((sec%3600)/60);
       const s=sec%60;
-      el.textContent=String(min).padStart(2,"0")+":"+String(s).padStart(2,"0");
+      el.textContent=String(h).padStart(2,"0")+":"+String(min).padStart(2,"0")+":"+String(s).padStart(2,"0");
     });
   }
 
