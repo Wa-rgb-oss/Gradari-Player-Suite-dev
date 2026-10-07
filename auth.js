@@ -11,6 +11,10 @@
     expires: "gm_access_expires_at"
   };
 
+  function siteHref(path = "") {
+    return new URL(path, document.baseURI).href;
+  }
+
   const parseJSON = (value, fallback = null) => {
     try { return JSON.parse(value); } catch { return fallback; }
   };
@@ -86,7 +90,7 @@
   }
 
   async function signUp(email, password) {
-    const redirectTo = new URL("login.html", window.location.href).href;
+    const redirectTo = siteHref("login/");
     const data = await request("/auth/v1/signup?redirect_to=" + encodeURIComponent(redirectTo), {
       method: "POST",
       body: JSON.stringify({ email, password })
@@ -156,10 +160,10 @@
     }
   }
 
-  async function requireAuth(loginPath = "login.html") {
+  async function requireAuth(loginPath = "login/") {
     const session = await getSession();
     if (!session?.user?.id) {
-      window.location.replace(loginPath);
+      window.location.replace(siteHref(loginPath));
       return null;
     }
     document.body.classList.remove("auth-pending");
@@ -167,19 +171,19 @@
     return session;
   }
 
-  async function redirectIfAuthenticated(target = "dashboard.html") {
+  async function redirectIfAuthenticated(target = "home/") {
     const session = await getSession();
     if (session?.user?.id) {
-      window.location.replace(target);
+      window.location.replace(siteHref(target));
       return true;
     }
     document.body.classList.remove("auth-pending");
     return false;
   }
 
-  async function routeEntry(authTarget = "dashboard.html", guestTarget = "login.html") {
+  async function routeEntry(authTarget = "home/", guestTarget = "login/") {
     const session = await getSession();
-    window.location.replace(session?.user?.id ? authTarget : guestTarget);
+    window.location.replace(siteHref(session?.user?.id ? authTarget : guestTarget));
   }
 
   async function signOut() {
@@ -232,6 +236,7 @@
 
   window.GMAuth = {
     CONFIG,
+    siteHref,
     getStored,
     saveSession,
     clearSession,

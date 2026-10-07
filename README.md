@@ -55,19 +55,19 @@ The frontend does not rely on hidden buttons for security.
 ## Main files
 
 - `index.html` — session router
-- `login.html` — player login and account creation
-- `dashboard.html` — authenticated player dashboard
-- `map.html` / `map.js` — interactive galactic hex map and world interaction layer
-- `player-suite.html` — player economy, inventory, faction, characters, actions, and canon
+- `login/` — player login and account creation
+- `home/` — authenticated player dashboard
+- `map/` / `map.js` — interactive galactic hex map and world interaction layer
+- `player-suite/` — player economy, inventory, faction, characters, actions, and canon
 - `player-suite.js` — player interactions
 - `player-data.js` — shared player-state loader
-- `about.html` — project overview
-- `admin.html` — restricted Game Master backend
+- `news/` — project overview
+- `admin/` — restricted Game Master backend
 - `admin.js` — admin controls
 - `auth.js` — persistent Supabase session handling
 - `ui.js` — shared UI helpers
 - `styles.css` — shared command-console visual system
-- `legacy-player-suite.html` — preserved original Player Suite
+- `legacy-player-suite/` — preserved original Player Suite
 
 ## Visual direction
 
@@ -89,7 +89,7 @@ Gradari includes a Senate politics framework.
 - Imperial tax assessments apply to configured faction-generated Aureum revenue, not member deposits or founding capital.
 - The First Consul and Senate chamber are controlled from the Game Master backend.
 
-The Politics player page is `politics.html`. Politics administration is part of the restricted `admin.html` backend.
+The Politics player page is `politics/`. Politics administration is part of the restricted `admin/` backend.
 
 ### Offices and elections
 

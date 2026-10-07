@@ -480,7 +480,7 @@
     const address = $("email").value.trim();
     if (!address) return setState($("loginState"), "ENTER THE ADMIN EMAIL ADDRESS FIRST.", "error");
     try {
-      const response = await fetch(GMAuth.CONFIG.url + "/auth/v1/recover?redirect_to=" + encodeURIComponent(new URL("reset-password.html", location.href).href), {
+      const response = await fetch(GMAuth.CONFIG.url + "/auth/v1/recover?redirect_to=" + encodeURIComponent(GMAuth.siteHref("reset-password/")), {
         method:"POST",
         headers:{apikey:GMAuth.CONFIG.key,"Content-Type":"application/json"},
         body:JSON.stringify({email:address})

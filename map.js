@@ -1194,7 +1194,7 @@
         '<button class="hud-button secondary shipyard-queue-btn" type="button" data-shipyard="'+esc(shipyard.id)+'" style="margin-top:8px">BEGIN CONSTRUCTION</button></article>';
     });
     if(station){
-      facilityControls += '<article class="notice"><strong>'+esc(station.station_name || "Guilded Concord Trade Station")+'</strong><div class="section-code">GUILDED CONCORD EXCHANGE</div><a class="hud-button secondary" href="exchange-markets.html" style="display:inline-flex;margin-top:8px">OPEN MARKET</a></article>';
+      facilityControls += '<article class="notice"><strong>'+esc(station.station_name || "Guilded Concord Trade Station")+'</strong><div class="section-code">GUILDED CONCORD EXCHANGE</div><a class="hud-button secondary" href="exchange-markets/" style="display:inline-flex;margin-top:8px">OPEN MARKET</a></article>';
     }
     $("selectedFacilityControls").innerHTML=facilityControls
       ? '<div class="section-code map-panel-divider location-actions-heading">LOCATION ACTIONS</div>'+facilityControls

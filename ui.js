@@ -232,9 +232,9 @@
       const selected=items.find(item=>readKey(item)===target.dataset.notificationKey); if(!selected) return;
       await markRead([selected]);
       if(selected.type==="message"){window.dispatchEvent(new CustomEvent("gm:open-chat"));setOpen(false);}
-      else if(selected.type==="friend_request") window.location.href="player-suite.html#friends";
-      else if(selected.type==="news") window.location.href="about.html#news";
-      else if(selected.type==="event"||selected.type==="world") window.location.href="dashboard.html";
+      else if(selected.type==="friend_request") window.location.href=GMAuth.siteHref("player-suite/#friends");
+      else if(selected.type==="news") window.location.href=GMAuth.siteHref("news/#news");
+      else if(selected.type==="event"||selected.type==="world") window.location.href=GMAuth.siteHref("home/");
     });
     document.addEventListener("click",e=>{if(!panel.hidden&&!panel.contains(e.target)&&e.target!==button&&!button.contains(e.target))setOpen(false);});
     refresh(); refreshTimer=setInterval(refresh,30000);
@@ -255,7 +255,7 @@
         document.querySelectorAll(".sidebar-footer").forEach(footer => {
           if (footer.querySelector("[data-admin-link]")) return;
           const link = document.createElement("a");
-          link.href = "admin.html";
+          link.href = GMAuth.siteHref("admin/");
           link.className = "admin-access-btn";
           link.dataset.adminLink = "";
           link.textContent = "ADMIN CONSOLE";
@@ -273,7 +273,7 @@
         button.disabled = true;
         button.textContent = "SIGNING OUT...";
         await GMAuth.signOut();
-        window.location.replace("login.html");
+        window.location.replace(GMAuth.siteHref("login/"));
       });
     });
 
