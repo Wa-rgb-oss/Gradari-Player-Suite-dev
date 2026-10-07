@@ -47,6 +47,7 @@
         <button class="tab" data-tab-target="admin-economy" type="button">ECONOMY</button>
         <button class="tab" data-tab-target="admin-gm-tools" type="button">GM TOOLS</button>
         <button class="tab" data-tab-target="admin-events" type="button">EVENTS</button>
+        <button class="tab" data-tab-target="admin-news" type="button">NEWS</button>
         <button class="tab" data-tab-target="admin-systems" type="button">SYSTEMS</button>
         <button class="tab" data-tab-target="admin-actions" type="button">ACTIONS</button>
         <button class="tab" data-tab-target="admin-world" type="button">WORLD</button>
@@ -372,6 +373,48 @@
         </div>
       </section>
 
+      <section class="panel" id="admin-news" data-tab-panel>
+        <div class="content-grid admin-news-grid">
+          <article class="hud-panel compact">
+            <div class="section-head">
+              <div><div class="section-code">ADMIN / NEWS</div><h2 id="adminNewsEditorTitle">New News Post</h2></div>
+              <p>MONTHLY DIGEST // MAJOR NEWS</p>
+            </div>
+
+            <form id="adminNewsForm" class="form-shell">
+              <input id="adminNewsEditId" type="hidden">
+              <label>
+                <span>Title *</span>
+                <input id="adminNewsTitle" name="title" maxlength="220" required placeholder="News post title">
+              </label>
+
+              <div class="section-code" style="margin-top:4px">POST CONTENT</div>
+              <div id="adminNewsSections" class="admin-news-sections"></div>
+
+              <div class="form-actions admin-news-builder-actions">
+                <button class="hud-button secondary" id="adminNewsAddHeader" type="button">ADD HEADER SECTION</button>
+                <button class="hud-button secondary" id="adminNewsAddBody" type="button">ADD BODY SECTION</button>
+              </div>
+
+              <div class="form-actions">
+                <button class="hud-button" id="adminNewsSubmit" type="submit">PUBLISH NEWS</button>
+                <button class="hud-button secondary" id="adminNewsCancelEdit" type="button" hidden>CANCEL EDIT</button>
+              </div>
+              <div class="form-state" id="adminNewsState"></div>
+            </form>
+          </article>
+
+          <aside class="hud-panel compact">
+            <div class="section-head">
+              <div><div class="section-code">NEWS / PUBLISHED</div><h2>News Archive</h2></div>
+              <p>EDIT // DELETE</p>
+            </div>
+            <div id="adminNewsList" class="stack"></div>
+            <div class="empty-state" id="adminNewsEmpty" hidden>NO NEWS POSTS HAVE BEEN PUBLISHED.</div>
+          </aside>
+        </div>
+      </section>
+
       <section class="panel" id="admin-systems" data-tab-panel>
         <div class="content-grid">
           <article class="stack">
@@ -524,17 +567,6 @@
                 <label class="checkbox-line"><input name="player_visible" type="checkbox" checked><span>Visible to players</span></label>
                 <button class="hud-button" type="submit">SAVE WORLD STATE</button>
                 <div class="form-state" id="worldState"></div>
-              </form>
-            </article>
-            <article class="hud-panel compact">
-              <div class="section-code">WORLD / NEWS</div><h2 style="margin:5px 0 16px;text-transform:uppercase">Publish News</h2>
-              <form id="newsForm" class="form-shell">
-                <label><span>Title *</span><input name="title" required></label>
-                <label><span>Body *</span><textarea name="body" required></textarea></label>
-                <label><span>Visibility</span><select name="visibility"><option value="public">Public</option><option value="faction">Faction</option><option value="admin">Admin Only</option></select></label>
-                <label><span>Faction</span><select name="faction_id" data-faction-select><option value="">None</option></select></label>
-                <button class="hud-button" type="submit">PUBLISH NEWS</button>
-                <div class="form-state" id="newsState"></div>
               </form>
             </article>
           </aside>
@@ -731,6 +763,7 @@
   <script src="auth.js"></script>
   <script src="ui.js"></script>
   <script src="admin.js"></script>
+  <script src="admin-news.js"></script>
   <script src="admin-systems.js"></script>
   <script src="admin-politics.js"></script>
   <script src="admin-map.js"></script>
