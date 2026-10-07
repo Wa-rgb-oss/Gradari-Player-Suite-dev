@@ -140,7 +140,11 @@
         }
       } catch (error) {
         signupState.classList.add("error");
-        signupState.textContent = "ACCOUNT CREATION FAILED // " + error.message;
+        if (error.code === "account_exists") {
+          signupState.textContent = "ACCOUNT ALREADY EXISTS // USE SIGN IN INSTEAD";
+        } else {
+          signupState.textContent = "ACCOUNT CREATION FAILED // " + error.message;
+        }
         button.disabled = false;
       }
     });
