@@ -3512,3 +3512,43 @@ dialog::backdrop{background:rgba(0,0,0,.72);backdrop-filter:blur(2px)}
   .auth-legal-dialog{width:96vw}
   .auth-legal-dialog-body{max-height:74vh}
 }
+
+
+/* GLOBAL BUILD STATUS */
+.build-status{
+  flex:0 0 auto;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  min-height:30px;
+  padding:5px 10px;
+  border:1px solid rgba(216,163,93,.34);
+  background:rgba(147,100,46,.08);
+  font:500 .62rem/1 var(--mono);
+  letter-spacing:.11em;
+  text-transform:uppercase;
+  white-space:nowrap;
+}
+.build-status span{color:var(--amber)}
+.build-status strong{
+  color:#e7edf0;
+  font-weight:500;
+  letter-spacing:.08em;
+}
+@media(max-width:1100px){
+  .topbar{gap:12px}
+  .build-status{padding:5px 8px;font-size:.58rem}
+}
+@media(max-width:820px){
+  .build-status{
+    margin-left:auto;
+    min-height:28px;
+    padding:5px 8px;
+    font-size:.56rem;
+  }
+}
+@media(max-width:520px){
+  .build-status{gap:6px;padding:4px 7px}
+  .build-status span{font-size:0}
+  .build-status span::after{content:"ALPHA";font-size:.55rem}
+}
