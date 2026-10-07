@@ -55,6 +55,7 @@
         <button class="tab" data-tab-target="admin-news" type="button">NEWS</button>
         <button class="tab" data-tab-target="admin-systems" type="button">SYSTEMS</button>
         <button class="tab" data-tab-target="admin-actions" type="button">ACTIONS</button>
+        <button class="tab" data-tab-target="admin-auth-log" type="button">AUTH LOG</button>
         <button class="tab" data-tab-target="admin-world" type="button">WORLD</button>
         <button class="tab" data-tab-target="admin-map" type="button">MAP</button>
       </div>
@@ -574,6 +575,48 @@
         <div id="actionAdminList" class="stack"></div>
       </section>
 
+      <section class="panel" id="admin-auth-log" data-tab-panel>
+        <section class="metric-grid">
+          <article class="metric-card"><div class="metric-label">Loaded Events</div><div class="metric-value" id="authLogTotal">--</div><div class="metric-detail">LATEST 500 RECORDS</div></article>
+          <article class="metric-card"><div class="metric-label">Last 24 Hours</div><div class="metric-value" id="authLog24h">--</div><div class="metric-detail">AUTH ACTIVITY</div></article>
+          <article class="metric-card"><div class="metric-label">New Accounts</div><div class="metric-value" id="authLogAccounts30d">--</div><div class="metric-detail">LAST 30 DAYS</div></article>
+          <article class="metric-card"><div class="metric-label">GM Events</div><div class="metric-value" id="authLogAdmin30d">--</div><div class="metric-detail">LAST 30 DAYS</div></article>
+        </section>
+
+        <article class="hud-panel compact">
+          <div class="section-head">
+            <div><div class="section-code">SECURITY / AUTHENTICATION</div><h2>Authentication Log</h2></div>
+            <p>ADMIN ONLY</p>
+          </div>
+          <p class="hero-copy" style="margin:0 0 18px">Server-side account and authentication history. Password values, access tokens, and refresh tokens are never stored in this log.</p>
+          <div class="form-grid" style="margin-bottom:18px">
+            <label><span>Event Type</span>
+              <select id="authLogActionFilter">
+                <option value="">All authentication events</option>
+                <option value="login">Login</option>
+                <option value="logout">Logout</option>
+                <option value="account_created">New account</option>
+                <option value="email_confirmation_requested">Confirmation sent</option>
+                <option value="email_confirmed">Email confirmed</option>
+                <option value="password_recovery_requested">Password recovery</option>
+                <option value="password_changed">Password changed</option>
+                <option value="email_changed">Email changed</option>
+                <option value="account_deleted">Account deleted</option>
+                <option value="admin_access_granted">GM access granted</option>
+                <option value="admin_access_denied">GM access denied</option>
+              </select>
+            </label>
+            <label><span>Search</span><input id="authLogSearch" type="search" placeholder="Email, user ID, event, source..."></label>
+          </div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead><tr><th>Time</th><th>Event</th><th>Account</th><th>Access</th><th>Details</th></tr></thead>
+              <tbody id="authLogRows"></tbody>
+            </table>
+          </div>
+        </article>
+      </section>
+
       <section class="panel" id="admin-world" data-tab-panel>
         <div class="content-grid">
           <article class="hud-panel compact">
@@ -783,9 +826,9 @@
     </section>
   </main>
 
-  <script src="auth.js"></script>
+  <script src="auth-20261007-v3.js"></script>
   <script src="ui.js"></script>
-  <script src="admin.js"></script>
+  <script src="admin.js?v=auth-log-20261007"></script>
   <script src="admin-news.js"></script>
   <script src="admin-artifacts.js?v=three-slots-20261007"></script>
   <script src="admin-systems.js"></script>
