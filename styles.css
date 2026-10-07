@@ -2362,7 +2362,7 @@ dialog::backdrop{background:rgba(0,0,0,.72);backdrop-filter:blur(2px)}
     padding:0!important;
     margin:0;
     display:grid!important;
-    grid-template-columns:repeat(7,minmax(0,1fr));
+    grid-template-columns:repeat(6,minmax(0,1fr));
     gap:2px!important;
     overflow:visible!important;
   }
@@ -3565,4 +3565,11 @@ dialog::backdrop{background:rgba(0,0,0,.72);backdrop-filter:blur(2px)}
   .sidebar-footer .notification-btn,
   .sidebar-footer .signout-btn{height:34px;min-height:34px}
   .sidebar-footer .notification-btn{width:34px;padding:6px}
+}
+
+/* Home access to News & About on phones. */
+.mobile-news-link{display:none!important}
+@media(max-width:760px){
+  .primary-nav a[href="news/"],.primary-nav a[href="about.html"],.primary-nav a[href="about/"]{display:none!important}
+  .hero-actions .mobile-news-link{display:flex!important;grid-column:1 / -1;width:100%}
 }
