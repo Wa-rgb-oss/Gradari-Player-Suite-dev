@@ -207,7 +207,7 @@
         let profiles=[]; if(profileIds.length) profiles=await api("player_profiles?user_id=in.("+profileIds.map(encodeURIComponent).join(",")+")&select=user_id,display_name");
         const names=new Map((profiles||[]).map(row=>[row.user_id,row.display_name||"PLAYER"]));
         items=[
-          ...(messages||[]).map(row=>({type:"message",id:row.id,title:names.get(row.sender_user_id)||"DIRECT MESSAGE",summary:String(row.body||"").slice(0,120),date:row.created_at})),
+          ...(messages||[]).map(row=>({type:"message",id:row.id,friendId:row.sender_user_id,title:names.get(row.sender_user_id)||"DIRECT MESSAGE",summary:String(row.body||"").slice(0,120),date:row.created_at})),
           ...(friendRequests||[]).map(row=>({type:"friend_request",id:row.id,title:"FRIEND REQUEST",summary:(names.get(row.sender_user_id)||"PLAYER")+" sent you a friend request.",date:row.created_at})),
           ...(events||[]).map(row=>({type:"event",id:row.id,title:row.title||"NEW EVENT",summary:row.description||String(row.event_type||"EVENT").toUpperCase(),date:row.created_at})),
           ...(news||[]).map(row=>({type:"news",id:row.id,title:row.title||"ADMIN BULLETIN",summary:String(row.body||"NEW WORLD BULLETIN").slice(0,120),date:row.published_at||row.created_at})),
@@ -231,7 +231,7 @@
       const target=e.target.closest("[data-notification-key]"); if(!target) return;
       const selected=items.find(item=>readKey(item)===target.dataset.notificationKey); if(!selected) return;
       await markRead([selected]);
-      if(selected.type==="message"){window.dispatchEvent(new CustomEvent("gm:open-chat"));setOpen(false);}
+      if(selected.type==="message"){window.dispatchEvent(new CustomEvent("gm:open-chat",{detail:{friendId:selected.friendId}}));setOpen(false);}
       else if(selected.type==="friend_request") window.location.href=GMAuth.siteHref("player-suite/#friends");
       else if(selected.type==="news") window.location.href=GMAuth.siteHref("news/#news");
       else if(selected.type==="event"||selected.type==="world") window.location.href=GMAuth.siteHref("home/");
