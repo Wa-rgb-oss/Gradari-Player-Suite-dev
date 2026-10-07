@@ -3378,3 +3378,21 @@ dialog::backdrop{background:rgba(0,0,0,.72);backdrop-filter:blur(2px)}
   .research-network-stage,.research-node-grid{min-height:690px}
 }
 
+
+
+/* NEWS & ABOUT HUB */
+.info-hub-tabs{margin-bottom:18px}
+.info-hub-tabs .tab{min-width:150px}
+.info-news-panel{margin-top:18px}
+.info-news-feed{display:grid;gap:12px}
+.info-news-card{padding:18px}
+.info-news-card h2{margin:8px 0 10px;font-size:1.15rem;text-transform:uppercase;letter-spacing:.04em}
+.info-news-card p{margin:0;color:var(--muted);font-size:.96rem;line-height:1.65;white-space:pre-wrap}
+.info-news-meta{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.info-news-meta time{font:500 .62rem var(--mono);letter-spacing:.08em;color:var(--dim)}
+#info-about>.hero-grid,#info-about>section:first-child{margin-top:0}
+#info-how-to-play>.hud-panel:first-child{margin-top:0}
+@media(max-width:720px){
+  .info-hub-tabs .tab{min-width:0}
+  .info-news-card{padding:15px}
+}
