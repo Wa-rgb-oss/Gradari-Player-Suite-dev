@@ -60,7 +60,11 @@
 
   function selectHashTab(){
     const hash=String(location.hash||"").replace(/^#/,"").toLowerCase();
-    const key=hash==="about"?"about":hash==="how-to-play"||hash==="howtoplay"?"how-to-play":"news";
+    let key="news";
+    if(hash==="about") key="about";
+    else if(hash==="how-to-play"||hash==="howtoplay") key="how-to-play";
+    else if(hash==="terms"||hash==="terms-of-use"||hash==="termsofuse") key="terms-of-use";
+    else if(hash==="privacy"||hash==="privacy-policy"||hash==="privacypolicy") key="privacy-policy";
     const button=document.querySelector('[data-info-hash="'+key+'"]');
     if(button && !button.classList.contains("active")) button.click();
   }
