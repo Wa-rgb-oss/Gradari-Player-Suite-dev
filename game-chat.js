@@ -239,7 +239,7 @@
     const ordered=requestedMode==="direct"?(rows||[]).slice().reverse():(rows||[]);
     log.innerHTML=ordered.map(m=>{
       const stamp=formatMessageStamp(m.created_at);
-      return '<div class="game-chat-line '+(m.sender_user_id===uid()?"mine":"")+'" data-message-id="'+esc(m.id)+'">'+
+      return '<div class="game-chat-line '+(requestedMode==="direct"&&m.sender_user_id===uid()?"mine":"")+'" data-message-id="'+esc(m.id)+'">'+
         '<div class="game-chat-meta"><b>'+esc(profiles.get(m.sender_user_id)||(m.sender_user_id===uid()?"YOU":"PLAYER"))+'</b><small>'+esc(stamp)+'</small></div>'+
         '<span>'+esc(m.body)+'</span>'+
       '</div>';
