@@ -64,18 +64,15 @@
   async function loadFriends(){
     const userId=uid();
     if(!userId) return;
-    const links=await api(
-      "friendships?or=(user_a.eq."+encodeURIComponent(userId)+",user_b.eq."+encodeURIComponent(userId)+")&select=*"
-    );
-    friends=(links||[]).map(f=>f.user_a===userId?f.user_b:f.user_a);
 
-    let people=[];
-    if(friends.length){
-      people=await api(
-        "player_profiles?user_id=in.("+friends.map(encodeURIComponent).join(",")+")&select=user_id,display_name"
-      ).catch(()=>[]);
-    }
-    profiles=new Map((people||[]).map(p=>[p.user_id,p.display_name||"PLAYER"]));
+    const [friendRows,discoverableProfiles]=await Promise.all([
+      api("rpc/get_my_chat_friends",{method:"POST",body:"{}"}),
+      api("player_profiles?is_discoverable=eq.true&select=user_id,display_name").catch(()=>[])
+    ]);
+
+    friends=(friendRows||[]).map(row=>row.user_id);
+    profiles=new Map((discoverableProfiles||[]).map(row=>[row.user_id,row.display_name||"PLAYER"]));
+    (friendRows||[]).forEach(row=>profiles.set(row.user_id,row.display_name||"PLAYER"));
 
     if(friendId && !friends.includes(friendId)) friendId=null;
     renderPicker();
@@ -150,23 +147,11 @@
     const userId=uid();
     if(!log||!userId) return;
 
-    const rows=await api(
-      "game_chat_messages?channel=eq.direct&or=(sender_user_id.eq."+encodeURIComponent(userId)+
-      ",recipient_user_id.eq."+encodeURIComponent(userId)+
-      ")&select=id,sender_user_id,recipient_user_id,body,created_at&order=created_at.desc&limit=300"
-    );
+    const rows=await api("rpc/get_my_direct_chat_threads",{method:"POST",body:"{}"});
 
     if(request!==messageRequest || mode!=="direct" || friendId) return;
 
-    const latest=new Map();
-    (rows||[]).forEach(message=>{
-      const other=message.sender_user_id===userId?message.recipient_user_id:message.sender_user_id;
-      if(!friends.includes(other) || latest.has(other)) return;
-      latest.set(other,message);
-    });
-
-    const chats=[...latest.entries()]
-      .sort((a,b)=>new Date(b[1].created_at)-new Date(a[1].created_at));
+    const chats=(rows||[]).filter(row=>friends.includes(row.friend_id));
 
     if(!chats.length){
       log.innerHTML=
@@ -181,9 +166,11 @@
 
     log.innerHTML=
       '<div class="game-chat-inbox">'+
-      chats.map(([other,message])=>{
-        const mine=message.sender_user_id===userId;
-        const snippet=(mine?"You: ":"")+String(message.body||"").replace(/\s+/g," ").trim();
+      chats.map(message=>{
+        const other=message.friend_id;
+        profiles.set(other,message.display_name||friendName(other));
+        const mine=message.latest_sender_user_id===userId;
+        const snippet=(mine?"You: ":"")+String(message.latest_message||"").replace(/\s+/g," ").trim();
         return '<button class="game-chat-thread-row" type="button" data-thread-friend="'+esc(other)+'">'+
           '<span class="game-chat-avatar">'+esc(friendName(other).slice(0,1).toUpperCase())+'</span>'+
           '<span class="game-chat-thread-copy">'+
