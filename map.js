@@ -10,6 +10,7 @@
   let militaryOperations = [];
   let characterTravel = [];
   let worldClock = null;
+  let visibleFacilities = [];
   let selectedHex = null;
   let hoverHex = null;
 
@@ -173,7 +174,7 @@
   }
 
   async function loadMapData() {
-    const [hexRows,territoryRows,labelRows,modifierRows,armyRows,armyMoveRows,operationRows,travelRows,clock] = await Promise.all([
+    const [hexRows,territoryRows,labelRows,modifierRows,armyRows,armyMoveRows,operationRows,travelRows,clock,publicFacilityRows] = await Promise.all([
       GMAuth.api("map_hexes?player_visible=eq.true&select=*&order=q.asc,r.asc"),
       GMAuth.api("territories?select=*&order=location_ref.asc"),
       GMAuth.api("map_labels?player_visible=eq.true&select=*&order=created_at.asc"),
@@ -182,7 +183,8 @@
       GMAuth.api("army_movements?select=*&order=created_at.desc&limit=100"),
       GMAuth.api("military_operations?select=*&order=created_at.desc&limit=100"),
       GMAuth.api("character_travel?select=*&order=created_at.desc&limit=20"),
-      GMAuth.api("rpc/get_world_clock",{method:"POST",body:"{}"})
+      GMAuth.api("rpc/get_world_clock",{method:"POST",body:"{}"}),
+      GMAuth.api("rpc/map_visible_facilities",{method:"POST",body:"{}"})
     ]);
     mapRegistry = hexRows || [];
     territories = territoryRows || [];
@@ -193,6 +195,7 @@
     militaryOperations = operationRows || [];
     characterTravel = travelRows || [];
     worldClock = clock || null;
+    visibleFacilities = publicFacilityRows || [];
   }
 
   async function refreshAll(message="",target=null) {
@@ -563,28 +566,57 @@
     ctx.restore();
   }
 
+  function facilityOwnershipStyle(row) {
+    const scope=String(row?.ownership_scope || "system");
+    if(scope==="self") return {stroke:"#86d7e8",symbol:"#86d7e8",dash:[]};
+    if(scope==="own_faction") return {stroke:"#d8a35d",symbol:"#f1d7b0",dash:[]};
+    if(scope==="same_faction_player") return {stroke:"#7caeb8",symbol:"#a9c8cf",dash:[3,3]};
+    return {stroke:"#667a82",symbol:"#8c9ca2",dash:[3,3]};
+  }
+
+  function facilityOwnershipLabel(row) {
+    const scope=String(row?.ownership_scope || "system");
+    if(scope==="self") return "YOUR FACILITY";
+    if(scope==="own_faction") return "YOUR FACTION";
+    if(scope==="same_faction_player") return "OWNED BY "+String(row?.owner_name || "PLAYER")+" // YOUR FACTION";
+    if(scope==="other_player") return "OWNED BY "+String(row?.owner_name || "PLAYER");
+    if(scope==="other_faction") return String(row?.owner_name || "FACTION")+" FACILITY";
+    return "UNALIGNED FACILITY";
+  }
+
+  function facilityOwnershipClass(row) {
+    const scope=String(row?.ownership_scope || "system");
+    if(scope==="self") return "ownership-self";
+    if(scope==="own_faction") return "ownership-faction";
+    if(scope==="same_faction_player") return "ownership-same-faction";
+    return "ownership-other";
+  }
+
   function drawFacilities() {
     if (!layers.facilities) return;
     ctx.save();
     ctx.textAlign="center";
     ctx.textBaseline="middle";
 
-    player.facilities.forEach(row => {
+    (visibleFacilities || []).forEach(row => {
       const h=parseRef(row.location_ref);
       if (!h || !mapHexSet.has(row.location_ref)) return;
       const p=worldToScreen(hexToWorld(h.q,h.r));
       const type=facilityTypeById(row.facility_type_id);
       const size=Math.max(7,10*camera.zoom);
+      const style=facilityOwnershipStyle(row);
 
       ctx.beginPath();
       ctx.arc(p.x,p.y,size,0,Math.PI*2);
       ctx.fillStyle="rgba(3,12,17,.94)";
       ctx.fill();
-      ctx.strokeStyle=row.status==="active" ? "#86d7e8" : "#d8a35d";
+      ctx.strokeStyle=style.stroke;
       ctx.lineWidth=Math.max(1,1.8*camera.zoom);
+      ctx.setLineDash(style.dash.map(value=>Math.max(1,value*camera.zoom)));
       ctx.stroke();
+      ctx.setLineDash([]);
 
-      ctx.fillStyle="#d8a35d";
+      ctx.fillStyle=style.symbol;
       ctx.font=`500 ${Math.max(8,12*camera.zoom)}px "Share Tech Mono", Consolas, monospace`;
       ctx.fillText(facilitySymbol(type),p.x,p.y+.5);
     });
@@ -1123,7 +1155,7 @@
     $("selectedHexStatus").textContent=systemType;
     $("selectedHexProduction").textContent=Math.round(production*100)+"%";
 
-    const selectedFacilities=player.facilities.filter(row=>row.location_ref===selectedHex.ref);
+    const selectedFacilities=(visibleFacilities || []).filter(row=>row.location_ref===selectedHex.ref);
     $("selectedHexSlots").textContent=selectedFacilities.length+" / "+Number(system?.slot_limit || 8);
     $("selectedHexPopulation").textContent=system ? fmt(system.population) : "--";
     $("selectedHexManpower").textContent=system ? fmt(system.manpower) : "--";
@@ -1137,17 +1169,29 @@
     $("selectedFacilityEmpty").hidden=selectedFacilities.length>0;
     $("selectedFacilityList").innerHTML=selectedFacilities.map(row => {
       const type=facilityTypeById(row.facility_type_id);
-      const clock=(player.facilityProductionClocks||[]).find(x=>x.facility_id===row.id);
-      const order=(player.factoryOrders||[]).find(x=>x.facility_id===row.id&&["producing","storage_blocked"].includes(String(x.status||"").toLowerCase()));
+      const fullFacility=(player.facilities||[]).find(x=>x.id===row.id);
+      const scope=String(row.ownership_scope||"system");
+      const canSeeOperations=Boolean(fullFacility && (scope==="self" || scope==="own_faction"));
+      const clock=canSeeOperations ? (player.facilityProductionClocks||[]).find(x=>x.facility_id===row.id) : null;
+      const order=canSeeOperations ? (player.factoryOrders||[]).find(x=>x.facility_id===row.id&&["producing","storage_blocked"].includes(String(x.status||"").toLowerCase())) : null;
       const nextAt=order?.status==="producing"?order?.completes_at:clock?.next_production_at;
-      const timer=order?.status==="storage_blocked"
+      const timer=!canSeeOperations ? "" : order?.status==="storage_blocked"
         ? '<div class="section-code">STORAGE FULL // OUTPUT HALTED</div>'
         : nextAt?'<div class="section-code">'+(order?'PRODUCTION':'NEXT OUTPUT')+' // <span data-map-countdown="'+esc(nextAt)+'">--:--:--</span></div>':'';
-      return '<article class="notice map-list-row"><div><strong>'+esc(row.name || type?.name || "Holding")+'</strong><div class="section-code">'+esc(type?.name || "FACILITY")+'</div>'+mapFacilityProductionRateHtml(row)+timer+'</div><span>'+esc(fmt(type?.upkeep_aureum_per_day ?? Number(type?.upkeep_aureum_per_cycle||0)))+' A / DAY</span></article>';
+      const operations=canSeeOperations
+        ? mapFacilityProductionRateHtml(fullFacility)+timer
+        : '<div class="section-code">OPERATIONS // PRIVATE</div>';
+      const ownerDetail=row.faction_name && scope!=="own_faction" && scope!=="other_faction"
+        ? '<div class="section-code">FACTION // '+esc(String(row.faction_name).toUpperCase())+'</div>'
+        : '';
+      const right=canSeeOperations
+        ? esc(fmt(type?.upkeep_aureum_per_day ?? Number(type?.upkeep_aureum_per_cycle||0)))+' A / DAY'
+        : esc(String(row.status||"ACTIVE").toUpperCase());
+      return '<article class="notice map-list-row map-facility-card '+facilityOwnershipClass(row)+'"><div><strong>'+esc(row.name || type?.name || "Holding")+'</strong><div class="facility-owner-tag">'+esc(facilityOwnershipLabel(row))+'</div><div class="section-code">'+esc(type?.name || "FACILITY")+' // LEVEL '+esc(row.level||1)+'</div>'+ownerDetail+operations+'</div><span>'+right+'</span></article>';
     }).join("");
     updateMapProductionCountdowns();
 
-    const ownedFacilities=selectedFacilities.filter(canControlFacility);
+    const ownedFacilities=(player.facilities||[]).filter(row=>row.location_ref===selectedHex.ref).filter(canControlFacility);
     const ownedRefineries=ownedFacilities.filter(row => facilityCode(facilityTypeById(row.facility_type_id)).includes("REFIN"));
     const ownedFactories=ownedFacilities.filter(row => facilityCode(facilityTypeById(row.facility_type_id)).includes("FACTORY"));
     const ownedShipyards=ownedFacilities.filter(row => facilityCode(facilityTypeById(row.facility_type_id)).includes("SHIP"));
