@@ -106,6 +106,12 @@
     return player?.primaryMembership?.status === "active" ? player.primaryMembership : null;
   }
 
+  function constructionFactionId() {
+    const playerFaction=activeMembership()?.faction_id;
+    if(playerFaction) return playerFaction;
+    return player?.factions?.find(row=>row.is_player_created===false && String(row.code||"").toUpperCase()==="GME")?.id || null;
+  }
+
   function facilityTypeById(id) {
     return player?.facilityTypes?.find(row => row.id === id) || null;
   }
@@ -983,11 +989,12 @@
     if (char.location_ref!==selectedHex.ref) return {ok:false,message:"YOUR CHARACTER MUST BE PRESENT AT THIS LOCATION."};
 
     const membership=activeMembership();
-    if (!membership?.faction_id) return {ok:false,message:"AN ACTIVE FACTION MEMBERSHIP IS REQUIRED."};
+    const authorityFactionId=constructionFactionId();
+    if (!authorityFactionId) return {ok:false,message:"NO VALID CONSTRUCTION AUTHORITY IS AVAILABLE."};
 
     const territory=territoryByRef(selectedHex.ref);
-    if (!territory?.faction_id) return {ok:false,message:"THIS HEX IS NOT CURRENTLY CONTROLLED BY YOUR FACTION."};
-    if (territory.faction_id!==membership.faction_id) return {ok:false,message:"THIS HEX IS CONTROLLED BY ANOTHER FACTION."};
+    if (!territory?.faction_id) return {ok:false,message:membership?"THIS HEX IS NOT CURRENTLY CONTROLLED BY YOUR FACTION.":"THIS HEX IS NOT CURRENTLY CONTROLLED BY THE EMPIRE."};
+    if (territory.faction_id!==authorityFactionId) return {ok:false,message:membership?"THIS HEX IS CONTROLLED BY ANOTHER FACTION.":"THIS HEX IS NOT IMPERIAL TERRITORY."};
 
     const system=(player.systemEconomies || []).find(row=>row.location_ref===selectedHex.ref);
     const slotLimit=Number(system?.slot_limit || 8);
