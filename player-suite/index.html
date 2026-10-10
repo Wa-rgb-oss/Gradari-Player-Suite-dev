@@ -186,9 +186,45 @@
         </section>
 
         <section class="panel" id="suite-faction" data-tab-panel>
-          <div class="faction-command-shell">
+          <div id="factionNoMembership" class="stack" hidden>
+            <article class="hud-panel faction-create-callout">
+              <div class="section-head">
+                <div><div class="section-code">FACTION / INDEPENDENT PLAYER</div><h2>Create a Faction</h2></div>
+                <span class="status-chip">GME CITIZEN</span>
+              </div>
+              <p class="hero-copy">You are part of the Gradari Mireris Empire, but you are not currently part of a player faction. Found a new faction with two other players or request to join an active faction below.</p>
+              <div class="form-actions">
+                <a class="hud-button" href="factions/create/">CREATE A FACTION</a>
+              </div>
+            </article>
+
+            <div class="content-grid faction-invitation-grid">
+              <article class="hud-panel compact">
+                <div class="section-code">FACTION / FOUNDING</div>
+                <h2 style="margin:5px 0 16px;text-transform:uppercase">Founding Invitations</h2>
+                <div id="factionProposalList" class="stack"></div>
+                <div class="empty-state" id="factionProposalEmpty" hidden>NO ACTIVE FOUNDING INVITATIONS.</div>
+                <div class="form-state" id="factionProposalState"></div>
+              </article>
+              <article class="hud-panel compact">
+                <div class="section-code">FACTION / INVITATIONS</div>
+                <h2 style="margin:5px 0 16px;text-transform:uppercase">Membership Invitations</h2>
+                <div id="factionInvitationList" class="stack"></div>
+                <div class="empty-state" id="factionInvitationEmpty" hidden>NO PENDING FACTION INVITATIONS.</div>
+              </article>
+            </div>
+          </div>
+
+          <div id="factionMemberSummary" class="faction-command-shell" hidden>
             <article class="hud-panel faction-command-hero">
-              <div class="section-head"><div><div class="section-code">FACTION / COMMAND</div><h2 id="factionName">No Active Faction</h2></div><p id="factionCode">UNASSIGNED</p></div>
+              <div class="section-head">
+                <div><div class="section-code">FACTION / COMMAND</div><h2 id="factionName">No Active Faction</h2></div>
+                <p id="factionCode">UNASSIGNED</p>
+              </div>
+              <div class="faction-identity-line">
+                <span class="status-chip" id="factionType">PLAYER FACTION</span>
+                <span class="section-code" id="factionMemberCount">0 MEMBERS</span>
+              </div>
               <p class="hero-copy" id="factionDescription">Faction membership, authority, territory, resources and treasury.</p>
               <div class="faction-command-metrics">
                 <div><span>Position</span><strong id="factionTitle">--</strong></div>
@@ -199,6 +235,10 @@
                 <div><span>Systems</span><strong id="factionSystemCount">--</strong></div>
               </div>
               <div class="permission-list" id="permissionList"></div>
+              <div class="form-actions faction-member-actions">
+                <button class="hud-button danger" id="leaveFactionButton" type="button">LEAVE FACTION</button>
+              </div>
+              <div class="form-state" id="leaveFactionState"></div>
             </article>
 
             <div class="faction-command-columns">
@@ -217,42 +257,44 @@
               </article>
             </div>
           </div>
-          <div id="factionNoMembership" class="content-grid" style="margin-top:18px" hidden>
-            <article class="hud-panel">
-              <div class="section-head"><div><div class="section-code">FACTION / FOUNDING</div><h2>Create a Faction</h2></div></div>
-              <p class="hero-copy" style="margin:0 0 20px">Faction creation requires multiple real players and a shared Aureum commitment. Founder pledges are only charged when the faction successfully forms.</p>
-              <div class="metric-grid" style="grid-template-columns:repeat(3,minmax(0,1fr));margin-top:0">
-                <article class="metric-card"><div class="metric-label">Required Founders</div><div class="metric-value" id="founderRequirement">--</div><div class="metric-detail">REAL PLAYER ACCOUNTS</div></article>
-                <article class="metric-card"><div class="metric-label">Creation Cost</div><div class="metric-value" id="factionCreationCost">--</div><div class="metric-detail">AUREUM TOTAL</div></article>
-                <article class="metric-card"><div class="metric-label">Minimum Each</div><div class="metric-value" id="founderMinimum">--</div><div class="metric-detail">AUREUM PLEDGE</div></article>
-              </div>
-              <form id="factionProposalForm" class="form-shell">
-                <div class="form-grid"><label><span>Faction Name *</span><input name="name" required maxlength="180"></label><label><span>Code / Abbreviation</span><input name="code" maxlength="20"></label></div>
-                <label><span>Description</span><textarea name="description" maxlength="2500"></textarea></label>
-                <label><span>Your Founder Pledge *</span><input name="contribution" type="number" min="0" step="0.01" required></label>
-                <button class="hud-button" type="submit">CREATE FOUNDING PROPOSAL</button>
-                <div class="form-state" id="factionProposalState"></div>
-              </form>
-            </article>
-            <aside class="stack">
-              <article class="hud-panel compact">
-                <div class="section-code">FACTION / PROPOSALS</div><h2 style="margin:5px 0 16px;text-transform:uppercase">Founding Activity</h2>
-                <div id="factionProposalList" class="stack"></div>
-                <div class="empty-state" id="factionProposalEmpty" hidden>NO ACTIVE FOUNDING PROPOSALS.</div>
-              </article>
-              <article class="hud-panel compact">
-                <div class="section-code">FACTION / INVITATIONS</div><h2 style="margin:5px 0 16px;text-transform:uppercase">Membership Invitations</h2>
-                <div id="factionInvitationList" class="stack"></div>
-                <div class="empty-state" id="factionInvitationEmpty" hidden>NO PENDING FACTION INVITATIONS.</div>
-              </article>
-            </aside>
-          </div>
 
-          
-          <div id="factionMemberControls" style="margin-top:18px" hidden>
-            <div class="section-code">TREASURY / RECENT ACTIVITY</div>
-            <div id="factionLedger" class="stack"></div>
-            <div class="empty-state" id="factionLedgerEmpty" hidden>NO FACTION TRANSACTIONS RECORDED.</div>
+          <article class="hud-panel faction-directory-panel">
+            <div class="section-head">
+              <div><div class="section-code">FACTION / DIRECTORY</div><h2>Active Factions</h2></div>
+              <p>PLAYER CREATED FACTIONS</p>
+            </div>
+            <div class="faction-directory-toolbar">
+              <label><span>Search Factions</span><input id="factionDirectorySearch" placeholder="Search name, code, leader, or type"></label>
+            </div>
+            <div id="factionDirectoryList" class="faction-directory-list"></div>
+            <div class="empty-state" id="factionDirectoryEmpty" hidden>NO ACTIVE PLAYER FACTIONS HAVE BEEN FOUNDED.</div>
+            <div class="form-state" id="factionDirectoryState"></div>
+          </article>
+
+          <div id="factionMemberControls" class="stack" hidden>
+            <div class="content-grid faction-community-grid">
+              <article class="hud-panel faction-forum-panel">
+                <div class="section-head">
+                  <div><div class="section-code">FACTION / FORUM</div><h2>Faction Forum</h2></div>
+                  <p>MEMBERS ONLY</p>
+                </div>
+                <div id="factionForumList" class="faction-forum-list"></div>
+                <div class="empty-state" id="factionForumEmpty" hidden>NO FACTION POSTS YET.</div>
+                <form id="factionForumForm" class="faction-forum-form">
+                  <textarea id="factionForumBody" maxlength="2000" placeholder="Post to your faction..."></textarea>
+                  <button class="hud-button" type="submit">POST</button>
+                </form>
+                <div class="form-state" id="factionForumState"></div>
+              </article>
+
+              <article class="hud-panel compact">
+                <div class="section-code">TREASURY / RECENT ACTIVITY</div>
+                <h2 style="margin:5px 0 16px;text-transform:uppercase">Faction Ledger</h2>
+                <div id="factionLedger" class="stack"></div>
+                <div class="empty-state" id="factionLedgerEmpty" hidden>NO FACTION TRANSACTIONS RECORDED.</div>
+              </article>
+            </div>
+
             <aside id="factionLeaderControls" class="stack" hidden>
               <article class="hud-panel compact amber">
                 <div class="hud-kicker amber">FACTION LEADER CONTROLS</div>
@@ -263,17 +305,24 @@
                   <div class="form-state" id="factionLeaderState"></div>
                 </form>
               </article>
+
               <article class="hud-panel compact">
-                <div class="section-code">FACTION / MEMBERS</div><h2 style="margin:5px 0 16px;text-transform:uppercase">Membership & Permissions</h2>
+                <div class="section-code">FACTION / JOIN REQUESTS</div>
+                <h2 style="margin:5px 0 16px;text-transform:uppercase">Pending Requests</h2>
+                <div id="factionJoinRequestList" class="stack"></div>
+                <div class="empty-state" id="factionJoinRequestEmpty" hidden>NO PENDING JOIN REQUESTS.</div>
+              </article>
+
+              <article class="hud-panel compact">
+                <div class="section-code">FACTION / MEMBERS</div><h2 style="margin:5px 0 16px;text-transform:uppercase">Membership &amp; Permissions</h2>
                 <form id="factionMemberInviteForm" class="form-shell" style="margin-bottom:18px">
-                  <label><span>Invite Player</span><select name="user_id" id="factionInvitePlayer"></select></label>
+                  <label><span>Invite Friend</span><select name="user_id" id="factionInvitePlayer"></select></label>
                   <button class="hud-button secondary" type="submit">SEND MEMBERSHIP INVITE</button>
                 </form>
                 <div id="factionMemberList" class="stack"></div>
               </article>
             </aside>
           </div>
-
         </section>
 
         <section class="panel" id="suite-characters" data-tab-panel>
@@ -447,10 +496,10 @@
 
   <script src="auth.js"></script>
   <script src="ui.js"></script>
-  <script src="player-data.js?v=ledger-order-20261010"></script>
-  <script src="player-suite.js?v=facility-levels-20261010"></script>
+  <script src="player-data.js?v=faction-foundation-20261010"></script>
+  <script src="player-suite.js?v=faction-foundation-20261010"></script>
   <script src="artifacts.js?v=artifacts-clean-20261007"></script>
-  <script src="player-systems.js"></script>
+  <script src="player-systems.js?v=faction-foundation-20261010"></script>
   <script src="game-chat.js"></script>
 </body>
 </html>
