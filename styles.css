@@ -3930,3 +3930,77 @@ dialog::backdrop{background:rgba(0,0,0,.72);backdrop-filter:blur(2px)}
   .facility-level-chips{justify-content:flex-start}
   .economy-facility-meta>.section-code{text-align:left}
 }
+
+
+/* FACTION FOUNDATION */
+.faction-create-callout{border-left:2px solid var(--cyan)}
+.faction-member-actions{margin-top:16px}
+.faction-identity-line{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:-4px 0 14px}
+.faction-directory-panel{margin-top:18px}
+.faction-directory-toolbar{margin-bottom:14px}
+.faction-directory-toolbar label{display:grid;gap:6px}
+.faction-directory-toolbar label>span{font:500 .58rem var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.faction-directory-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.faction-directory-card{display:grid;gap:12px;padding:16px;border:1px solid rgba(134,215,232,.16);background:rgba(4,12,16,.44)}
+.faction-directory-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.faction-directory-card h3{margin:4px 0 0;text-transform:uppercase;letter-spacing:.03em;font-size:1.05rem}
+.faction-directory-card p{margin:0;color:var(--muted);line-height:1.55;font-size:.8rem}
+.faction-directory-meta{display:grid;gap:4px;padding-top:10px;border-top:1px solid rgba(134,215,232,.1)}
+.faction-directory-meta span{font:500 .55rem var(--mono);letter-spacing:.08em;color:var(--dim)}
+.faction-directory-meta strong{font-size:.76rem}
+.faction-directory-actions{display:flex;justify-content:flex-end}
+.faction-directory-actions .hud-button{min-width:132px}
+.faction-community-grid{align-items:start}
+.faction-forum-panel{display:flex;flex-direction:column;min-height:420px}
+.faction-forum-list{flex:1;min-height:220px;max-height:430px;overflow-y:auto;display:grid;align-content:start;gap:8px;padding-right:4px}
+.faction-forum-post{padding:11px 12px;border:1px solid rgba(134,215,232,.12);background:rgba(4,11,15,.38)}
+.faction-forum-post-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.faction-forum-post-head strong{color:var(--cyan);font-size:.72rem}
+.faction-forum-post-head small{color:var(--dim);font-size:.56rem}
+.faction-forum-post p{margin:7px 0 0;color:var(--text);font-size:.78rem;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere}
+.faction-forum-form{display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid rgba(134,215,232,.14)}
+.faction-forum-form textarea{min-height:72px;max-height:150px;resize:vertical}
+.faction-invitation-grid{align-items:start}
+
+/* FACTION CREATION PAGE */
+.faction-create-page{display:grid;gap:18px}
+.faction-create-back{margin:0}
+.faction-create-title{margin-bottom:18px}
+.faction-create-metrics{margin:0}
+.faction-create-grid{align-items:start}
+.faction-type-description{display:grid;gap:4px;padding:10px 12px;border-left:2px solid rgba(79,212,232,.55);background:rgba(79,212,232,.045)}
+.faction-type-description strong{font-size:.72rem;text-transform:uppercase}
+.faction-type-description span{font-size:.72rem;color:var(--muted);line-height:1.5}
+.faction-type-list{display:grid;gap:7px}
+.faction-type-option{display:grid;gap:4px;width:100%;padding:10px 11px;border:1px solid rgba(134,215,232,.13);background:rgba(4,12,16,.38);color:var(--text);text-align:left;cursor:pointer}
+.faction-type-option strong{text-transform:uppercase;font-size:.7rem;letter-spacing:.04em}
+.faction-type-option span{color:var(--muted);font-size:.64rem;line-height:1.4}
+.faction-type-option:hover,.faction-type-option.active{border-color:rgba(79,212,232,.5);background:rgba(79,212,232,.07)}
+.faction-proposal-workspace{display:grid;gap:18px}
+.faction-proposal-metrics{margin:0}
+.faction-type-metric{font-size:.76rem!important;line-height:1.25}
+.faction-founder-grid{align-items:start}
+.faction-friend-list{display:grid;gap:6px;margin-top:10px}
+.faction-friend-row{width:100%;display:grid;grid-template-columns:36px minmax(0,1fr) auto;align-items:center;gap:10px;padding:9px;border:1px solid rgba(134,215,232,.12);background:rgba(4,12,16,.34);color:var(--text);text-align:left;cursor:pointer}
+.faction-friend-row:hover{background:rgba(79,212,232,.06);border-color:rgba(79,212,232,.32)}
+.faction-friend-row>span:nth-child(2){min-width:0;display:grid;gap:2px}
+.faction-friend-row strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.72rem}
+.faction-friend-row small{font:500 .54rem var(--mono);letter-spacing:.07em;color:var(--muted)}
+.faction-friend-row i{font:600 .56rem var(--mono);font-style:normal;letter-spacing:.07em;color:var(--cyan)}
+.faction-finalize-actions{justify-content:flex-end}
+
+@media(max-width:900px){
+  .faction-directory-list{grid-template-columns:1fr}
+}
+@media(max-width:720px){
+  .faction-directory-card-head{align-items:flex-start}
+  .faction-directory-actions .hud-button{width:100%}
+  .faction-forum-form{grid-template-columns:1fr}
+  .faction-forum-form .hud-button{width:100%}
+  .faction-create-metrics,.faction-proposal-metrics{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .faction-finalize-actions{align-items:stretch;flex-direction:column}
+  .faction-finalize-actions .hud-button{width:100%}
+}
+@media(max-width:420px){
+  .faction-create-metrics,.faction-proposal-metrics{grid-template-columns:1fr!important}
+}
