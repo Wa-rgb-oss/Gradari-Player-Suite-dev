@@ -203,18 +203,9 @@
 
       let controls = "";
       if (proposal.status === "open" && isCreator) {
-        const attached = new Set(members.map(m => m.user_id));
-        const options = chatFriends
-          .filter(p => p.user_id !== uid && !attached.has(p.user_id))
-          .map(p => '<option value="' + esc(p.user_id) + '">' + esc(p.display_name || "Player") + '</option>')
-          .join("");
         controls = `
-          <div class="form-shell" style="margin-top:14px">
-            <label><span>Invite Founder</span><select class="founder-invite-select" data-proposal="${esc(proposal.id)}"><option value="">Select player</option>${options}</select></label>
-            <div class="form-actions">
-              <button class="hud-button secondary founder-invite" type="button" data-proposal="${esc(proposal.id)}">INVITE FOUNDER</button>
-              <button class="hud-button founder-finalize" type="button" data-proposal="${esc(proposal.id)}">FOUND FACTION</button>
-            </div>
+          <div class="form-actions" style="margin-top:14px">
+            <a class="hud-button secondary" href="factions/create/">OPEN FOUNDING PAGE</a>
           </div>`;
       } else if (proposal.status === "open" && mine?.status === "invited") {
         controls = `
