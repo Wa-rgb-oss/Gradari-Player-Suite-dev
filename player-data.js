@@ -26,7 +26,7 @@
       GMAuth.api("asset_catalog?select=id,code,name,kind,unit,description&order=name.asc"),
       GMAuth.api("characters?user_id=eq." + uid + "&select=*&order=is_main.desc,created_at.asc"),
       GMAuth.api("actions_tab?user_id=eq." + uid + "&select=id,action_title,category,status,created_at,resolution,resolved_at&order=created_at.desc"),
-      GMAuth.api("player_transactions?user_id=eq." + uid + "&select=id,amount,currency,kind,description,balance_after,created_at&order=created_at.desc&limit=30"),
+      GMAuth.api("player_transactions?user_id=eq." + uid + "&select=id,amount,currency,kind,description,balance_after,created_at&order=created_at.desc,id.desc&limit=30"),
       GMAuth.api("world_state?select=key,label,category,value,updated_at&order=category.asc,key.asc"),
       GMAuth.api("game_news?select=id,title,body,content_sections,visibility,faction_id,published_at&order=published_at.desc&limit=12"),
       GMAuth.api("game_config?select=*&limit=1"),
