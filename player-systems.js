@@ -19,8 +19,9 @@
   }
 
   function playerLabel(userId) {
+    const friend = chatFriends.find(x => x.user_id === userId);
     const row = state?.directory?.find(x => x.user_id === userId);
-    return row?.display_name || row?.handle || "Player";
+    return friend?.display_name || row?.display_name || row?.handle || "Player";
   }
 
   async function refresh(message="",target=null) {
