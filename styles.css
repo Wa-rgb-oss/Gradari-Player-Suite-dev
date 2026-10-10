@@ -3899,3 +3899,34 @@ dialog::backdrop{background:rgba(0,0,0,.72);backdrop-filter:blur(2px)}
   }
   .facility-owner-tag{font-size:.55rem}
 }
+
+
+/* FACILITY LEVEL CONTROLS */
+.economy-facility-meta{
+  flex-direction:column;
+  align-items:flex-end;
+  min-width:250px;
+}
+.facility-level-chips{
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:flex-end;
+  gap:7px;
+}
+.economy-facility-meta>.section-code{
+  max-width:320px;
+  text-align:right;
+  line-height:1.5;
+}
+.upgrade-owned-facility[disabled]{
+  opacity:.48;
+  cursor:default;
+}
+@media(max-width:720px){
+  .economy-facility-meta{
+    min-width:0;
+    align-items:flex-start;
+  }
+  .facility-level-chips{justify-content:flex-start}
+  .economy-facility-meta>.section-code{text-align:left}
+}
