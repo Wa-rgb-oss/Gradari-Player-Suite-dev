@@ -801,7 +801,7 @@
     drawSelection();
 
     $("mapClaimedCount").textContent=territories.filter(row=>row.faction_id).length.toLocaleString();
-    $("mapFacilityCount").textContent=player?.facilities?.length.toLocaleString() || "0";
+    $("mapFacilityCount").textContent=(visibleFacilities || []).length.toLocaleString();
     $("mapZoomReadout").textContent=Math.round(camera.zoom*100)+"%";
   }
 
