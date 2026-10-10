@@ -1123,8 +1123,13 @@
   }
   if(!window.__gmMapProductionCountdown)window.__gmMapProductionCountdown=setInterval(updateMapProductionCountdowns,1000);
 
+  function facilityLevelMultiplier(level){
+    const value=Math.max(1,Math.min(3,Number(level||1)));
+    return value===1 ? 1 : value===2 ? 1.5 : 2;
+  }
+
   function mapFacilityDailyOutputs(facility){
-    const type=facilityTypeById(facility.facility_type_id),code=facilityCode(type),health=Math.max(0,Math.min(100,Number(facility.health??100)))/100,modifier=Number(facility.production_modifier??1),outputs=[];
+    const type=facilityTypeById(facility.facility_type_id),code=facilityCode(type),health=Math.max(0,Math.min(100,Number(facility.health??100)))/100,modifier=Number(facility.production_modifier??1)*facilityLevelMultiplier(facility.level),outputs=[];
     if(code.includes("AGRI")||code.includes("FARM")) outputs.push({code:"food",quantity:360*modifier*health});
     else if(code.includes("RESEARCH")) outputs.push({code:"research_points",quantity:1*modifier*health});
     else if(code.includes("MINE")||code.includes("EXTRACT")) (player.resourceDeposits||[]).filter(d=>d.location_ref===facility.location_ref).forEach(d=>outputs.push({code:String(d.resource_code),quantity:360*Number(d.richness??1)*modifier*health}));
@@ -1134,12 +1139,12 @@
   }
   function mapPlayerStorageSummary(){
     const uid=session?.user?.id;
-    const storageCount=(player?.facilities||[]).filter(row=>
+    const storageRows=(player?.facilities||[]).filter(row=>
       row.owner_user_id===uid &&
       String(row.status||"active").toLowerCase()==="active" &&
       facilityCode(facilityTypeById(row.facility_type_id)).includes("STORAGE")
-    ).length;
-    const capacity=storageCount*5000;
+    );
+    const capacity=storageRows.reduce((sum,row)=>sum+(5000*facilityLevelMultiplier(row.level)),0);
     const used=(player?.playerResources||[]).reduce((sum,row)=>sum+Math.max(0,Number(row.quantity||0)),0);
     return {capacity,used,available:Math.max(0,capacity-used)};
   }
@@ -1160,7 +1165,7 @@
         const storage=mapPlayerStorageSummary();
         return '<div class="section-code">STORAGE // '+esc(fmt(storage.available))+' AVAILABLE / '+esc(fmt(storage.capacity))+' TOTAL</div>';
       }
-      return '<div class="section-code">STORAGE // 5,000 UNIT CAPACITY</div>';
+      return '<div class="section-code">STORAGE // '+esc(fmt(5000*facilityLevelMultiplier(facility.level)))+' UNIT CAPACITY</div>';
     }
 
     const names=new Map((player.resourceCatalog||[]).map(x=>[String(x.code),x.name]));
@@ -1251,8 +1256,9 @@
       const ownerDetail=row.faction_name && scope!=="own_faction" && scope!=="other_faction"
         ? '<div class="section-code">FACTION // '+esc(String(row.faction_name).toUpperCase())+'</div>'
         : '';
+      const baseUpkeep=Number(type?.upkeep_aureum_per_day ?? type?.upkeep_aureum_per_cycle ?? 0);
       const right=canSeeOperations
-        ? esc(fmt(type?.upkeep_aureum_per_day ?? Number(type?.upkeep_aureum_per_cycle||0)))+' A / DAY'
+        ? esc(fmt(baseUpkeep*facilityLevelMultiplier(row.level)))+' A / DAY'
         : esc(String(row.status||"ACTIVE").toUpperCase());
       return '<article class="notice map-list-row map-facility-card '+facilityOwnershipClass(row)+'"><div><strong>'+esc(row.name || type?.name || "Holding")+'</strong><div class="facility-owner-tag">'+esc(facilityOwnershipLabel(row))+'</div><div class="section-code">'+esc(type?.name || "FACILITY")+' // LEVEL '+esc(row.level||1)+'</div>'+ownerDetail+operations+'</div><span>'+right+'</span></article>';
     }).join("");
@@ -1283,7 +1289,13 @@
         ? '<div class="section-code">COMPLETES // <span data-map-countdown="'+esc(order.completes_at)+'">--:--:--</span></div>'
         : '';
       const output=recipe
-        ? '<div class="section-code">OUTPUT // +'+esc(fmt(Number(recipe.output_quantity||1)*Number(order?.quantity||1)))+' '+esc(String(resourceName||"RESOURCE").toUpperCase())+'</div>'
+        ? '<div class="section-code">OUTPUT // +'+esc(fmt(
+            Number(recipe.output_quantity||1)
+            * Number(order?.quantity||1)
+            * Number(factory.production_modifier??1)
+            * (Math.max(0,Math.min(100,Number(factory.health??100)))/100)
+            * facilityLevelMultiplier(factory.level)
+          ))+' '+esc(String(resourceName||"RESOURCE").toUpperCase())+'</div>'
         : '';
       const blocked=status==="storage_blocked"
         ? '<div class="status-chip amber" style="margin-top:8px">FREE RESOURCE STORAGE TO RESUME OUTPUT'+(Number(order?.output_remaining||0)>0?' // '+esc(fmt(order.output_remaining))+' REMAINING':'')+'</div>'
