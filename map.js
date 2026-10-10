@@ -622,15 +622,15 @@
 
         ctx.beginPath();
         ctx.arc(p.x,p.y,size,0,Math.PI*2);
-        ctx.fillStyle="rgba(3,12,17,.94)";
+        ctx.fillStyle="rgba(3,12,17,.60)";
         ctx.fill();
-        ctx.strokeStyle=style.stroke;
+        ctx.strokeStyle=colorWithAlpha(style.stroke,.60);
         ctx.lineWidth=Math.max(1,1.6*camera.zoom);
         ctx.setLineDash(style.dash.map(value=>Math.max(1,value*camera.zoom)));
         ctx.stroke();
         ctx.setLineDash([]);
 
-        ctx.fillStyle=style.symbol;
+        ctx.fillStyle=colorWithAlpha(style.symbol,.60);
         ctx.font=`500 ${Math.max(7,10*camera.zoom)}px "Share Tech Mono", Consolas, monospace`;
         ctx.fillText(facilitySymbol(type),p.x,p.y+.5);
       });
@@ -1099,9 +1099,24 @@
   }
   function updateMapProductionCountdowns(){
     document.querySelectorAll("[data-map-countdown]").forEach(el=>{
-      const ms=new Date(el.dataset.mapCountdown).getTime()-Date.now();
+      let target=new Date(el.dataset.mapCountdown).getTime();
+      const intervalMs=Number(el.dataset.mapIntervalMs||0);
+      let ms=target-Date.now();
+
       if(!Number.isFinite(ms)){el.textContent="--:--:--";return}
-      if(ms<=0){el.textContent="READY";scheduleProductionRefresh();return}
+
+      if(ms<=0 && intervalMs>0){
+        const rolls=Math.floor((-ms)/intervalMs)+1;
+        target+=rolls*intervalMs;
+        ms=target-Date.now();
+        el.dataset.mapCountdown=new Date(target).toISOString();
+        scheduleProductionRefresh();
+      }else if(ms<=0){
+        el.textContent="PROCESSING";
+        scheduleProductionRefresh();
+        return;
+      }
+
       const sec=Math.ceil(ms/1000),h=Math.floor(sec/3600),m=Math.floor((sec%3600)/60),s=sec%60;
       el.textContent=String(h).padStart(2,"0")+":"+String(m).padStart(2,"0")+":"+String(s).padStart(2,"0");
     });
@@ -1117,7 +1132,43 @@
     else if(code.includes("FACTORY")){const order=(player.factoryOrders||[]).find(x=>x.facility_id===facility.id&&["producing","storage_blocked"].includes(String(x.status||"").toLowerCase()));const recipe=(player.factoryRecipes||[]).find(x=>x.code===order?.recipe_code);if(recipe){const hours=Math.max(1,Number(recipe.production_world_hours||1));outputs.push({code:String(recipe.output_resource_code),quantity:(36/hours)*Number(recipe.output_quantity||1)*modifier*health});}}
     return outputs;
   }
-  function mapFacilityProductionRateHtml(facility){const names=new Map((player.resourceCatalog||[]).map(x=>[String(x.code),x.name])),outputs=mapFacilityDailyOutputs(facility);return outputs.length?'<div class="section-code">PRODUCTION // '+outputs.map(o=>'+'+fmt(o.quantity)+' '+esc(String(o.code==="research_points"?"RESEARCH POINTS":(names.get(o.code)||o.code)).toUpperCase())+' / DAY').join(' // ')+'</div>':'<div class="section-code">PRODUCTION // NO ACTIVE DAILY OUTPUT</div>';}
+  function mapPlayerStorageSummary(){
+    const uid=session?.user?.id;
+    const storageCount=(player?.facilities||[]).filter(row=>
+      row.owner_user_id===uid &&
+      String(row.status||"active").toLowerCase()==="active" &&
+      facilityCode(facilityTypeById(row.facility_type_id)).includes("STORAGE")
+    ).length;
+    const capacity=storageCount*5000;
+    const used=(player?.playerResources||[]).reduce((sum,row)=>sum+Math.max(0,Number(row.quantity||0)),0);
+    return {capacity,used,available:Math.max(0,capacity-used)};
+  }
+
+  function passiveFacilityIntervalMs(type){
+    const code=facilityCode(type);
+    if(code.includes("RESEARCH")) return 7*60*60*1000+12*60*1000;
+    if(code.includes("MINE")||code.includes("EXTRACT")||code.includes("AGRI")||code.includes("FARM")||code.includes("REFIN")) return 12*60*1000;
+    return 0;
+  }
+
+  function mapFacilityProductionRateHtml(facility){
+    const type=facilityTypeById(facility.facility_type_id);
+    const code=facilityCode(type);
+
+    if(code.includes("STORAGE")){
+      if(facility.owner_user_id===session?.user?.id){
+        const storage=mapPlayerStorageSummary();
+        return '<div class="section-code">STORAGE // '+esc(fmt(storage.available))+' AVAILABLE / '+esc(fmt(storage.capacity))+' TOTAL</div>';
+      }
+      return '<div class="section-code">STORAGE // 5,000 UNIT CAPACITY</div>';
+    }
+
+    const names=new Map((player.resourceCatalog||[]).map(x=>[String(x.code),x.name]));
+    const outputs=mapFacilityDailyOutputs(facility);
+    return outputs.length
+      ? '<div class="section-code">PRODUCTION // '+outputs.map(o=>'+'+fmt(o.quantity)+' '+esc(String(o.code==="research_points"?"RESEARCH POINTS":(names.get(o.code)||o.code)).toUpperCase())+' / DAY').join(' // ')+'</div>'
+      : '<div class="section-code">PRODUCTION // NO ACTIVE DAILY OUTPUT</div>';
+  }
 
   function renderSelection() {
     if (!selectedHex) {
@@ -1190,9 +1241,10 @@
       const clock=canSeeOperations ? (player.facilityProductionClocks||[]).find(x=>x.facility_id===row.id) : null;
       const order=canSeeOperations ? (player.factoryOrders||[]).find(x=>x.facility_id===row.id&&["producing","storage_blocked"].includes(String(x.status||"").toLowerCase())) : null;
       const nextAt=order?.status==="producing"?order?.completes_at:clock?.next_production_at;
+      const intervalMs=order ? 0 : passiveFacilityIntervalMs(type);
       const timer=!canSeeOperations ? "" : order?.status==="storage_blocked"
         ? '<div class="section-code">STORAGE FULL // OUTPUT HALTED</div>'
-        : nextAt?'<div class="section-code">'+(order?'PRODUCTION':'NEXT OUTPUT')+' // <span data-map-countdown="'+esc(nextAt)+'">--:--:--</span></div>':'';
+        : nextAt?'<div class="section-code">'+(order?'PRODUCTION':'NEXT OUTPUT')+' // <span data-map-countdown="'+esc(nextAt)+'" data-map-interval-ms="'+esc(intervalMs)+'">--:--:--</span></div>':'';
       const operations=canSeeOperations
         ? mapFacilityProductionRateHtml(fullFacility)+timer
         : '<div class="section-code">OPERATIONS // PRIVATE</div>';
