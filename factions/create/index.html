@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <base href="../../">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#050a0e">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Create a Faction | Gradari Mireris</title>
+  <link rel="stylesheet" href="styles.css?v=faction-foundation-20261010">
+  <link rel="icon" type="image/png" sizes="192x192" href="/favicon.png">
+  <link rel="icon" type="image/x-icon" sizes="16x16 32x32 48x48 64x64" href="/favicon.ico">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+</head>
+<body class="auth-pending">
+  <div class="app-shell protected-page">
+    <aside class="sidebar">
+      <div class="brand-block">
+        <div class="brand-code"><span>PLAYER NETWORK</span>GRADARI MIRERIS</div>
+        <div class="brand-sub">PERSISTENT STRATEGY / ROLEPLAY / 4X PLAYER INTERFACE</div>
+      </div>
+      <nav class="primary-nav" aria-label="Primary">
+        <a href="home/"><span class="nav-index">01</span><span class="nav-label">HOME</span><span class="nav-arrow">›</span></a>
+        <a href="map/"><span class="nav-index">02</span><span class="nav-label">MAP</span><span class="nav-arrow">›</span></a>
+        <a href="politics/"><span class="nav-index">03</span><span class="nav-label">POLITICS</span><span class="nav-arrow">›</span></a>
+        <a href="exchange-markets/"><span class="nav-index">04</span><span class="nav-label">EXCHANGE MARKETS</span><span class="nav-arrow">›</span></a>
+        <a href="research/"><span class="nav-index">05</span><span class="nav-label">RESEARCH</span><span class="nav-arrow">›</span></a>
+        <a class="active" href="player-suite/#faction"><span class="nav-index">06</span><span class="nav-label">PLAYER SUITE</span><span class="nav-arrow">›</span></a>
+        <a href="news/"><span class="nav-index">07</span><span class="nav-label">NEWS &amp; ABOUT</span><span class="nav-arrow">›</span></a>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="user-readout"><strong>SIGNED IN</strong><span data-user-email>Loading identity...</span></div>
+        <button class="signout-btn" type="button" data-signout>LOG OUT</button>
+      </div>
+    </aside>
+
+    <div class="main-frame">
+      <header class="topbar">
+        <div class="page-id"><span class="page-bracket"></span><div><strong>FACTION / FOUNDING</strong><span>PLAYER ORGANIZATION CREATION</span></div></div>
+        <div class="top-telemetry"><span><i class="status-dot"></i>PLAYER LINK ACTIVE</span><span data-system-time>--:--:--</span></div>
+      </header>
+
+      <main class="page-content faction-create-page">
+        <div class="form-actions faction-create-back">
+          <a class="hud-button secondary" href="player-suite/#faction">‹ BACK TO FACTIONS</a>
+        </div>
+
+        <article class="hud-panel">
+          <div class="hud-kicker">FACTION / FOUNDING</div>
+          <h1 class="hero-title faction-create-title"><small>ORGANIZE WITH OTHER PLAYERS</small>CREATE A<br>FACTION</h1>
+          <p class="hero-copy">A player faction is an organization inside the Gradari Mireris Empire. Founding requires three players in total. You create the proposal, invite two or more friends, and each accepted founder commits Aureum toward the founding cost.</p>
+        </article>
+
+        <section class="metric-grid faction-create-metrics">
+          <article class="metric-card"><div class="metric-label">Required Founders</div><div class="metric-value" id="createFounderRequirement">--</div><div class="metric-detail">TOTAL PLAYERS</div></article>
+          <article class="metric-card"><div class="metric-label">Creation Cost</div><div class="metric-value" id="createFactionCost">--</div><div class="metric-detail">AUREUM TOTAL</div></article>
+          <article class="metric-card"><div class="metric-label">Minimum Pledge</div><div class="metric-value" id="createFounderMinimum">--</div><div class="metric-detail">AUREUM PER FOUNDER</div></article>
+          <article class="metric-card"><div class="metric-label">Your Balance</div><div class="metric-value" id="createPlayerBalance">--</div><div class="metric-detail">AUREUM AVAILABLE</div></article>
+        </section>
+
+        <article class="hud-panel" id="factionCreateMemberBlock" hidden>
+          <div class="section-code">FACTION / UNAVAILABLE</div>
+          <h2>You are already in a faction</h2>
+          <p class="hero-copy" id="factionCreateMemberCopy">Leave your current faction before creating another one.</p>
+          <a class="hud-button" href="player-suite/#faction">OPEN FACTION TAB</a>
+        </article>
+
+        <section class="content-grid faction-create-grid" id="factionCreateFormBlock">
+          <article class="hud-panel">
+            <div class="section-head">
+              <div><div class="section-code">FOUNDING / IDENTITY</div><h2>Faction Proposal</h2></div>
+              <p>STEP 1</p>
+            </div>
+            <form id="factionCreateForm" class="form-shell">
+              <div class="form-grid">
+                <label><span>Faction Name *</span><input name="name" required maxlength="180" placeholder="Faction name"></label>
+                <label><span>Code / Abbreviation</span><input name="code" maxlength="20" placeholder="Optional"></label>
+              </div>
+              <label><span>Faction Type *</span>
+                <select name="faction_type" id="factionCreateType" required>
+                  <option value="political_bloc">Political Bloc</option>
+                  <option value="noble_house">Noble House</option>
+                  <option value="corporate_alliance">Corporate Alliance</option>
+                  <option value="colonial_movement">Colonial Movement</option>
+                  <option value="military_institution">Military Institution</option>
+                  <option value="regional_government">Regional Government</option>
+                  <option value="ideological_organization">Ideological Organization</option>
+                  <option value="commercial_alliance">Commercial Alliance</option>
+                </select>
+              </label>
+              <div class="faction-type-description" id="factionTypeDescription"></div>
+              <label><span>Public Description</span><textarea name="description" maxlength="2500" placeholder="What does this faction represent?"></textarea></label>
+              <label><span>Your Founder Pledge *</span><input name="contribution" type="number" min="0" step="0.01" required></label>
+              <button class="hud-button" type="submit">CREATE FOUNDING PROPOSAL</button>
+              <div class="form-state" id="factionCreateState"></div>
+            </form>
+          </article>
+
+          <aside class="hud-panel compact">
+            <div class="section-code">FACTION / TYPES</div>
+            <h2 style="margin:5px 0 16px;text-transform:uppercase">Organization Types</h2>
+            <div class="faction-type-list" id="factionTypeList"></div>
+          </aside>
+        </section>
+
+        <section class="hud-panel faction-proposal-workspace" id="factionProposalWorkspace" hidden>
+          <div class="section-head">
+            <div><div class="section-code">FOUNDING / ACTIVE PROPOSAL</div><h2 id="activeProposalName">Faction Proposal</h2></div>
+            <span class="status-chip amber">AWAITING FOUNDERS</span>
+          </div>
+          <p class="hero-copy" id="activeProposalDescription"></p>
+          <div class="metric-grid faction-proposal-metrics">
+            <article class="metric-card"><div class="metric-label">Accepted Founders</div><div class="metric-value" id="activeFounderCount">0 / 3</div><div class="metric-detail">PLAYERS</div></article>
+            <article class="metric-card"><div class="metric-label">Founding Pool</div><div class="metric-value" id="activeFoundingPool">0</div><div class="metric-detail">AUREUM PLEDGED</div></article>
+            <article class="metric-card"><div class="metric-label">Type</div><div class="metric-value faction-type-metric" id="activeProposalType">--</div><div class="metric-detail">ORGANIZATION</div></article>
+          </div>
+
+          <div class="content-grid faction-founder-grid">
+            <article class="hud-panel compact">
+              <div class="section-code">FOUNDING / PLAYERS</div>
+              <h2 style="margin:5px 0 16px;text-transform:uppercase">Founders</h2>
+              <div id="activeFounderList" class="stack"></div>
+            </article>
+
+            <article class="hud-panel compact">
+              <div class="section-code">FOUNDING / INVITE</div>
+              <h2 style="margin:5px 0 16px;text-transform:uppercase">Invite Friends</h2>
+              <label><span>Search Friends</span><input id="founderFriendSearch" placeholder="Search friend name"></label>
+              <div id="founderFriendList" class="faction-friend-list"></div>
+              <div class="empty-state" id="founderFriendEmpty" hidden>NO AVAILABLE FRIENDS TO INVITE.</div>
+            </article>
+          </div>
+
+          <div class="form-actions faction-finalize-actions">
+            <button class="hud-button" id="finalizeFactionButton" type="button">FOUND FACTION</button>
+            <a class="hud-button secondary" href="player-suite/#faction">RETURN TO FACTION TAB</a>
+          </div>
+          <div class="form-state" id="factionFinalizeState"></div>
+        </section>
+
+        <section class="hud-panel" id="factionFounderInvitations">
+          <div class="section-head">
+            <div><div class="section-code">FOUNDING / INVITATIONS</div><h2>Invitations to Found</h2></div>
+            <p>FROM FRIENDS</p>
+          </div>
+          <div id="founderInvitationList" class="stack"></div>
+          <div class="empty-state" id="founderInvitationEmpty" hidden>NO PENDING FOUNDING INVITATIONS.</div>
+          <div class="form-state" id="founderInvitationState"></div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <script src="auth.js"></script>
+  <script src="ui.js"></script>
+  <script src="faction-create.js?v=faction-foundation-20261010"></script>
+</body>
+</html>
