@@ -32,7 +32,7 @@
   <div class="landing-shell">
     <header class="landing-header">
       <a class="brand" href="/" aria-label="Gradari Mireris home"><img src="/assets/brand/gm-mark.png" width="56" height="56" alt=""><span>GRADARI<br>MIRERIS</span></a>
-      <nav aria-label="Main navigation"><a class="nav-login" href="/login/">Log In</a><a class="button small" href="/login/#signup">Create Account</a></nav>
+      <nav aria-label="Main navigation"><a class="nav-login" href="/about/">About</a><a class="nav-login" href="/login/">Log In</a><a class="button small" href="/login/#signup">Create Account</a></nav>
     </header>
     <main id="main">
       <section class="hero" aria-labelledby="hero-title">
@@ -44,7 +44,20 @@
           <div class="hero-actions"><a class="button" href="/login/#signup">Create Account <span aria-hidden="true">↗</span></a><a class="button secondary" href="/login/">Log In</a></div>
           <div class="alpha-note"><span class="status-dot" aria-hidden="true"></span>ALPHA V0.02 <span class="alpha-detail">Development in progress</span></div>
         </div>
-        <div class="hero-atmosphere" aria-hidden="true"></div>
+        <aside class="hero-atmosphere" aria-label="Latest Gradari Mireris updates">
+          <div class="public-news-shell">
+            <div class="public-news-head">
+              <div>
+                <div class="eyebrow">LATEST UPDATES / NEWS</div>
+                <h2>Imperial Bulletins</h2>
+              </div>
+              <span>PUBLIC FEED</span>
+            </div>
+            <div id="publicNewsFeed" class="public-news-feed"></div>
+            <div id="publicNewsState" class="public-news-state" aria-live="polite">LOADING PUBLIC BULLETINS...</div>
+            <a class="public-news-about" href="/about/">Read About Gradari Mireris <span aria-hidden="true">↗</span></a>
+          </div>
+        </aside>
       </section>
       <section class="world-section" aria-labelledby="world-title">
         <div class="section-heading"><div><div class="eyebrow">THE THREE SCALES OF PLAY</div><h2 id="world-title">A place in the Empire</h2></div><p>Personal choices. Faction ambitions. Imperial consequences.</p></div>
@@ -59,7 +72,8 @@
         <aside><div class="eyebrow">DURING ALPHA</div><h3>A world in development</h3><p>Features, balance, and systems are still developing. Some areas may be incomplete, and player feedback helps guide the next stage.</p><p>The world clock carries production and political timers forward between visits.</p></aside>
       </section>
     </main>
-    <footer class="landing-footer"><span>GRADARI MIRERIS <span class="footer-version">ALPHA V0.02</span></span><nav aria-label="Footer navigation"><a href="/login/#terms-of-use">Terms of Use</a><a href="/login/#privacy-policy">Privacy Policy</a><a href="/login/">Player Access</a></nav></footer>
+    <footer class="landing-footer"><span>GRADARI MIRERIS <span class="footer-version">ALPHA V0.02</span></span><nav aria-label="Footer navigation"><a href="/about/">About</a><a href="/login/#terms-of-use">Terms of Use</a><a href="/login/#privacy-policy">Privacy Policy</a><a href="/login/">Player Access</a></nav></footer>
   </div>
+  <script src="/landing.js?v=public-news-20261010"></script>
 </body>
 </html>
