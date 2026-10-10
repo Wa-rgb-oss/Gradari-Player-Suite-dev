@@ -1,6 +1,10 @@
 (() => {
   let session = null;
   let state = null;
+  let factionDirectory = [];
+  let chatFriends = [];
+  let factionForumPosts = [];
+  let factionJoinRequests = [];
 
   const $ = id => document.getElementById(id);
   const esc = value => GMUI.esc(value);
@@ -27,11 +31,141 @@
   function renderConfig() {
     const cfg = state.config;
     if (!cfg) return;
-    $("founderRequirement").textContent = cfg.faction_min_founders;
-    $("factionCreationCost").textContent = fmt(cfg.faction_creation_cost);
-    $("founderMinimum").textContent = fmt(cfg.faction_min_contribution);
+    if ($("founderRequirement")) $("founderRequirement").textContent = cfg.faction_min_founders;
+    if ($("factionCreationCost")) $("factionCreationCost").textContent = fmt(cfg.faction_creation_cost);
+    if ($("founderMinimum")) $("founderMinimum").textContent = fmt(cfg.faction_min_contribution);
     const contribution = $("factionProposalForm")?.elements?.contribution;
     if (contribution) contribution.min = String(cfg.faction_min_contribution);
+  }
+
+  function factionTypeLabel(value) {
+    const labels = {
+      political_bloc:"Political Bloc",
+      noble_house:"Noble House",
+      corporate_alliance:"Corporate Alliance",
+      colonial_movement:"Colonial Movement",
+      military_institution:"Military Institution",
+      regional_government:"Regional Government",
+      ideological_organization:"Ideological Organization",
+      commercial_alliance:"Commercial Alliance"
+    };
+    return labels[String(value || "").toLowerCase()] || "Player Faction";
+  }
+
+  async function loadFactionCommunityData() {
+    const membership=state?.primaryMembership;
+    const faction=membership?.faction;
+    const isLeader=Boolean(faction && faction.leader_user_id===session.user.id && faction.leadership_status!=="vacant");
+    const calls=[
+      rpc("get_faction_directory"),
+      rpc("get_my_chat_friends"),
+      membership?.faction_id ? rpc("get_my_faction_forum_posts",{p_limit:60}) : Promise.resolve([])
+    ];
+    if(isLeader) calls.push(rpc("get_faction_join_requests"));
+    const [directory,friends,forum,requests=[]]=await Promise.all(calls);
+    factionDirectory=directory || [];
+    chatFriends=friends || [];
+    factionForumPosts=forum || [];
+    factionJoinRequests=requests || [];
+  }
+
+  function renderFactionDirectory() {
+    const root=$("factionDirectoryList");
+    const empty=$("factionDirectoryEmpty");
+    if(!root || !empty) return;
+    const query=String($("factionDirectorySearch")?.value || "").trim().toLowerCase();
+    const membership=state?.primaryMembership;
+    const rows=factionDirectory.filter(row=>{
+      if(!query) return true;
+      return [row.name,row.code,row.leader_name,factionTypeLabel(row.faction_type),row.description]
+        .some(value=>String(value||"").toLowerCase().includes(query));
+    });
+
+    empty.hidden=rows.length>0;
+    root.innerHTML=rows.map(row=>{
+      const current=membership?.faction_id===row.faction_id;
+      const alreadyMember=Boolean(membership?.faction_id);
+      const pending=row.my_request_status==="pending";
+      let action="";
+      if(current){
+        action='<button class="hud-button secondary" type="button" disabled>CURRENT FACTION</button>';
+      }else if(alreadyMember){
+        action='<button class="hud-button secondary" type="button" disabled>IN A FACTION</button>';
+      }else if(pending){
+        action='<button class="hud-button secondary" type="button" disabled>REQUEST PENDING</button>';
+      }else if(row.join_requests_enabled){
+        action='<button class="hud-button faction-request-join" type="button" data-faction="'+esc(row.faction_id)+'">REQUEST TO JOIN</button>';
+      }else{
+        action='<button class="hud-button secondary" type="button" disabled>REQUESTS CLOSED</button>';
+      }
+      return '<article class="faction-directory-card">'+
+        '<div class="faction-directory-card-head"><div>'+
+          '<div class="section-code">'+esc(String(row.code||"NO CODE").toUpperCase())+' // '+esc(factionTypeLabel(row.faction_type).toUpperCase())+'</div>'+
+          '<h3>'+esc(row.name||"Unnamed Faction")+'</h3>'+
+        '</div><span class="status-chip">'+esc(fmt(row.member_count))+' MEMBER'+(Number(row.member_count)===1?"":"S")+'</span></div>'+
+        '<p>'+esc(row.description||"No public faction description has been published.")+'</p>'+
+        '<div class="faction-directory-meta"><span>LEADER</span><strong>'+esc(row.leader_name||"Vacant")+'</strong></div>'+
+        '<div class="faction-directory-actions">'+action+'</div>'+
+      '</article>';
+    }).join("");
+
+    root.querySelectorAll(".faction-request-join").forEach(button=>{
+      button.addEventListener("click",async()=>{
+        button.disabled=true;
+        try{
+          await rpc("request_join_faction",{p_faction_id:button.dataset.faction});
+          setState($("factionDirectoryState"),"JOIN REQUEST SENT","success");
+          await refresh();
+        }catch(error){
+          button.disabled=false;
+          setState($("factionDirectoryState"),"JOIN REQUEST FAILED // "+error.message,"error");
+        }
+      });
+    });
+  }
+
+  function renderFactionForum() {
+    const root=$("factionForumList");
+    const empty=$("factionForumEmpty");
+    if(!root || !empty) return;
+    const rows=(factionForumPosts||[]).slice().reverse();
+    empty.hidden=rows.length>0;
+    root.innerHTML=rows.map(row=>{
+      const date=new Date(row.created_at);
+      const stamp=Number.isNaN(date.getTime())?"":date.toLocaleDateString(undefined,{month:"short",day:"numeric"})+" // "+date.toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"});
+      return '<article class="faction-forum-post">'+
+        '<div class="faction-forum-post-head"><strong>'+esc(row.display_name||"Player")+'</strong><small>'+esc(stamp)+'</small></div>'+
+        '<p>'+esc(row.body||"")+'</p>'+
+      '</article>';
+    }).join("");
+    root.scrollTop=root.scrollHeight;
+  }
+
+  function renderFactionJoinRequests() {
+    const root=$("factionJoinRequestList");
+    const empty=$("factionJoinRequestEmpty");
+    if(!root || !empty) return;
+    empty.hidden=factionJoinRequests.length>0;
+    root.innerHTML=factionJoinRequests.map(row=>
+      '<article class="notice"><div class="split-actions"><div><strong style="color:var(--text)">'+esc(row.display_name||"Player")+'</strong>'+
+      '<div class="section-code">REQUESTED '+esc(new Date(row.created_at).toLocaleDateString())+'</div></div>'+
+      '<div class="form-actions"><button class="hud-button faction-join-response" type="button" data-id="'+esc(row.request_id)+'" data-accept="true">ACCEPT</button>'+
+      '<button class="hud-button danger faction-join-response" type="button" data-id="'+esc(row.request_id)+'" data-accept="false">DECLINE</button></div></div></article>'
+    ).join("");
+
+    root.querySelectorAll(".faction-join-response").forEach(button=>{
+      button.addEventListener("click",async()=>{
+        try{
+          await rpc("respond_faction_join_request",{
+            p_request_id:button.dataset.id,
+            p_accept:button.dataset.accept==="true"
+          });
+          await refresh(button.dataset.accept==="true"?"PLAYER JOINED FACTION":"JOIN REQUEST DECLINED",$("factionLeaderState"));
+        }catch(error){
+          setState($("factionLeaderState"),"JOIN REQUEST UPDATE FAILED // "+error.message,"error");
+        }
+      });
+    });
   }
 
   function proposalMemberRows(proposalId) {
@@ -69,9 +203,9 @@
       let controls = "";
       if (proposal.status === "open" && isCreator) {
         const attached = new Set(members.map(m => m.user_id));
-        const options = state.directory
+        const options = chatFriends
           .filter(p => p.user_id !== uid && !attached.has(p.user_id))
-          .map(p => '<option value="' + esc(p.user_id) + '">' + esc(p.display_name || p.handle || "Player") + '</option>')
+          .map(p => '<option value="' + esc(p.user_id) + '">' + esc(p.display_name || "Player") + '</option>')
           .join("");
         controls = `
           <div class="form-shell" style="margin-top:14px">
@@ -269,13 +403,17 @@
   async function renderFactionSystems() {
     const membership = state.primaryMembership;
     const noFaction = $("factionNoMembership");
+    const memberSummary = $("factionMemberSummary");
     const memberControls = $("factionMemberControls");
     const leaderControls = $("factionLeaderControls");
 
+    await loadFactionCommunityData();
     renderMembershipInvitations();
+    renderFactionDirectory();
 
     if (!membership?.faction) {
       noFaction.hidden = false;
+      memberSummary.hidden = true;
       memberControls.hidden = true;
       leaderControls.hidden = true;
       renderConfig();
@@ -284,10 +422,16 @@
     }
 
     noFaction.hidden = true;
+    memberSummary.hidden = false;
     memberControls.hidden = false;
     renderFactionLedger();
+    renderFactionForum();
 
     const faction = membership.faction;
+    const directoryRow=factionDirectory.find(row=>row.faction_id===faction.id);
+    if($("factionType")) $("factionType").textContent=factionTypeLabel(faction.faction_type).toUpperCase();
+    if($("factionMemberCount")) $("factionMemberCount").textContent=fmt(directoryRow?.member_count||0)+" MEMBERS";
+
     const isLeader = faction.leader_user_id === session.user.id && faction.leadership_status !== "vacant";
     leaderControls.hidden = !isLeader;
 
@@ -298,10 +442,11 @@
       const select = $("factionInvitePlayer");
       const currentMembers = await GMAuth.api("faction_memberships?faction_id=eq." + encodeURIComponent(faction.id) + "&select=user_id");
       const memberIds = new Set(currentMembers.map(x => x.user_id));
-      select.innerHTML = '<option value="">Select player</option>' + state.directory
+      select.innerHTML = '<option value="">Select friend</option>' + chatFriends
         .filter(p => !memberIds.has(p.user_id))
-        .map(p => '<option value="' + esc(p.user_id) + '">' + esc(p.display_name || p.handle || "Player") + '</option>')
+        .map(p => '<option value="' + esc(p.user_id) + '">' + esc(p.display_name || "Player") + '</option>')
         .join("");
+      renderFactionJoinRequests();
       await renderLeaderMembers(faction);
     }
   }
@@ -622,21 +767,34 @@
     }
   });
 
-  $("factionProposalForm")?.addEventListener("submit",async event => {
+  $("factionDirectorySearch")?.addEventListener("input",renderFactionDirectory);
+
+  $("factionForumForm")?.addEventListener("submit",async event=>{
     event.preventDefault();
-    const form=event.currentTarget;
-    const d=Object.fromEntries(new FormData(form));
-    try {
-      await rpc("create_faction_proposal",{
-        p_name:d.name.trim(),
-        p_code:d.code.trim() || null,
-        p_description:d.description.trim() || null,
-        p_contribution:Number(d.contribution || 0)
-      });
-      form.reset();
-      await refresh("FOUNDING PROPOSAL CREATED",$("factionProposalState"));
-    } catch (error) {
-      setState($("factionProposalState"),"PROPOSAL FAILED // " + error.message,"error");
+    const body=$("factionForumBody")?.value.trim();
+    if(!body) return;
+    try{
+      await rpc("post_faction_forum_message",{p_body:body});
+      $("factionForumBody").value="";
+      await refresh("POST ADDED TO FACTION FORUM",$("factionForumState"));
+    }catch(error){
+      setState($("factionForumState"),"FORUM POST FAILED // "+error.message,"error");
+    }
+  });
+
+  $("leaveFactionButton")?.addEventListener("click",async()=>{
+    const faction=state?.primaryMembership?.faction;
+    if(!faction) return;
+    const confirmed=await GMUI.confirmAction(
+      "Leave "+faction.name+"? Your Empire affiliation is not affected.",
+      {code:"FACTION / MEMBERSHIP",title:"Leave Faction",confirmText:"LEAVE FACTION"}
+    );
+    if(!confirmed) return;
+    try{
+      await rpc("leave_faction");
+      await refresh("FACTION MEMBERSHIP ENDED",$("leaveFactionState"));
+    }catch(error){
+      setState($("leaveFactionState"),"LEAVE FACTION FAILED // "+error.message,"error");
     }
   });
 
