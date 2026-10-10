@@ -3827,3 +3827,75 @@ dialog::backdrop{background:rgba(0,0,0,.72);backdrop-filter:blur(2px)}
     max-height:min(560px,76svh);
   }
 }
+
+
+/* MAP FACILITY OWNERSHIP */
+.map-facility-card{
+  position:relative;
+  gap:12px;
+  align-items:flex-start;
+}
+.map-facility-card>div{min-width:0}
+.map-facility-card>span{
+  flex:0 0 auto;
+  color:var(--muted);
+  font:500 .62rem/1.4 var(--mono);
+  letter-spacing:.06em;
+  text-align:right;
+}
+.facility-owner-tag{
+  display:inline-flex;
+  align-items:center;
+  min-height:22px;
+  margin:7px 0 6px;
+  padding:4px 8px;
+  border:1px solid rgba(134,215,232,.24);
+  background:rgba(79,212,232,.06);
+  color:var(--cyan);
+  font:600 .58rem/1.2 var(--mono);
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}
+.map-facility-card.ownership-self{
+  border-left-color:var(--cyan);
+  background:rgba(79,212,232,.055);
+}
+.map-facility-card.ownership-self .facility-owner-tag{
+  border-color:rgba(134,215,232,.4);
+  background:rgba(79,212,232,.11);
+  color:var(--cyan);
+}
+.map-facility-card.ownership-faction{
+  border-left-color:var(--amber);
+  background:rgba(216,163,93,.055);
+}
+.map-facility-card.ownership-faction .facility-owner-tag{
+  border-color:rgba(216,163,93,.38);
+  background:rgba(216,163,93,.1);
+  color:var(--amber);
+}
+.map-facility-card.ownership-same-faction{
+  border-left-color:#7caeb8;
+  background:rgba(124,174,184,.035);
+}
+.map-facility-card.ownership-same-faction .facility-owner-tag{
+  border-color:rgba(124,174,184,.28);
+  background:rgba(124,174,184,.07);
+  color:#a9c8cf;
+}
+.map-facility-card.ownership-other{
+  border-left-color:#667a82;
+  background:rgba(102,122,130,.025);
+}
+.map-facility-card.ownership-other .facility-owner-tag{
+  border-color:rgba(102,122,130,.3);
+  background:rgba(102,122,130,.06);
+  color:#9babb1;
+}
+@media(max-width:760px){
+  .map-facility-card>span{
+    max-width:36%;
+    overflow-wrap:anywhere;
+  }
+  .facility-owner-tag{font-size:.55rem}
+}
