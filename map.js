@@ -598,27 +598,42 @@
     ctx.textAlign="center";
     ctx.textBaseline="middle";
 
-    (visibleFacilities || []).forEach(row => {
-      const h=parseRef(row.location_ref);
-      if (!h || !mapHexSet.has(row.location_ref)) return;
-      const p=worldToScreen(hexToWorld(h.q,h.r));
-      const type=facilityTypeById(row.facility_type_id);
-      const size=Math.max(7,10*camera.zoom);
-      const style=facilityOwnershipStyle(row);
+    const groups=new Map();
+    (visibleFacilities || []).forEach(row=>{
+      if(!groups.has(row.location_ref)) groups.set(row.location_ref,[]);
+      groups.get(row.location_ref).push(row);
+    });
 
-      ctx.beginPath();
-      ctx.arc(p.x,p.y,size,0,Math.PI*2);
-      ctx.fillStyle="rgba(3,12,17,.94)";
-      ctx.fill();
-      ctx.strokeStyle=style.stroke;
-      ctx.lineWidth=Math.max(1,1.8*camera.zoom);
-      ctx.setLineDash(style.dash.map(value=>Math.max(1,value*camera.zoom)));
-      ctx.stroke();
-      ctx.setLineDash([]);
+    groups.forEach((rows,locationRef)=>{
+      const h=parseRef(locationRef);
+      if(!h || !mapHexSet.has(locationRef)) return;
+      const center=worldToScreen(hexToWorld(h.q,h.r));
+      const ring=Math.max(13,18*camera.zoom);
 
-      ctx.fillStyle=style.symbol;
-      ctx.font=`500 ${Math.max(8,12*camera.zoom)}px "Share Tech Mono", Consolas, monospace`;
-      ctx.fillText(facilitySymbol(type),p.x,p.y+.5);
+      rows.forEach((row,index)=>{
+        const angle=rows.length===1 ? 0 : (-Math.PI/2)+(Math.PI*2*index/rows.length);
+        const p={
+          x:center.x+Math.cos(angle)*ring,
+          y:center.y+Math.sin(angle)*ring
+        };
+        const type=facilityTypeById(row.facility_type_id);
+        const size=Math.max(5.5,8*camera.zoom);
+        const style=facilityOwnershipStyle(row);
+
+        ctx.beginPath();
+        ctx.arc(p.x,p.y,size,0,Math.PI*2);
+        ctx.fillStyle="rgba(3,12,17,.94)";
+        ctx.fill();
+        ctx.strokeStyle=style.stroke;
+        ctx.lineWidth=Math.max(1,1.6*camera.zoom);
+        ctx.setLineDash(style.dash.map(value=>Math.max(1,value*camera.zoom)));
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        ctx.fillStyle=style.symbol;
+        ctx.font=`500 ${Math.max(7,10*camera.zoom)}px "Share Tech Mono", Consolas, monospace`;
+        ctx.fillText(facilitySymbol(type),p.x,p.y+.5);
+      });
     });
     ctx.restore();
   }
