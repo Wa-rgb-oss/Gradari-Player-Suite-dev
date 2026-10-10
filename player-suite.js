@@ -219,7 +219,7 @@
       const type=typeMap.get(facility.facility_type_id);
       const code=String(type?.code || "").toUpperCase();
       const health=Math.max(0,Math.min(100,Number(facility.health ?? 100)))/100;
-      const modifier=Number(facility.production_modifier ?? 1);
+      const modifier=Number(facility.production_modifier ?? 1)*facilityLevelMultiplier(facility.level);
       const results=[];
 
       if(code==="AGRI_COMPLEX"){
@@ -330,11 +330,24 @@
     empty.hidden=true;
   }
 
+  function facilityLevelMultiplier(level){
+    const value=Math.max(1,Math.min(3,Number(level||1)));
+    return value===1 ? 1 : value===2 ? 1.5 : 2;
+  }
+
+  function facilityUpgradeCost(type,currentLevel){
+    const level=Math.max(1,Math.min(3,Number(currentLevel||1)));
+    if(level>=3) return 0;
+    const target=level+1;
+    const base=Math.max(0,Number(type?.build_cost_aureum||0));
+    return base*(target===2 ? 0.5 : 1);
+  }
+
   function facilityDailyOutputs(facility,typeMap,ownedFacilities){
     const type=typeMap.get(facility.facility_type_id);
     const code=String(type?.code || "").toUpperCase();
     const health=Math.max(0,Math.min(100,Number(facility.health ?? 100)))/100;
-    const modifier=Number(facility.production_modifier ?? 1);
+    const modifier=Number(facility.production_modifier ?? 1)*facilityLevelMultiplier(facility.level);
     const outputs=[];
     if(code==="AGRI_COMPLEX") outputs.push({code:"food",quantity:360*modifier*health});
     else if(code==="RESEARCH_SITE") outputs.push({code:"research_points",quantity:1*modifier*health});
@@ -371,7 +384,7 @@
         String(typeMap.get(row.facility_type_id)?.code||"").toUpperCase()==="STORAGE" &&
         String(row.status||"active").toLowerCase()==="active"
       );
-      const capacity=activeStorage.length*5000;
+      const capacity=activeStorage.reduce((sum,row)=>sum+(5000*facilityLevelMultiplier(row.level)),0);
       const used=(state.playerResources||state.resources||[]).reduce((sum,row)=>sum+Math.max(0,Number(row.quantity||0)),0);
       const available=Math.max(0,capacity-used);
       return '<div class="section-code">STORAGE // '+fmt(available)+' AVAILABLE / '+fmt(capacity)+' TOTAL</div>';
@@ -399,7 +412,7 @@
     const typeMap=new Map((state.facilityTypes || []).map(row => [row.id,row]));
 
     const storageFacilities=ownedFacilities.filter(row=>String(typeMap.get(row.facility_type_id)?.code||"").toUpperCase()==="STORAGE"&&String(row.status||"active").toLowerCase()==="active");
-    const storageCapacity=storageFacilities.length*5000;
+    const storageCapacity=storageFacilities.reduce((sum,row)=>sum+(5000*facilityLevelMultiplier(row.level)),0);
     const storageUsed=(state.playerResources||state.resources||[]).reduce((sum,row)=>sum+Math.max(0,Number(row.quantity||0)),0);
     const storageAvailable=Math.max(0,storageCapacity-storageUsed);
     const storagePct=storageCapacity>0?Math.min(100,(storageUsed/storageCapacity)*100):0;
@@ -419,7 +432,7 @@
       // remains a strategic output, so it is not falsely converted into Aureum profit here.
       const netAureum=-ownedFacilities
         .filter(row => String(row.status || "active").toLowerCase() !== "inactive")
-        .reduce((sum,row) => sum + Number(typeMap.get(row.facility_type_id)?.upkeep_aureum_per_cycle || 0),0);
+        .reduce((sum,row) => sum + Number(typeMap.get(row.facility_type_id)?.upkeep_aureum_per_cycle || 0)*facilityLevelMultiplier(row.level),0);
       facilityNet.hidden=false;
       facilityNet.classList.toggle("positive",netAureum>0);
       facilityNet.classList.toggle("negative",netAureum<0);
@@ -428,17 +441,22 @@
       facilityEmpty.hidden=true;
       facilityList.innerHTML=ownedFacilities.map(row=>{
         const type=typeMap.get(row.facility_type_id);
-        const upkeep=Number(type?.upkeep_aureum_per_cycle || 0);
+        const level=Math.max(1,Math.min(3,Number(row.level||1)));
+        const levelMultiplier=facilityLevelMultiplier(level);
+        const upkeep=Number(type?.upkeep_aureum_per_cycle || 0)*levelMultiplier;
+        const upgradeCost=facilityUpgradeCost(type,level);
         const status=String(row.status || "active").toUpperCase();
         const health=Math.max(0,Math.min(100,Number(row.health ?? 100)));
+        const effectiveness=health*levelMultiplier;
         const healthLabel=health>=75?"GOOD":health>=40?"DAMAGED":health>0?"CRITICAL":"OFFLINE";
         return '<article class="notice economy-facility-row">'+
           '<div><strong>'+esc(row.name || type?.name || "Facility")+'</strong>'+
-          '<div class="section-code">'+esc(type?.name || "FACILITY")+' // '+esc(row.location_ref || "LOCATION UNSET")+'</div>'+facilityProductionRateHtml(row,typeMap,ownedFacilities)+
-          '<div class="facility-health"><span>FACILITY HEALTH</span><strong>'+esc(fmt(health))+'% // '+healthLabel+'</strong><div class="facility-health-track"><i style="width:'+health+'%"></i></div><small>'+esc(fmt(health))+'% PRODUCTION EFFECTIVENESS</small></div></div>'+
-          '<div class="economy-facility-meta"><span class="status-chip '+(status==="ACTIVE"?"":"muted")+'">'+esc(status)+'</span>'+
+          '<div class="section-code">'+esc(type?.name || "FACILITY")+' // '+esc(row.location_ref || "LOCATION UNSET")+' // LEVEL '+esc(level)+'</div>'+facilityProductionRateHtml(row,typeMap,ownedFacilities)+
+          '<div class="facility-health"><span>FACILITY HEALTH</span><strong>'+esc(fmt(health))+'% // '+healthLabel+'</strong><div class="facility-health-track"><i style="width:'+health+'%"></i></div><small>'+esc(fmt(effectiveness))+'% EFFECTIVE OUTPUT AT LEVEL '+esc(level)+'</small></div></div>'+
+          '<div class="economy-facility-meta"><div class="facility-level-chips"><span class="status-chip '+(status==="ACTIVE"?"":"muted")+'">'+esc(status)+'</span><span class="status-chip">LEVEL '+esc(level)+'</span></div>'+
           '<strong class="economy-facility-cost">'+(upkeep?'-'+esc(fmt(upkeep)):'0')+' AUREUM / DAY</strong>'+
-          '<div class="facility-edit-actions"><button class="hud-button secondary edit-owned-facility" type="button" data-id="'+esc(row.id)+'">EDIT</button><button class="hud-button danger scrap-owned-facility" type="button" data-id="'+esc(row.id)+'">SCRAP</button></div></div>'+
+          '<div class="section-code">'+(level<3?'NEXT UPGRADE // '+esc(fmt(upgradeCost))+' AUREUM // '+esc(fmt(facilityLevelMultiplier(level+1)*100))+'% OUTPUT & CAPACITY':'MAXIMUM FACILITY LEVEL // 200% OUTPUT & CAPACITY')+'</div>'+
+          '<div class="facility-edit-actions"><button class="hud-button upgrade-owned-facility" type="button" data-id="'+esc(row.id)+'" '+(level>=3?'disabled':'')+'>'+(level>=3?'MAX LEVEL':'UPGRADE TO LEVEL '+(level+1))+'</button><button class="hud-button secondary edit-owned-facility" type="button" data-id="'+esc(row.id)+'">EDIT</button><button class="hud-button danger scrap-owned-facility" type="button" data-id="'+esc(row.id)+'">SCRAP</button></div></div>'+
           '</article>';
       }).join("");
     }else{
@@ -447,6 +465,28 @@
       facilityList.innerHTML="";
       facilityEmpty.hidden=false;
     }
+
+    facilityList.querySelectorAll(".upgrade-owned-facility:not([disabled])").forEach(button=>button.addEventListener("click",async()=>{
+      const facility=ownedFacilities.find(row=>row.id===button.dataset.id);
+      if(!facility) return;
+      const type=typeMap.get(facility.facility_type_id);
+      const level=Math.max(1,Math.min(3,Number(facility.level||1)));
+      if(level>=3) return;
+      const target=level+1;
+      const cost=facilityUpgradeCost(type,level);
+      const multiplier=facilityLevelMultiplier(target);
+      const ok=await GMUI.confirmAction(
+        "Upgrade "+(facility.name || type?.name || "this facility")+" to Level "+target+" for "+fmt(cost)+" Aureum? Level "+target+" provides "+fmt(multiplier*100)+"% output/capacity and scales daily upkeep to the same level.",
+        {code:"FACILITY / UPGRADE",title:"Upgrade Facility",confirmText:"UPGRADE FACILITY"}
+      );
+      if(!ok) return;
+      try{
+        await GMAuth.api("rpc/upgrade_owned_facility",{method:"POST",body:JSON.stringify({p_facility_id:facility.id})});
+        await refreshState();
+      }catch(error){
+        await GMUI.modal({code:"FACILITY / ERROR",title:"Upgrade Failed",message:error.message,confirmText:"CLOSE"});
+      }
+    }));
 
     facilityList.querySelectorAll(".edit-owned-facility").forEach(button=>button.addEventListener("click",async()=>{
       const facility=ownedFacilities.find(row=>row.id===button.dataset.id);
