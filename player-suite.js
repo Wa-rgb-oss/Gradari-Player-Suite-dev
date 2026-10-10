@@ -363,6 +363,20 @@
   }
 
   function facilityProductionRateHtml(facility,typeMap,ownedFacilities){
+    const type=typeMap.get(facility.facility_type_id);
+    const code=String(type?.code||"").toUpperCase();
+
+    if(code==="STORAGE"){
+      const activeStorage=ownedFacilities.filter(row=>
+        String(typeMap.get(row.facility_type_id)?.code||"").toUpperCase()==="STORAGE" &&
+        String(row.status||"active").toLowerCase()==="active"
+      );
+      const capacity=activeStorage.length*5000;
+      const used=(state.playerResources||state.resources||[]).reduce((sum,row)=>sum+Math.max(0,Number(row.quantity||0)),0);
+      const available=Math.max(0,capacity-used);
+      return '<div class="section-code">STORAGE // '+fmt(available)+' AVAILABLE / '+fmt(capacity)+' TOTAL</div>';
+    }
+
     const resourceMap=new Map((state.resourceCatalog||[]).map(x=>[String(x.code),x]));
     const outputs=facilityDailyOutputs(facility,typeMap,ownedFacilities);
     if(!outputs.length) return '<div class="section-code">PRODUCTION // NO ACTIVE DAILY OUTPUT</div>';
