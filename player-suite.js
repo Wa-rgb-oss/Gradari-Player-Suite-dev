@@ -479,7 +479,12 @@
       return;
     }
     $("transactionEmpty").hidden = true;
-    body.innerHTML = state.transactions.map(row => {
+    const orderedTransactions=state.transactions.slice().sort((a,b)=>{
+      const timeDiff=new Date(b.created_at).getTime()-new Date(a.created_at).getTime();
+      if(timeDiff!==0) return timeDiff;
+      return Number(b.id||0)-Number(a.id||0);
+    });
+    body.innerHTML = orderedTransactions.map(row => {
       const typeLabel=String(row.kind || "Transaction")
         .replace(/_/g," ")
         .replace(/\b\w/g,char=>char.toUpperCase());
