@@ -7,7 +7,7 @@
   <meta name="theme-color" content="#050a0e">
   <meta name="robots" content="noindex,nofollow">
   <title>Player Suite | Gradari Mireris</title>
-  <link rel="stylesheet" href="styles.css?v=faction-foundation-20261010">
+  <link rel="stylesheet" href="styles.css?v=facility-schedule-20261019">
 
   <link rel="icon" type="image/png" sizes="192x192" href="/favicon.png">
   <link rel="icon" type="image/x-icon" sizes="16x16 32x32 48x48 64x64" href="/favicon.ico">
@@ -171,11 +171,19 @@
 
           <article class="hud-panel compact economy-owned-facilities">
             <div class="section-head">
-              <div><div class="section-code">ECONOMY / FACILITIES</div><h2>Owned Facilities</h2></div>
+              <div><div class="section-code">ECONOMY / FACILITY SCHEDULE</div><h2>Owned Facilities</h2></div>
               <p id="ownedFacilityCount">0/20 FACILITIES</p>
             </div>
-            <div id="ownedFacilityList" class="stack"></div>
+            <p class="hero-copy facility-schedule-copy">Manage every player-owned facility from one schedule. Use the filters to narrow the list, change configurable production directly in the table, and use the Manage menu for renaming, upgrades, or scrapping.</p>
+            <div class="facility-schedule-toolbar" id="facilityScheduleToolbar">
+              <label class="facility-schedule-search"><span>Search</span><input id="facilityScheduleSearch" placeholder="Facility name or hex"></label>
+              <label><span>Type</span><select id="facilityScheduleType"><option value="">ALL TYPES</option></select></label>
+              <label><span>Status</span><select id="facilityScheduleStatus"><option value="">ALL STATUSES</option></select></label>
+              <label><span>Sort</span><select id="facilityScheduleSort"><option value="name">NAME</option><option value="type">TYPE</option><option value="location">LOCATION</option><option value="level">LEVEL</option><option value="upkeep">UPKEEP</option></select></label>
+            </div>
+            <div id="ownedFacilityList" class="facility-schedule-wrap"></div>
             <div class="empty-state" id="ownedFacilityEmpty" hidden>YOU DO NOT CURRENTLY OWN ANY FACILITIES.</div>
+            <div class="form-state" id="facilityScheduleState"></div>
           </article>
 
           <article class="hud-panel compact">
@@ -497,7 +505,7 @@
   <script src="auth.js"></script>
   <script src="ui.js"></script>
   <script src="player-data.js?v=faction-foundation-20261010"></script>
-  <script src="player-suite.js?v=faction-foundation-20261010"></script>
+  <script src="player-suite.js?v=facility-schedule-20261019"></script>
   <script src="artifacts.js?v=artifacts-clean-20261007"></script>
   <script src="player-systems.js?v=faction-foundation-20261010"></script>
   <script src="game-chat.js"></script>
