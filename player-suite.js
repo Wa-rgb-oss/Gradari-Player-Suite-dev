@@ -474,7 +474,7 @@
         '<div class="facility-config-row">'+
           '<select class="facility-production-select" data-id="'+esc(row.id)+'" data-current="'+esc(currentRecipe)+'">'+options+'</select>'+
           '<select class="facility-production-qty" data-id="'+esc(row.id)+'">'+quantities+'</select>'+
-          '<button class="facility-config-apply" type="button" data-id="'+esc(row.id)+'" '+(currentRecipe?'disabled':'')+'>APPLY</button>'+
+          '<button class="facility-config-apply" type="button" data-id="'+esc(row.id)+'" disabled>APPLY</button>'+
         '</div>'+
         '<small>'+esc(statusText)+(order?.completes_at?' // '+esc(new Date(order.completes_at).toLocaleString()):'')+'</small>'+
       '</div>';
