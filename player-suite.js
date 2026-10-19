@@ -427,104 +427,321 @@
     }
 
     facilityCount.textContent=ownedFacilities.length+"/20 FACILITIES";
-    if(ownedFacilities.length){
-      // Player-owned facilities currently debit Aureum upkeep each in-game day. Resource production
-      // remains a strategic output, so it is not falsely converted into Aureum profit here.
+    const scheduleToolbar=$("facilityScheduleToolbar");
+    const scheduleSearch=$("facilityScheduleSearch");
+    const scheduleType=$("facilityScheduleType");
+    const scheduleStatus=$("facilityScheduleStatus");
+    const scheduleSort=$("facilityScheduleSort");
+    const scheduleState=$("facilityScheduleState");
+    const resourceNames=new Map((state.resourceCatalog || []).map(row=>[String(row.code),row.name || row.code]));
+
+    const facilityTypeCode=row=>String(typeMap.get(row.facility_type_id)?.code || typeMap.get(row.facility_type_id)?.name || "").toUpperCase();
+    const facilityUpkeep=row=>Number(typeMap.get(row.facility_type_id)?.upkeep_aureum_per_cycle || 0)*facilityLevelMultiplier(row.level);
+    const facilityHealth=row=>Math.max(0,Math.min(100,Number(row.health ?? 100)));
+    const facilityStatus=row=>String(row.status || "active").toUpperCase();
+
+    const typeOptions=[...new Set(ownedFacilities.map(row=>typeMap.get(row.facility_type_id)?.name || "Facility"))]
+      .sort((a,b)=>String(a).localeCompare(String(b)));
+    const statusOptions=[...new Set(ownedFacilities.map(facilityStatus))]
+      .sort((a,b)=>String(a).localeCompare(String(b)));
+    const previousType=scheduleType?.value || "";
+    const previousStatus=scheduleStatus?.value || "";
+    if(scheduleType){
+      scheduleType.innerHTML='<option value="">ALL TYPES</option>'+typeOptions.map(name=>'<option value="'+esc(name)+'">'+esc(String(name).toUpperCase())+'</option>').join("");
+      if(typeOptions.includes(previousType)) scheduleType.value=previousType;
+    }
+    if(scheduleStatus){
+      scheduleStatus.innerHTML='<option value="">ALL STATUSES</option>'+statusOptions.map(status=>'<option value="'+esc(status)+'">'+esc(status)+'</option>').join("");
+      if(statusOptions.includes(previousStatus)) scheduleStatus.value=previousStatus;
+    }
+
+    function factoryConfigurationHtml(row){
+      const order=(state.factoryOrders || []).find(item=>item.facility_id===row.id);
+      const currentRecipe=order?.recipe_code || "";
+      const recipes=state.factoryRecipes || [];
+      const quantity=Number(order?.quantity || 1);
+      const qtyOptions=[1,5,10,25,50,100,250,500,1000];
+      const options='<option value="">SELECT PRODUCTION LINE</option>'+recipes.map(recipe=>
+        '<option value="'+esc(recipe.code)+'" '+(recipe.code===currentRecipe?'selected':'')+'>'+
+        esc(recipe.name || recipe.code)+'</option>'
+      ).join("");
+      const quantities=qtyOptions.map(value=>
+        '<option value="'+value+'" '+(value===quantity?'selected':'')+'>'+value+'×</option>'
+      ).join("");
+      const status=String(order?.status || "").toUpperCase();
+      const statusText=status ? status.replaceAll("_"," ") : "IDLE";
+      return '<div class="facility-config-stack">'+
+        '<div class="facility-config-row">'+
+          '<select class="facility-production-select" data-id="'+esc(row.id)+'" data-current="'+esc(currentRecipe)+'">'+options+'</select>'+
+          '<select class="facility-production-qty" data-id="'+esc(row.id)+'">'+quantities+'</select>'+
+          '<button class="facility-config-apply" type="button" data-id="'+esc(row.id)+'" '+(currentRecipe?'disabled':'')+'>APPLY</button>'+
+        '</div>'+
+        '<small>'+esc(statusText)+(order?.completes_at?' // '+esc(new Date(order.completes_at).toLocaleString()):'')+'</small>'+
+      '</div>';
+    }
+
+    function facilityConfigurationHtml(row){
+      const type=typeMap.get(row.facility_type_id);
+      const code=facilityTypeCode(row);
+      const level=Math.max(1,Math.min(3,Number(row.level||1)));
+      const outputs=facilityDailyOutputs(row,typeMap,ownedFacilities);
+
+      if(code.includes("FACTORY")) return factoryConfigurationHtml(row);
+
+      if(code.includes("STORAGE")){
+        const capacity=5000*facilityLevelMultiplier(level);
+        return '<div class="facility-fixed-config"><strong>'+esc(fmt(capacity))+' UNITS</strong><small>AUTOMATIC STORAGE CAPACITY</small></div>';
+      }
+
+      if(code.includes("REFIN")){
+        const connections=(state.facilityConnections || []).filter(item=>item.refinery_facility_id===row.id);
+        const outputText=outputs.length
+          ? outputs.map(item=>'+'+fmt(item.quantity)+' '+String(resourceNames.get(String(item.code)) || item.code).toUpperCase()).join(' // ')
+          : 'NO ACTIVE OUTPUT';
+        return '<div class="facility-fixed-config"><strong>'+esc(outputText)+'</strong><small>'+connections.length+' / 3 MINES CONNECTED // CONNECTIONS MANAGED ON MAP</small></div>';
+      }
+
+      if(outputs.length){
+        const outputText=outputs.map(item=>'+'+fmt(item.quantity)+' '+String(resourceNames.get(String(item.code)) || item.code).toUpperCase()+' / DAY').join(' // ');
+        return '<div class="facility-fixed-config"><strong>'+esc(outputText)+'</strong><small>AUTOMATIC PRODUCTION</small></div>';
+      }
+
+      if(code.includes("SHIP")){
+        return '<div class="facility-fixed-config"><strong>SHIP CONSTRUCTION</strong><small>ORDERS MANAGED ON MAP</small></div>';
+      }
+
+      if(code.includes("TRADING")){
+        return '<div class="facility-fixed-config"><strong>TRADING POST</strong><small>NO AUTOMATIC PRODUCTION</small></div>';
+      }
+
+      return '<div class="facility-fixed-config"><strong>NO CONFIGURATION</strong><small>'+esc(type?.category || "FACILITY")+'</small></div>';
+    }
+
+    function renderFacilitySchedule(){
+      if(!ownedFacilities.length){
+        facilityNet.hidden=true;
+        facilityNet.textContent="";
+        if(scheduleToolbar) scheduleToolbar.hidden=true;
+        facilityList.innerHTML="";
+        facilityEmpty.textContent="YOU DO NOT CURRENTLY OWN ANY FACILITIES.";
+        facilityEmpty.hidden=false;
+        return;
+      }
+
+      if(scheduleToolbar) scheduleToolbar.hidden=false;
+
       const netAureum=-ownedFacilities
         .filter(row => String(row.status || "active").toLowerCase() !== "inactive")
-        .reduce((sum,row) => sum + Number(typeMap.get(row.facility_type_id)?.upkeep_aureum_per_cycle || 0)*facilityLevelMultiplier(row.level),0);
+        .reduce((sum,row) => sum + facilityUpkeep(row),0);
       facilityNet.hidden=false;
       facilityNet.classList.toggle("positive",netAureum>0);
       facilityNet.classList.toggle("negative",netAureum<0);
       facilityNet.textContent=(netAureum>=0?"+":"")+fmt(netAureum)+" AUREUM / DAY // FACILITY NET";
 
-      facilityEmpty.hidden=true;
-      facilityList.innerHTML=ownedFacilities.map(row=>{
+      const search=String(scheduleSearch?.value || "").trim().toLowerCase();
+      const selectedType=scheduleType?.value || "";
+      const selectedStatus=scheduleStatus?.value || "";
+      const sortMode=scheduleSort?.value || "name";
+
+      let rows=ownedFacilities.filter(row=>{
+        const type=typeMap.get(row.facility_type_id);
+        if(selectedType && String(type?.name || "Facility")!==selectedType) return false;
+        if(selectedStatus && facilityStatus(row)!==selectedStatus) return false;
+        if(search){
+          const haystack=[
+            row.name,
+            type?.name,
+            type?.code,
+            row.location_ref
+          ].map(value=>String(value||"").toLowerCase()).join(" ");
+          if(!haystack.includes(search)) return false;
+        }
+        return true;
+      });
+
+      rows=rows.slice().sort((a,b)=>{
+        const typeA=String(typeMap.get(a.facility_type_id)?.name || "");
+        const typeB=String(typeMap.get(b.facility_type_id)?.name || "");
+        if(sortMode==="type") return typeA.localeCompare(typeB) || String(a.name||"").localeCompare(String(b.name||""));
+        if(sortMode==="location") return String(a.location_ref||"").localeCompare(String(b.location_ref||"")) || String(a.name||"").localeCompare(String(b.name||""));
+        if(sortMode==="level") return Number(b.level||1)-Number(a.level||1) || String(a.name||"").localeCompare(String(b.name||""));
+        if(sortMode==="upkeep") return facilityUpkeep(b)-facilityUpkeep(a) || String(a.name||"").localeCompare(String(b.name||""));
+        return String(a.name || typeA).localeCompare(String(b.name || typeB));
+      });
+
+      facilityEmpty.textContent=rows.length ? "YOU DO NOT CURRENTLY OWN ANY FACILITIES." : "NO FACILITIES MATCH THE CURRENT FILTERS.";
+      facilityEmpty.hidden=rows.length>0;
+
+      if(!rows.length){
+        facilityList.innerHTML="";
+        return;
+      }
+
+      const body=rows.map(row=>{
         const type=typeMap.get(row.facility_type_id);
         const level=Math.max(1,Math.min(3,Number(row.level||1)));
-        const levelMultiplier=facilityLevelMultiplier(level);
-        const upkeep=Number(type?.upkeep_aureum_per_cycle || 0)*levelMultiplier;
+        const upkeep=facilityUpkeep(row);
         const upgradeCost=facilityUpgradeCost(type,level);
-        const status=String(row.status || "active").toUpperCase();
-        const health=Math.max(0,Math.min(100,Number(row.health ?? 100)));
-        const effectiveness=health*levelMultiplier;
+        const health=facilityHealth(row);
         const healthLabel=health>=75?"GOOD":health>=40?"DAMAGED":health>0?"CRITICAL":"OFFLINE";
-        return '<article class="notice economy-facility-row">'+
-          '<div><strong>'+esc(row.name || type?.name || "Facility")+'</strong>'+
-          '<div class="section-code">'+esc(type?.name || "FACILITY")+' // '+esc(row.location_ref || "LOCATION UNSET")+' // LEVEL '+esc(level)+'</div>'+facilityProductionRateHtml(row,typeMap,ownedFacilities)+
-          '<div class="facility-health"><span>FACILITY HEALTH</span><strong>'+esc(fmt(health))+'% // '+healthLabel+'</strong><div class="facility-health-track"><i style="width:'+health+'%"></i></div><small>'+esc(fmt(effectiveness))+'% EFFECTIVE OUTPUT AT LEVEL '+esc(level)+'</small></div></div>'+
-          '<div class="economy-facility-meta"><div class="facility-level-chips"><span class="status-chip '+(status==="ACTIVE"?"":"muted")+'">'+esc(status)+'</span><span class="status-chip">LEVEL '+esc(level)+'</span></div>'+
-          '<strong class="economy-facility-cost">'+(upkeep?'-'+esc(fmt(upkeep)):'0')+' AUREUM / DAY</strong>'+
-          '<div class="section-code">'+(level<3?'NEXT UPGRADE // '+esc(fmt(upgradeCost))+' AUREUM // '+esc(fmt(facilityLevelMultiplier(level+1)*100))+'% OUTPUT & CAPACITY':'MAXIMUM FACILITY LEVEL // 200% OUTPUT & CAPACITY')+'</div>'+
-          '<div class="facility-edit-actions"><button class="hud-button upgrade-owned-facility" type="button" data-id="'+esc(row.id)+'" '+(level>=3?'disabled':'')+'>'+(level>=3?'MAX LEVEL':'UPGRADE TO LEVEL '+(level+1))+'</button><button class="hud-button secondary edit-owned-facility" type="button" data-id="'+esc(row.id)+'">EDIT</button><button class="hud-button danger scrap-owned-facility" type="button" data-id="'+esc(row.id)+'">SCRAP</button></div></div>'+
-          '</article>';
+        const status=facilityStatus(row);
+        const levelOptions='<option value="">LEVEL '+level+' // '+fmt(facilityLevelMultiplier(level)*100)+'%</option>'+
+          (level<3?'<option value="upgrade">UPGRADE TO L'+(level+1)+' // '+fmt(upgradeCost)+' A</option>':'');
+        const manageOptions='<option value="">MANAGE...</option>'+
+          '<option value="rename">RENAME</option>'+
+          '<option value="scrap">SCRAP FACILITY</option>';
+
+        return '<tr data-facility-id="'+esc(row.id)+'">'+
+          '<td class="facility-schedule-name"><strong>'+esc(row.name || type?.name || "Facility")+'</strong><small>'+esc(String(type?.code || "FACILITY").toUpperCase())+'</small></td>'+
+          '<td><strong>'+esc(type?.name || "Facility")+'</strong><small>'+esc(String(type?.category || "FACILITY").toUpperCase())+'</small></td>'+
+          '<td><span class="facility-location-code">'+esc(row.location_ref || "UNPLACED")+'</span></td>'+
+          '<td><select class="facility-level-select" data-id="'+esc(row.id)+'">'+levelOptions+'</select></td>'+
+          '<td><span class="status-chip '+(status==="ACTIVE"?"":"muted")+'">'+esc(status)+'</span></td>'+
+          '<td><div class="facility-schedule-health"><div><strong>'+esc(fmt(health))+'%</strong><small>'+healthLabel+'</small></div><div class="facility-health-track"><i style="width:'+health+'%"></i></div></div></td>'+
+          '<td class="facility-schedule-config">'+facilityConfigurationHtml(row)+'</td>'+
+          '<td class="facility-schedule-upkeep"><strong>'+(upkeep?'-'+esc(fmt(upkeep)):'0')+' A</strong><small>PER IN-GAME DAY</small></td>'+
+          '<td><select class="facility-manage-select" data-id="'+esc(row.id)+'">'+manageOptions+'</select></td>'+
+        '</tr>';
       }).join("");
-    }else{
-      facilityNet.hidden=true;
-      facilityNet.textContent="";
-      facilityList.innerHTML="";
-      facilityEmpty.hidden=false;
+
+      facilityList.innerHTML=
+        '<div class="facility-schedule-scroll">'+
+          '<table class="facility-schedule-table">'+
+            '<thead><tr>'+
+              '<th>Facility</th><th>Type</th><th>Location</th><th>Level</th><th>Status</th><th>Health</th><th>Production / Configuration</th><th>Upkeep</th><th>Manage</th>'+
+            '</tr></thead>'+
+            '<tbody>'+body+'</tbody>'+
+          '</table>'+
+        '</div>'+
+        '<div class="facility-schedule-foot">'+rows.length+' OF '+ownedFacilities.length+' FACILITIES SHOWN</div>';
+
+      facilityList.querySelectorAll(".facility-level-select").forEach(select=>select.addEventListener("change",async()=>{
+        if(select.value!=="upgrade") return;
+        const facility=ownedFacilities.find(row=>row.id===select.dataset.id);
+        if(!facility){select.value="";return;}
+        const type=typeMap.get(facility.facility_type_id);
+        const level=Math.max(1,Math.min(3,Number(facility.level||1)));
+        if(level>=3){select.value="";return;}
+        const target=level+1;
+        const cost=facilityUpgradeCost(type,level);
+        const multiplier=facilityLevelMultiplier(target);
+        const ok=await GMUI.confirmAction(
+          "Upgrade "+(facility.name || type?.name || "this facility")+" to Level "+target+" for "+fmt(cost)+" Aureum? Level "+target+" provides "+fmt(multiplier*100)+"% output/capacity and scales daily upkeep to the same level.",
+          {code:"FACILITY / UPGRADE",title:"Upgrade Facility",confirmText:"UPGRADE FACILITY"}
+        );
+        if(!ok){select.value="";return;}
+        try{
+          select.disabled=true;
+          await GMAuth.api("rpc/upgrade_owned_facility",{method:"POST",body:JSON.stringify({p_facility_id:facility.id})});
+          setState(scheduleState,"FACILITY UPGRADED","success");
+          await refreshState();
+        }catch(error){
+          select.disabled=false;
+          select.value="";
+          await GMUI.modal({code:"FACILITY / ERROR",title:"Upgrade Failed",message:error.message,confirmText:"CLOSE"});
+        }
+      }));
+
+      facilityList.querySelectorAll(".facility-manage-select").forEach(select=>select.addEventListener("change",async()=>{
+        const action=select.value;
+        select.value="";
+        if(!action) return;
+        const facility=ownedFacilities.find(row=>row.id===select.dataset.id);
+        if(!facility) return;
+        const type=typeMap.get(facility.facility_type_id);
+
+        if(action==="rename"){
+          const choice=await GMUI.modal({
+            code:"FACILITY / EDIT",
+            title:facility.name || type?.name || "Facility",
+            message:"Update the name shown for this facility across the Player Suite and Map.",
+            input:true,
+            inputLabel:"Facility Name",
+            defaultValue:facility.name || "",
+            confirmText:"SAVE NAME"
+          });
+          if(choice===null) return;
+          try{
+            await GMAuth.api("rpc/update_owned_facility",{method:"POST",body:JSON.stringify({p_facility_id:facility.id,p_name:choice})});
+            setState(scheduleState,"FACILITY NAME UPDATED","success");
+            await refreshState();
+          }catch(error){
+            await GMUI.modal({code:"FACILITY / ERROR",title:"Update Failed",message:error.message,confirmText:"CLOSE"});
+          }
+          return;
+        }
+
+        if(action==="scrap"){
+          const ok=await GMUI.confirmAction(
+            "Scrap "+(facility.name || type?.name || "this facility")+"? This permanently removes it from the map and does not refund its construction cost.",
+            {code:"FACILITY / SCRAP",title:"Scrap Facility",confirmText:"SCRAP FACILITY",danger:true}
+          );
+          if(!ok) return;
+          try{
+            await GMAuth.api("rpc/scrap_owned_facility",{method:"POST",body:JSON.stringify({p_facility_id:facility.id})});
+            setState(scheduleState,"FACILITY SCRAPPED","success");
+            await refreshState();
+          }catch(error){
+            await GMUI.modal({code:"FACILITY / ERROR",title:"Scrap Failed",message:error.message,confirmText:"CLOSE"});
+          }
+        }
+      }));
+
+      facilityList.querySelectorAll(".facility-production-select").forEach(select=>select.addEventListener("change",()=>{
+        const id=select.dataset.id;
+        const apply=facilityList.querySelector('.facility-config-apply[data-id="'+id+'"]');
+        if(apply) apply.disabled=!select.value;
+      }));
+      facilityList.querySelectorAll(".facility-production-qty").forEach(select=>select.addEventListener("change",()=>{
+        const apply=facilityList.querySelector('.facility-config-apply[data-id="'+select.dataset.id+'"]');
+        const recipe=facilityList.querySelector('.facility-production-select[data-id="'+select.dataset.id+'"]');
+        if(apply) apply.disabled=!recipe?.value;
+      }));
+
+      facilityList.querySelectorAll(".facility-config-apply").forEach(button=>button.addEventListener("click",async()=>{
+        const facility=ownedFacilities.find(row=>row.id===button.dataset.id);
+        if(!facility) return;
+        const recipeSelect=facilityList.querySelector('.facility-production-select[data-id="'+button.dataset.id+'"]');
+        const qtySelect=facilityList.querySelector('.facility-production-qty[data-id="'+button.dataset.id+'"]');
+        const recipeCode=recipeSelect?.value;
+        const quantity=Number(qtySelect?.value || 1);
+        if(!recipeCode) return;
+
+        const existing=(state.factoryOrders || []).find(order=>
+          order.facility_id===facility.id && ["producing","storage_blocked"].includes(String(order.status||"").toLowerCase())
+        );
+        if(existing){
+          const ok=await GMUI.confirmAction(
+            "Change "+(facility.name || "this factory")+"'s production line? The current batch will be cancelled. Consumed inputs are not refunded.",
+            {code:"FACILITY / FACTORY",title:"Change Production",confirmText:"CHANGE PRODUCTION"}
+          );
+          if(!ok) return;
+        }
+
+        try{
+          button.disabled=true;
+          await GMAuth.api("rpc/"+(existing?"change_factory_production":"queue_factory_production"),{
+            method:"POST",
+            body:JSON.stringify({
+              p_facility_id:facility.id,
+              p_recipe_code:recipeCode,
+              p_quantity:quantity
+            })
+          });
+          setState(scheduleState,"FACTORY PRODUCTION UPDATED","success");
+          await refreshState();
+        }catch(error){
+          button.disabled=false;
+          await GMUI.modal({code:"FACILITY / ERROR",title:"Production Update Failed",message:error.message,confirmText:"CLOSE"});
+        }
+      }));
     }
 
-    facilityList.querySelectorAll(".upgrade-owned-facility:not([disabled])").forEach(button=>button.addEventListener("click",async()=>{
-      const facility=ownedFacilities.find(row=>row.id===button.dataset.id);
-      if(!facility) return;
-      const type=typeMap.get(facility.facility_type_id);
-      const level=Math.max(1,Math.min(3,Number(facility.level||1)));
-      if(level>=3) return;
-      const target=level+1;
-      const cost=facilityUpgradeCost(type,level);
-      const multiplier=facilityLevelMultiplier(target);
-      const ok=await GMUI.confirmAction(
-        "Upgrade "+(facility.name || type?.name || "this facility")+" to Level "+target+" for "+fmt(cost)+" Aureum? Level "+target+" provides "+fmt(multiplier*100)+"% output/capacity and scales daily upkeep to the same level.",
-        {code:"FACILITY / UPGRADE",title:"Upgrade Facility",confirmText:"UPGRADE FACILITY"}
-      );
-      if(!ok) return;
-      try{
-        await GMAuth.api("rpc/upgrade_owned_facility",{method:"POST",body:JSON.stringify({p_facility_id:facility.id})});
-        await refreshState();
-      }catch(error){
-        await GMUI.modal({code:"FACILITY / ERROR",title:"Upgrade Failed",message:error.message,confirmText:"CLOSE"});
-      }
-    }));
-
-    facilityList.querySelectorAll(".edit-owned-facility").forEach(button=>button.addEventListener("click",async()=>{
-      const facility=ownedFacilities.find(row=>row.id===button.dataset.id);
-      if(!facility) return;
-      const type=typeMap.get(facility.facility_type_id);
-      const choice=await GMUI.modal({
-        code:"FACILITY / EDIT",
-        title:facility.name || type?.name || "Facility",
-        message:"Rename this facility or scrap it permanently.",
-        input:true,
-        inputLabel:"Facility Name",
-        defaultValue:facility.name || "",
-        confirmText:"SAVE NAME"
-      });
-      if(choice===null) return;
-      try{
-        await GMAuth.api("rpc/update_owned_facility",{method:"POST",body:JSON.stringify({p_facility_id:facility.id,p_name:choice})});
-        await refreshState();
-      await loadFriends();
-      }catch(error){
-        await GMUI.modal({code:"FACILITY / ERROR",title:"Update Failed",message:error.message,confirmText:"CLOSE"});
-      }
-    }));
-
-    facilityList.querySelectorAll(".scrap-owned-facility").forEach(button=>button.addEventListener("click",async()=>{
-      const facility=ownedFacilities.find(row=>row.id===button.dataset.id);
-      if(!facility) return;
-      const ok=await GMUI.confirmAction("Scrap "+(facility.name || "this facility")+"? This permanently removes the facility and does not refund its construction cost.",{
-        code:"FACILITY / SCRAP",title:"Scrap Facility",confirmText:"SCRAP FACILITY",danger:true
-      });
-      if(!ok) return;
-      try{
-        await GMAuth.api("rpc/scrap_owned_facility",{method:"POST",body:JSON.stringify({p_facility_id:facility.id})});
-        await refreshState();
-      }catch(error){
-        await GMUI.modal({code:"FACILITY / ERROR",title:"Scrap Failed",message:error.message,confirmText:"CLOSE"});
-      }
-    }));
+    if(scheduleSearch) scheduleSearch.oninput=renderFacilitySchedule;
+    if(scheduleType) scheduleType.onchange=renderFacilitySchedule;
+    if(scheduleStatus) scheduleStatus.onchange=renderFacilitySchedule;
+    if(scheduleSort) scheduleSort.onchange=renderFacilitySchedule;
+    renderFacilitySchedule();
 
     const body = $("transactionRows");
     if (!state.transactions.length) {
