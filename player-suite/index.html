@@ -55,6 +55,7 @@
           <button class="tab" type="button" data-tab-target="suite-faction">FACTION</button>
           <button class="tab" type="button" data-tab-target="suite-characters">CHARACTER &amp; ARTIFACTS</button>
           <button class="tab" type="button" data-tab-target="suite-friends">FRIENDS</button>
+          <button class="tab" type="button" data-tab-target="suite-contracts">CONTRACTS &amp; ASSIGNMENTS</button>
           <button class="tab" type="button" data-tab-target="suite-actions">ACTIONS</button>
           <button class="tab" type="button" data-tab-target="suite-canon">CANON</button>
         </div>
@@ -487,6 +488,25 @@
           </div>
         </section>
 
+        <section class="panel" id="suite-contracts" data-tab-panel>
+          <div class="section-head">
+            <div><div class="section-code">ALPHA 0.5.0 / CIVILIAN OPERATIONS</div><h2>Contracts &amp; Assignments</h2></div>
+          </div>
+          <p class="hero-copy">Accept economic, political, and exploration assignments. Cooperative contracts require a party and will unlock in a later Phase One implementation.</p>
+          <div class="content-grid">
+            <div>
+              <div class="section-code" style="margin-bottom:12px">AVAILABLE CONTRACTS</div>
+              <div id="civilianContractList" class="stack"><div class="empty-state">LOADING CONTRACTS...</div></div>
+            </div>
+            <aside class="hud-panel compact">
+              <div class="section-code">PERSONAL CONTRACT HISTORY</div>
+              <h2 style="margin:5px 0 12px;text-transform:uppercase">Assignments</h2>
+              <div id="civilianAssignmentList" class="telemetry-stack"><div class="empty-state">LOADING...</div></div>
+              <div id="civilianContractState" class="form-state" role="status" aria-live="polite"></div>
+            </aside>
+          </div>
+        </section>
+
         <section class="panel" id="suite-canon" data-tab-panel>
           <article class="hud-panel prose">
             <div class="section-code">CANON / CANON &amp; GAME GUIDE</div>
@@ -508,6 +528,7 @@
   <script src="player-suite.js?v=facility-schedule-20261019"></script>
   <script src="artifacts.js?v=artifacts-clean-20261007"></script>
   <script src="player-systems.js?v=faction-foundation-20261010"></script>
+  <script src="civilian-contracts.js?v=alpha050-phase1-20261026"></script>
   <script src="game-chat.js"></script>
 </body>
 </html>
