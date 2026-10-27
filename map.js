@@ -9,6 +9,10 @@
   let armyMovements = [];
   let militaryOperations = [];
   let characterTravel = [];
+  let routePreview = null;
+  let routePreviewKey = "";
+  let routePreviewError = "";
+  let routePreviewRequest = 0;
   let worldClock = null;
   let visibleFacilities = [];
   let hexConditions = [];
@@ -128,7 +132,10 @@
   }
 
   function currentWorldHour() {
-    return Number(worldClock?.total_world_hours || 0);
+    const original=Number(worldClock?.total_world_hours||0);
+    if(!worldClock?.running || !worldClock?.server_time) return original;
+    const passed=Math.max(0,(Date.now()-Date.parse(worldClock.server_time))/3600000);
+    return original+passed*Number(worldClock.speed||5);
   }
 
   function worldArrivalLabel(totalHours) {
@@ -232,6 +239,7 @@
     hexSize = Number(player.config?.map_hex_size || 32);
     buildCircle();
     renderUi();
+    requestRoutePreview();
     draw();
     if (message && target) setState(target,message,"success");
   }
@@ -739,33 +747,63 @@
     ctx.restore();
   }
 
-  function drawCharacterTravelRoute() {
-    if(!layers.character) return;
+  function activeCharacterTravel() {
     const char=livingCharacter();
-    const travel=char ? characterTravel.find(row=>row.character_id===char.id && row.status==="traveling") : null;
-    if(!travel) return;
-    const from=parseRef(travel.from_ref), to=parseRef(travel.to_ref);
-    if(!from || !to) return;
-    const a=worldToScreen(hexToWorld(from.q,from.r));
-    const b=worldToScreen(hexToWorld(to.q,to.r));
+    return char ? characterTravel.find(row=>row.character_id===char.id&&row.status==="traveling") : null;
+  }
+
+  function mapTravelWaypoints(travel) {
+    if(!travel) return [];
+    if(Array.isArray(travel.route_waypoints)&&travel.route_waypoints.length>1)
+      return travel.route_waypoints;
+    return [{ref:travel.from_ref,arrival_world_hour:travel.depart_world_hour},
+            {ref:travel.to_ref,arrival_world_hour:travel.arrive_world_hour}];
+  }
+
+  function travelPointOnRoute(travel) {
+    const waypoints=mapTravelWaypoints(travel);
+    if(waypoints.length<2)return null;
+    const now=currentWorldHour();
+    for(let i=1;i<waypoints.length;i++){
+      const start=Number(waypoints[i-1].arrival_world_hour);
+      const finish=Number(waypoints[i].arrival_world_hour);
+      if(now<=finish||i===waypoints.length-1){
+        const a=parseRef(waypoints[i-1].ref),b=parseRef(waypoints[i].ref);
+        if(!a||!b)return null;
+        const fraction=Math.max(0,Math.min(1,(now-start)/Math.max(.001,finish-start)));
+        const x=hexToWorld(a.q,a.r),y=hexToWorld(b.q,b.r);
+        return {x:x.x+(y.x-x.x)*fraction,y:x.y+(y.y-x.y)*fraction};
+      }
+    }
+    return null;
+  }
+
+  function drawCharacterTravelRoute() {
+    if(!layers.character)return;
+    const travel=activeCharacterTravel();
+    const rows=travel ? mapTravelWaypoints(travel) : (routePreview?.route||[]);
+    if(rows.length<2)return;
+    const current=currentWorldHour();
     ctx.save();
-    ctx.beginPath();
-    ctx.moveTo(a.x,a.y);
-    ctx.lineTo(b.x,b.y);
-    ctx.setLineDash([3,8]);
-    ctx.lineDashOffset=0;
-    ctx.strokeStyle="rgba(240,201,143,.9)";
-    ctx.lineWidth=Math.max(1.5,2*camera.zoom);
-    ctx.shadowColor="rgba(216,163,93,.45)";
-    ctx.shadowBlur=5;
-    ctx.stroke();
+    for(let i=1;i<rows.length;i++){
+      const a=parseRef(rows[i-1].ref),b=parseRef(rows[i].ref);
+      if(!a||!b)continue;
+      const start=worldToScreen(hexToWorld(a.q,a.r));
+      const end=worldToScreen(hexToWorld(b.q,b.r));
+      const completed=travel&&Number(rows[i].arrival_world_hour)<=current;
+      ctx.beginPath();ctx.moveTo(start.x,start.y);ctx.lineTo(end.x,end.y);
+      ctx.setLineDash(completed?[]:[3,7]);
+      ctx.strokeStyle=completed?"rgba(89,207,200,.96)":"rgba(240,201,143,.90)";
+      ctx.lineWidth=Math.max(1.5,2*camera.zoom);
+      ctx.stroke();
+    }
     ctx.setLineDash([]);
-    ctx.shadowBlur=0;
-    ctx.beginPath();
-    ctx.arc(b.x,b.y,Math.max(4,5*camera.zoom),0,Math.PI*2);
-    ctx.strokeStyle="#d8a35d";
-    ctx.lineWidth=1.5;
-    ctx.stroke();
+    const last=parseRef(rows[rows.length-1].ref);
+    if(last){
+      const b=worldToScreen(hexToWorld(last.q,last.r));
+      ctx.beginPath();ctx.arc(b.x,b.y,Math.max(4,5*camera.zoom),0,Math.PI*2);
+      ctx.strokeStyle="#d8a35d";ctx.lineWidth=1.5;ctx.stroke();
+    }
     ctx.restore();
   }
 
@@ -775,7 +813,8 @@
     const h=parseRef(char?.location_ref);
     if (!h) return;
 
-    const p=worldToScreen(hexToWorld(h.q,h.r));
+    const moving=travelPointOnRoute(activeCharacterTravel());
+    const p=worldToScreen(moving||hexToWorld(h.q,h.r));
     const scale=Math.max(.72,Math.min(1.35,camera.zoom));
     const pinH=Math.max(24,30*scale);
     const pinW=Math.max(18,22*scale);
@@ -922,6 +961,7 @@
     camera.y=rect.height/2-p.y*camera.zoom;
     selectedHex={q:h.q,r:h.r,ref};
     renderSelection();
+    requestRoutePreview();
     draw();
   }
 
@@ -931,6 +971,7 @@
     if (!mapHexSet.has(ref)) return;
     selectedHex={q:h.q,r:h.r,ref};
     renderSelection();
+    requestRoutePreview();
     draw();
   }
 
@@ -1065,27 +1106,64 @@
 
   function renderTravelPanel() {
     const char=livingCharacter();
-    const travel=char ? characterTravel.find(row=>row.character_id===char.id && row.status==="traveling") : null;
-    let distance=0;
-    let hours=0;
-    let arrival=null;
-
-    if(char?.location_ref && selectedHex){
-      distance=hexDistance(char.location_ref,selectedHex.ref);
-      const condition=hexConditions.find(row=>row.location_ref===selectedHex.ref);
-      const difficulty=Number(condition?.movement_difficulty??3);
-      hours=distance*Number(player?.config?.character_travel_hours_per_hex || 6)
-        *(0.75+0.25*difficulty)*(navigationRadius>1?.9:1);
-      arrival=currentWorldHour()+hours;
-    }
-
-    $("mapTravelDistance").textContent=selectedHex && char?.location_ref ? distance+" HEX"+(distance===1?"":"ES") : "--";
-    $("mapTravelHours").textContent=distance ? movementTimeLabel(hours) : "--";
-    $("mapTravelArrival").textContent=distance ? arrivalTimeLabel(arrival) : "--";
-
+    const travel=activeCharacterTravel();
     const button=$("mapTravelBtn");
-    button.disabled=Boolean(travel) || !char?.location_ref || !selectedHex || distance!==1;
-    button.textContent=travel ? "CHARACTER IN TRANSIT" : distance>1 ? "SELECT ADJACENT HEX" : "TRAVEL TO SELECTED HEX";
+    const progress=$("mapTravelProgress");
+    const routeDisplay=$("mapTravelRouteStops");
+    if(travel){
+      const stops=mapTravelWaypoints(travel);
+      const total=Number(travel.distance||stops.length-1);
+      const done=stops.slice(1).filter(step=>Number(step.arrival_world_hour)<=currentWorldHour()).length;
+      $("mapTravelDistance").textContent=total+" HEX"+(total===1?"":"ES");
+      $("mapTravelHours").textContent=movementTimeLabel(Math.max(0,Number(travel.arrive_world_hour)-currentWorldHour()))+" REMAINING";
+      $("mapTravelArrival").textContent=arrivalTimeLabel(travel.arrive_world_hour);
+      progress.textContent="TRAVELING // "+done+" / "+total+" HEXES REACHED";
+      routeDisplay.textContent="ROUTE // "+stops.map(s=>s.ref).join(" → ");
+      button.disabled=true;
+      button.textContent="CHARACTER IN TRANSIT";
+      return;
+    }
+    const hasTarget=Boolean(char?.location_ref&&selectedHex&&selectedHex.ref!==char.location_ref);
+    const preview=hasTarget&&routePreview&&routePreviewKey===char.id+"|"+char.location_ref+"|"+selectedHex.ref ? routePreview : null;
+    const pending=hasTarget&&!preview&&!routePreviewError;
+    const distance=hasTarget?hexDistance(char.location_ref,selectedHex.ref):0;
+    $("mapTravelDistance").textContent=distance?distance+" HEX"+(distance===1?"":"ES"):"--";
+    $("mapTravelHours").textContent=preview?movementTimeLabel(preview.travel_hours):pending?"CALCULATING ROUTE...":"--";
+    $("mapTravelArrival").textContent=preview?arrivalTimeLabel(preview.arrive_world_hour):"--";
+    progress.textContent=routePreviewError|| (preview?"ROUTE READY // "+distance+" LEGS":"");
+    routeDisplay.textContent=preview?"ROUTE // "+preview.route.map(step=>step.ref).join(" → "):"";
+    button.disabled=!preview;
+    button.textContent=preview?"TRAVEL TO SELECTED HEX":pending?"CALCULATING ROUTE...":"SELECT DESTINATION";
+  }
+
+  function requestRoutePreview() {
+    const char=livingCharacter();
+    const travel=activeCharacterTravel();
+    const key=char?.location_ref&&selectedHex ? char.id+"|"+char.location_ref+"|"+selectedHex.ref : "";
+    if(!key||travel||char.movement_status!=="stationary"||char.location_ref===selectedHex.ref){
+      ++routePreviewRequest;
+      routePreview=null;routePreviewKey="";routePreviewError="";
+      renderTravelPanel();
+      return;
+    }
+    if(key===routePreviewKey)return;
+    const request=++routePreviewRequest;
+    routePreviewKey=key;routePreview=null;routePreviewError="";
+    renderTravelPanel();
+    GMAuth.api("rpc/preview_character_route",{
+      method:"POST",body:JSON.stringify({p_character_id:char.id,p_to_ref:selectedHex.ref})
+    }).then(result=>{
+      if(request!==routePreviewRequest)return;
+      routePreview=result;
+      renderTravelPanel();
+      draw();
+    }).catch(error=>{
+      if(request!==routePreviewRequest)return;
+      routePreview=null;
+      routePreviewError="ROUTE UNAVAILABLE // "+(error.message||"PLEASE TRY AGAIN");
+      renderTravelPanel();
+      draw();
+    });
   }
 
   function canMilitary() {
@@ -1732,8 +1810,8 @@
 
   $("mapTravelBtn").addEventListener("click",async () => {
     const char=livingCharacter();
-    if(!char || !selectedHex) return;
-    if(!await GMUI.confirmAction("Begin travel to "+selectedHex.ref+"? Travel time follows the live world clock.",{code:"CHARACTER / TRAVEL",title:"Begin Travel",confirmText:"BEGIN TRAVEL"})) return;
+    if(!char || !selectedHex || !routePreview || routePreviewKey!==char.id+"|"+char.location_ref+"|"+selectedHex.ref)return;
+    if(!await GMUI.confirmAction("Travel automatically across "+routePreview.distance+" hexes to "+selectedHex.ref+"? Estimated time: "+movementTimeLabel(routePreview.travel_hours)+". The server may add delays from piracy.",{code:"CHARACTER / TRAVEL",title:"Begin Travel",confirmText:"BEGIN TRAVEL"}))return;
     try{
       setState($("mapTravelState"),"TRAVEL ORDER TRANSMITTED...");
       const result=await GMAuth.api("rpc/begin_character_travel",{
