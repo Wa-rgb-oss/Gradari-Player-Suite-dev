@@ -12,6 +12,7 @@
   let worldClock = null;
   let visibleFacilities = [];
   let hexConditions = [];
+  let civilianBalanceConfig = null;
   let civilianSignals = [];
   let navigationRadius = 1;
   let selectedHex = null;
@@ -183,7 +184,7 @@
   }
 
   async function loadMapData() {
-    const [hexRows,territoryRows,labelRows,modifierRows,armyRows,armyMoveRows,operationRows,travelRows,clock,publicFacilityRows,hexConditionRows] = await Promise.all([
+    const [hexRows,territoryRows,labelRows,modifierRows,armyRows,armyMoveRows,operationRows,travelRows,clock,publicFacilityRows,hexConditionRows,civilianBalanceRows] = await Promise.all([
       GMAuth.api("map_hexes?player_visible=eq.true&select=*&order=q.asc,r.asc"),
       GMAuth.api("territories?select=*&order=location_ref.asc"),
       GMAuth.api("map_labels?player_visible=eq.true&select=*&order=created_at.asc"),
@@ -194,7 +195,8 @@
       GMAuth.api("character_travel?select=*&order=created_at.desc&limit=20"),
       GMAuth.api("rpc/get_world_clock",{method:"POST",body:"{}"}),
       GMAuth.api("rpc/map_visible_facilities",{method:"POST",body:"{}"}),
-      GMAuth.api("hex_conditions?select=location_ref,stability_percent,movement_difficulty")
+      GMAuth.api("hex_conditions?select=location_ref,stability_percent,movement_difficulty"),
+      GMAuth.api("civilian_economy_config?select=*&limit=1").catch(()=>[])
     ]);
     mapRegistry = hexRows || [];
     territories = territoryRows || [];
@@ -207,6 +209,7 @@
     worldClock = clock || null;
     visibleFacilities = publicFacilityRows || [];
     hexConditions = hexConditionRows || [];
+    civilianBalanceConfig = civilianBalanceRows?.[0] || null;
     civilianSignals = [];
     const currentChar = livingCharacter();
     if (currentChar && currentChar.movement_status === "stationary") {
@@ -1245,7 +1248,8 @@
       $("selectedHexPopulation").textContent="--";
       $("selectedHexManpower").textContent="--";
       ["selectedHexCapacity","selectedHexFood","selectedHexEnergy",
-       "selectedHexStability","selectedHexDifficulty","selectedHexPiracy"].forEach(id=>$(id).textContent="--");
+       "selectedHexStability","selectedHexDifficulty","selectedHexPiracy",
+       "selectedHexFoodCost","selectedHexEnergyCost","selectedHexTax"].forEach(id=>$(id).textContent="--");
       $("selectedCivilianDiscoveries").innerHTML='<div class="empty-state">NO SIGNALS DISCOVERED.</div>';
       $("selectedResourceList").innerHTML="";
       $("selectedResourceEmpty").hidden=false;
@@ -1296,6 +1300,15 @@
     $("selectedHexCapacity").textContent=system?.population_capacity!=null?fmt(system.population_capacity):"--";
     $("selectedHexFood").textContent=system?fmt(system.food):"--";
     $("selectedHexEnergy").textContent=system?fmt(system.energy):"--";
+    const citizens=Number(system?.population||0);
+    const dailyFood=citizens*Number(civilianBalanceConfig?.food_per_civilian_per_day||.001);
+    const dailyEnergy=citizens*Number(civilianBalanceConfig?.energy_per_civilian_per_day||.001);
+    const supplied=Number(system?.food||0)>=dailyFood&&Number(system?.energy||0)>=dailyEnergy;
+    $("selectedHexFoodCost").textContent=system?fmt(dailyFood)+" / DAY":"--";
+    $("selectedHexEnergyCost").textContent=system?fmt(dailyEnergy)+" / DAY":"--";
+    const stable=Number(hexConditions.find(h=>h.location_ref===selectedHex.ref)?.stability_percent??65);
+    const dailyTax=citizens*Number(civilianBalanceConfig?.tax_aureum_per_civilian_per_day||.02)*(stable/100)*(supplied?1:.5);
+    $("selectedHexTax").textContent=system?fmt(dailyTax)+" A / DAY":"--";
     $("selectedHexStability").textContent=fmt(stability)+"%";
     $("selectedHexDifficulty").textContent=difficulty+"/5";
     $("selectedHexPiracy").textContent=fmt(Math.min(35,(100-stability)*.2+(difficulty-1)))+"% PIRACY CHANCE";
