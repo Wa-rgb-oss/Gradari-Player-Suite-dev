@@ -54,6 +54,7 @@
       faction:"suite-faction",
       characters:"suite-characters",
       friends:"suite-friends",
+      contracts:"suite-contracts",
       actions:"suite-actions",
       markets:"suite-markets",
       canon:"suite-canon"
