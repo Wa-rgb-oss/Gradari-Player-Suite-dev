@@ -24,6 +24,9 @@
   const shown=available.filter(c=>selected==="all"||c.career_path===selected);
   list.innerHTML=shown.length?shown.map(c=>{
    const taken=mine.has(c.id);
+   const now=currentWorldHour();
+   const cooldown=(assignments.filter(a=>a.contract_id===c.id&&a.status==="completed"&&a.accepted_world_hour!=null)
+      .reduce((remaining,a)=>Math.max(remaining,Number(a.accepted_world_hour)+Number(c.cooldown_game_hours||36)-Number(now||0)),0));
    const groupSize=roster.length||1;
    const required=groupSize<c.min_party_size||groupSize>c.max_party_size;
    return '<article class="hud-panel compact" style="margin-bottom:12px">'+
@@ -35,7 +38,7 @@
     '<div class="telemetry-row"><span>Reward Pool</span><strong>'+amt(c.reward_aureum)+' A / '+esc(c.reward_reputation)+' REP / '+esc(c.reward_research_points)+' RP</strong></div>'+
     '<div class="telemetry-row"><span>Deadline After Acceptance</span><strong>'+esc(c.duration_game_hours==null?"NONE":c.duration_game_hours+" GAME HOURS")+'</strong></div></div>'+
     '<div class="form-actions" style="margin-top:12px"><button class="hud-button secondary" type="button" data-contract-action="accept" data-id="'+esc(c.id)+'" '+
-      ((taken||required||working)?'disabled':'')+'>'+(taken?"ALREADY ACCEPTED":required?"PARTY SIZE REQUIRED":"ACCEPT CONTRACT")+'</button></div></article>';
+      ((taken||required||cooldown>0||working)?'disabled':'')+'>'+(taken?"ALREADY ACCEPTED":required?"PARTY SIZE REQUIRED":cooldown>0?"COOLDOWN "+Math.ceil(cooldown)+" GAME HRS":"ACCEPT CONTRACT")+'</button></div></article>';
   }).join(""):'<div class="empty-state">NO AVAILABLE CONTRACTS FOR THIS CAREER.</div>';
 
   active.innerHTML=assignments.length?assignments.map(a=>{
