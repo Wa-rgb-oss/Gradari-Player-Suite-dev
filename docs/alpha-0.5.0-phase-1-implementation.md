@@ -1,60 +1,44 @@
-# Gradari Mireris Alpha 0.5.0, Phase 1
+# Alpha 0.5.0 Phase 1: Implementation and QA
 
-## Implementation status (2026-10-26)
+Date: October 26, 2026. Gradari Supabase project: tgszdvvitdijzkkbrlpl.
 
-This branch starts Phase 1 using the current `Gradari-Player-Suite-dev` codebase. Nothing here has been merged into `main` or applied to the production Gradari database.
+## Backend implemented
+- RLS-secured contracts, objectives, deadlines, cooldowns, verified and transaction-safe shared rewards.
+- Temporary three-player parties, friendship invitations, membership, leadership succession.
+- Server-validated visits, local food/energy deliveries, and political activity contracts. Seven starting assignments.
+- Civilian reputation and career-specific research-perk bonuses.
+- Population cap, growth, food and energy consumption, shortage decline, governmental taxation, local supply transfer, daily audit ledger.
+- Seven populated canon systems (total 112,000 civilians), starting food/energy reserves, 631 configurable hex stability/difficulty records.
+- Population tick integrated once per 36-hour in-game day; removed duplicate legacy industry-cycle population growth.
+- Hex-by-hex adjacent movement, difficulty-dependent ETA, server-rolled variable piracy travel delays.
+- Research branches for exploration/navigation, politics and general specialization; existing industrial research retained.
+- Dynamic proximity events, first-discovery rewards and cooperative nearby discovery sharing.
 
-### Completed on this branch
+## Frontend implemented
+- Player Suite Contracts & Assignments: contract board, career filter, accept/cancel/verify, timed countdowns, resource deliveries, reputation, temporary party creation and invites.
+- Map HUD: population, capacity, food, energy, demand, taxes, stability, movement difficulty, piracy, and nearby discovery markers.
+- Map Character: adjacent travel restriction, difficulty ETA and piracy incident notification.
+- Research: three-column tier layout extended for additional branches.
 
-- Added a `Contracts & Assignments` tab to the existing Player Suite without replacing the existing layout or styling.
-- Added a civilian contract board that loads authorized contracts and the current player's assignments.
-- Added a secure, atomic contract-acceptance RPC; players cannot directly insert their own assignments or award themselves rewards.
-- Added the first SQL migration for civilian contracts and assignment state.
-- Added a separate, non-destructive migration extending the existing `system_economies` model with population capacity, military-population tracking, and local energy storage.
-- Added hex stability/movement-difficulty data structures, an audit ledger for future population-day processing, and a read-only population preview helper.
+## Initial balance
+- Growth 0.3 percent per full-supply game day, reduced by stability and proximity to capacity.
+- Decline 0.1 percent under shortage; food/energy need 0.001 units per civilian per day.
+- Tax 0.02 Aureum per civilian per day, scaled by stability and lowered under shortage.
+- Capital starts at 40,000/80,000 civilians/capacity; six other developed locations start at 12,000/30,000 each.
+- Initial population reserves cover approximately ten game days. All values are provisional for Alpha testing.
 
-### Not implemented yet
+## QA performed
+- Rollback-only signed-in contract acceptance, successful 100-Aureum claim, cooldown enforcement.
+- Rollback-only party creation, friend invitation and acceptance with two members.
+- Rollback-only adjacent map travel (server returned nine world hours).
+- Rollback-only first/second civilian-day processing, proving repeated day processing adds no additional taxes or updates.
+- Verified no test assignments, reputation records, party records or daily ledger entries persisted.
+- Confirmed contracts (7), populated systems (7), hex condition records (631), discovery events (3), and navigation perks (3).
+- Confirmed RLS on all new civilian tables and no anonymous EXECUTE permission for civilian RPCs.
+- JavaScript syntax and HTML integration checks passed for the Player Suite, Map, and Research.
 
-- Contract objectives/completion and Aureum/reputation/research-point payouts.
-- Temporary three-player parties and cooperative contract enrollment.
-- Canonical in-game world-clock deadline processing.
-- Civilian population's actual daily energy/food deduction, growth and taxation.
-- Local energy production/supply mapping.
-- Hex travel, piracy/discovery events, navigation research, and other Phase 1 roadmap items.
-- Phase 2 recruitment and warfare.
-
-### Existing system compatibility findings
-
-1. The current game already uses `public.system_economies.population`, `manpower`, and `food`.
-2. The legacy `run_industry_cycle()` already changes population and manpower. The new population simulation must replace/integrate its existing logic rather than process twice.
-3. The existing `queue_ship_construction()` spends local manpower but does not explicitly transfer civilians into military personnel. Phase 2 will require a careful reconciliation of active ships and any queued orders, with no inferred or duplicated personnel.
-4. Existing `ship_blueprints`, `ships`, and `shipyard_orders` should be extended, not duplicated.
-5. Production/stability/taxing rules are **not** activated by these migrations. Balance constants remain unset pending user approval.
-
-### Database deployment blocker
-
-The currently connected Supabase project is the **CleanFreaks** project, not the Gradari database. Gradari's configured Supabase project (visible in `auth.js`) is not accessible through the active Supabase connector. **Do not apply these migrations to CleanFreaks.**
-
-Once Gradari Supabase access is enabled, inspect its live schema/migrations, back up relevant data, verify function and policy dependencies, and apply these migrations in timestamp order. Then run database-level security and concurrency tests.
-
-### Review / testing checklist
-
-- [ ] Confirm GitHub branch contains only intended modifications.
-- [ ] Check JavaScript syntax, HTML panel/tab anchors, and CSS compatibility.
-- [ ] Validate SQL migrations on a Gradari staging database and confirm `private.is_admin()` is available.
-- [ ] Test authenticated and anonymous RLS access for both new tables.
-- [ ] Verify two simultaneous accept requests cannot create two active assignments.
-- [ ] Verify players cannot modify payouts or mark their own assignments completed.
-- [ ] Verify contract board loads and shows database-unavailable fallback safely.
-- [ ] Check desktop and mobile tab navigation and direct `#contracts` link.
-- [ ] Audit current population/manpower/ship order totals before activation.
-- [ ] Confirm that the live game behavior does not change until migrations and features are intentionally released.
-
-### Next implementation sequence
-
-1. Connect the correct Gradari Supabase project and validate pending migrations.
-2. Finish contract completion/rewards and canonical world-clock deadlines, with transaction-safe payouts.
-3. Add three-person temporary parties, invites, cooperative acceptance and eligibility.
-4. Expand research/network career rules; implement hex travel, conditions, proximity discoveries.
-5. Integrate a **single** daily civilian population tick with growth caps, local food/energy accounting, taxation, and reconciliation logs.
-6. Test Phase 1 end-to-end before beginning Phase 2.
+## Release cautions
+- Changes to Gradari Supabase are applied. The GitHub feature branch must be merged to publish the new frontend.
+- An authenticated desktop/mobile visual smoke test is still advised after publication; end-to-end multi-user play and the first full live civilian day require observation.
+- Phase 2 recruitment, military accounting and warfare are not implemented in this release.
+- Existing shipyard manpower remains legacy until Phase 2 migration. Do not mix it with the reserved military_population field.
