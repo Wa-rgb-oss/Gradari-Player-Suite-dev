@@ -1905,6 +1905,37 @@
     });
   });
 
+  // Keep the active route and visible character location synchronized without
+  // requesting the entire galaxy map during every update.
+  let refreshingTravel=false;
+  async function refreshActiveTravel() {
+    const char=livingCharacter();
+    if(!char||!activeCharacterTravel()||refreshingTravel||document.hidden)return;
+    refreshingTravel=true;
+    try{
+      const [trips,updates,clock]=await Promise.all([
+        GMAuth.api("character_travel?user_id=eq."+encodeURIComponent(session.user.id)+"&character_id=eq."+encodeURIComponent(char.id)+"&status=eq.traveling&select=*"),
+        GMAuth.api("characters?id=eq."+encodeURIComponent(char.id)+"&select=id,location_ref,location_name,movement_status,status,life_status"),
+        GMAuth.api("rpc/get_world_clock",{method:"POST",body:"{}"})
+      ]);
+      characterTravel=(characterTravel||[]).filter(row=>row.character_id!==char.id).concat(trips||[]);
+      const latest=updates?.[0];
+      if(latest) Object.assign(char,latest);
+      if(clock) worldClock=clock;
+      renderCharacterPanel();
+      renderTravelPanel();
+      draw();
+    }catch(error){
+      console.warn("Unable to refresh active civilian route",error);
+    }finally{refreshingTravel=false;}
+  }
+  setInterval(refreshActiveTravel,30000);
+  setInterval(()=>{
+    if(!activeCharacterTravel()||document.hidden)return;
+    renderTravelPanel();
+    draw();
+  },5000);
+
   const observer=new ResizeObserver(() => resizeCanvas(false));
   observer.observe(canvas.parentElement);
 
