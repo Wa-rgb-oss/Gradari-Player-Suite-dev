@@ -48,6 +48,9 @@
     (supply?'<form class="form-shell" data-contract-action="supply" data-id="'+esc(a.id)+'">'+
       '<div class="form-grid"><label><span>Supply Amount</span><input type="number" name="quantity" min="0.01" max="1000000" step="any" required></label>'+
       '<label><span>Source</span><select name="source"><option value="player">PERSONAL INVENTORY</option><option value="faction">FACTION INVENTORY</option></select></label></div>'+
+      '<label><span>Resource</span><select name="resource"><option value="'+esc(c.objective_resource_code)+'">'+esc(String(c.objective_resource_code).toUpperCase())+'</option>'+
+      (c.objective_resource_code==="energy"?'<option value="energy_cells">ENERGY CELLS (1:1)</option>':'')+
+      '</select></label>'+
       '<button class="hud-button secondary" type="submit">DELIVER '+esc(c.objective_resource_code?.toUpperCase())+'</button></form>':'')+
     (inProgress?'<div class="form-actions" style="margin-top:10px"><button type="button" class="hud-button secondary" data-contract-action="claim" data-id="'+esc(a.id)+'">VERIFY &amp; CLAIM</button>'+
       '<button type="button" class="hud-button danger" data-contract-action="cancel" data-id="'+esc(a.id)+'">CANCEL</button></div>':'')+
@@ -120,7 +123,7 @@
   const a=assignments.find(a=>a.id===form.dataset.id),c=available.find(c=>c.id===a?.contract_id);
   if(!c)return feedback("CONTRACT UNAVAILABLE",true);
   const values=new FormData(form);
-  transact(api("supply_civilian_system",{p_location_ref:c.location_ref,p_resource:c.objective_resource_code,
+  transact(api("supply_civilian_system",{p_location_ref:c.location_ref,p_resource:values.get("resource"),
    p_quantity:Number(values.get("quantity")),p_source:values.get("source"),p_assignment_id:a.id}),"SUPPLIES DELIVERED");
  });
  partyActions.addEventListener("click",e=>{
