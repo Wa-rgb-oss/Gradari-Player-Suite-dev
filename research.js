@@ -116,6 +116,23 @@
       requirements.get(row.perk_id).push(row.prerequisite_perk_id);
     });
 
+    // Allocate one or more rows per research discipline; the original
+    // five-row network otherwise overlaps new Alpha 0.5.0 career branches.
+    const positions=new Map();
+    const categories=[...new Set(perks.map(perk=>String(perk.category||"GENERAL").toUpperCase()))].sort();
+    let nextRow=1;
+    categories.forEach(category=>{
+      const items=perks.filter(perk=>String(perk.category||"GENERAL").toUpperCase()===category)
+        .sort((a,b)=>Number(a.sort_order||0)-Number(b.sort_order||0)||String(a.name).localeCompare(String(b.name)));
+      let rowsUsed=1;
+      for(let tier=1;tier<=3;tier++){
+        const inTier=items.filter(perk=>Number(perk.tier||1)===tier);
+        rowsUsed=Math.max(rowsUsed,inTier.length);
+        inTier.forEach((perk,index)=>positions.set(perk.id,{col:tier,row:nextRow+index}));
+      }
+      nextRow+=rowsUsed;
+    });
+
     const nodes=perks.map(perk=>{
       const req=requirements.get(perk.id)||[];
       const missing=req.filter(id=>!owned.has(id));
@@ -127,8 +144,8 @@
       const status=isOwned?"UNLOCKED":missing.length?"LOCKED":affordable?"AVAILABLE":"INSUFFICIENT RP";
       const reqNames=req.map(id=>perkMap.get(id)?.name).filter(Boolean);
       const missingNames=missing.map(id=>perkMap.get(id)?.name).filter(Boolean);
-      const col=Math.max(1,Math.min(3,Number(perk.position_x||0)+1));
-      const row=Math.max(1,Math.min(5,Number(perk.position_y||0)+1));
+      const col=positions.get(perk.id)?.col||Math.max(1,Math.min(3,Number(perk.tier||1)));
+      const row=positions.get(perk.id)?.row||1;
       const initials=String(perk.name||"RP").split(/\s+/).map(part=>part[0]).join("").slice(0,3).toUpperCase();
       let action='';
       if(isOwned){
