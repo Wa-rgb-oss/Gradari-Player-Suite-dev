@@ -496,6 +496,14 @@
           <div class="content-grid">
             <div>
               <div class="section-code" style="margin-bottom:12px">AVAILABLE CONTRACTS</div>
+              <label class="form-shell" style="display:block;margin-bottom:14px"><span>Career Filter</span>
+                <select id="civilianCareerFilter">
+                  <option value="all">ALL CAREERS</option>
+                  <option value="economic">ECONOMIC</option>
+                  <option value="political">POLITICAL</option>
+                  <option value="exploration">EXPLORATION</option>
+                </select>
+              </label>
               <div id="civilianContractList" class="stack"><div class="empty-state">LOADING CONTRACTS...</div></div>
             </div>
             <aside class="hud-panel compact">
@@ -503,6 +511,12 @@
               <h2 style="margin:5px 0 12px;text-transform:uppercase">Assignments</h2>
               <div id="civilianAssignmentList" class="telemetry-stack"><div class="empty-state">LOADING...</div></div>
               <div id="civilianContractState" class="form-state" role="status" aria-live="polite"></div>
+              <div class="section-code" style="margin-top:24px">TEMPORARY PARTY / MAX 3 PLAYERS</div>
+              <div id="civilianPartyInfo" class="telemetry-stack" style="margin:14px 0"></div>
+              <div id="civilianPartyActions" class="form-actions"></div>
+              <div id="civilianPartyInvites" class="stack" style="margin-top:14px"></div>
+              <div class="section-code" style="margin-top:24px">CAREER REPUTATION</div>
+              <div id="civilianReputation" class="telemetry-stack"></div>
             </aside>
           </div>
         </section>
