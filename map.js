@@ -11,6 +11,10 @@
   let characterTravel = [];
   let worldClock = null;
   let visibleFacilities = [];
+  let hexConditions = [];
+  let civilianBalanceConfig = null;
+  let civilianSignals = [];
+  let navigationRadius = 1;
   let selectedHex = null;
   let hoverHex = null;
 
@@ -180,7 +184,7 @@
   }
 
   async function loadMapData() {
-    const [hexRows,territoryRows,labelRows,modifierRows,armyRows,armyMoveRows,operationRows,travelRows,clock,publicFacilityRows] = await Promise.all([
+    const [hexRows,territoryRows,labelRows,modifierRows,armyRows,armyMoveRows,operationRows,travelRows,clock,publicFacilityRows,hexConditionRows,civilianBalanceRows] = await Promise.all([
       GMAuth.api("map_hexes?player_visible=eq.true&select=*&order=q.asc,r.asc"),
       GMAuth.api("territories?select=*&order=location_ref.asc"),
       GMAuth.api("map_labels?player_visible=eq.true&select=*&order=created_at.asc"),
@@ -190,7 +194,9 @@
       GMAuth.api("military_operations?select=*&order=created_at.desc&limit=100"),
       GMAuth.api("character_travel?select=*&order=created_at.desc&limit=20"),
       GMAuth.api("rpc/get_world_clock",{method:"POST",body:"{}"}),
-      GMAuth.api("rpc/map_visible_facilities",{method:"POST",body:"{}"})
+      GMAuth.api("rpc/map_visible_facilities",{method:"POST",body:"{}"}),
+      GMAuth.api("hex_conditions?select=location_ref,stability_percent,movement_difficulty"),
+      GMAuth.api("civilian_economy_config?select=*&limit=1").catch(()=>[])
     ]);
     mapRegistry = hexRows || [];
     territories = territoryRows || [];
@@ -202,6 +208,21 @@
     characterTravel = travelRows || [];
     worldClock = clock || null;
     visibleFacilities = publicFacilityRows || [];
+    hexConditions = hexConditionRows || [];
+    civilianBalanceConfig = civilianBalanceRows?.[0] || null;
+    civilianSignals = [];
+    const currentChar = livingCharacter();
+    if (currentChar && currentChar.movement_status === "stationary") {
+      try {
+        const scan = await GMAuth.api("rpc/scan_civilian_discoveries",{
+          method:"POST",body:JSON.stringify({p_character_id:currentChar.id})
+        });
+        civilianSignals = scan?.events || [];
+        navigationRadius = Number(scan?.scan_radius || 1);
+      } catch (error) {
+        console.warn("Civilian discovery scan unavailable",error);
+      }
+    }
   }
 
   async function refreshAll(message="",target=null) {
@@ -804,6 +825,34 @@
   }
 
 
+  function drawCivilianSignals() {
+    const byHex = new Map();
+    (civilianSignals || []).forEach(event => {
+      const group = byHex.get(event.location_ref) || [];
+      group.push(event);
+      byHex.set(event.location_ref,group);
+    });
+    ctx.save();
+    byHex.forEach((signals,ref) => {
+      const h = parseRef(ref);
+      if (!h) return;
+      const p=worldToScreen(hexToWorld(h.q,h.r));
+      const x=p.x+hexSize*camera.zoom*.5,y=p.y-hexSize*camera.zoom*.5;
+      ctx.beginPath();
+      ctx.arc(x,y,Math.max(7,9*camera.zoom),0,Math.PI*2);
+      ctx.fillStyle="rgba(18,44,55,.95)";
+      ctx.fill();
+      ctx.strokeStyle=signals.some(event=>event.rarity==="rare")?"#E7BC72":"#7CC7DB";
+      ctx.lineWidth=1.4;
+      ctx.stroke();
+      ctx.font="bold "+Math.max(9,10*camera.zoom)+"px sans-serif";
+      ctx.textAlign="center";ctx.textBaseline="middle";
+      ctx.fillStyle="#FFFFFF";
+      ctx.fillText(signals.some(event=>event.rarity==="rare")?"★":String(signals.length),x,y);
+    });
+    ctx.restore();
+  }
+
   function draw() {
     const rect=canvas.getBoundingClientRect();
     ctx.clearRect(0,0,rect.width,rect.height);
@@ -813,6 +862,7 @@
     drawMapLabels();
     drawSystems();
     drawModifiers();
+    drawCivilianSignals();
     drawTradeStations();
     drawFacilities();
     drawShips();
@@ -1022,7 +1072,10 @@
 
     if(char?.location_ref && selectedHex){
       distance=hexDistance(char.location_ref,selectedHex.ref);
-      hours=distance*Number(player?.config?.character_travel_hours_per_hex || 6);
+      const condition=hexConditions.find(row=>row.location_ref===selectedHex.ref);
+      const difficulty=Number(condition?.movement_difficulty??3);
+      hours=distance*Number(player?.config?.character_travel_hours_per_hex || 6)
+        *(0.75+0.25*difficulty)*(navigationRadius>1?.9:1);
       arrival=currentWorldHour()+hours;
     }
 
@@ -1031,8 +1084,8 @@
     $("mapTravelArrival").textContent=distance ? arrivalTimeLabel(arrival) : "--";
 
     const button=$("mapTravelBtn");
-    button.disabled=Boolean(travel) || !char?.location_ref || !selectedHex || distance<1;
-    button.textContent=travel ? "CHARACTER IN TRANSIT" : "TRAVEL TO SELECTED HEX";
+    button.disabled=Boolean(travel) || !char?.location_ref || !selectedHex || distance!==1;
+    button.textContent=travel ? "CHARACTER IN TRANSIT" : distance>1 ? "SELECT ADJACENT HEX" : "TRAVEL TO SELECTED HEX";
   }
 
   function canMilitary() {
@@ -1194,6 +1247,10 @@
       $("selectedHexSlots").textContent="0 / 8";
       $("selectedHexPopulation").textContent="--";
       $("selectedHexManpower").textContent="--";
+      ["selectedHexCapacity","selectedHexFood","selectedHexEnergy",
+       "selectedHexStability","selectedHexDifficulty","selectedHexPiracy",
+       "selectedHexFoodCost","selectedHexEnergyCost","selectedHexTax"].forEach(id=>$(id).textContent="--");
+      $("selectedCivilianDiscoveries").innerHTML='<div class="empty-state">NO SIGNALS DISCOVERED.</div>';
       $("selectedResourceList").innerHTML="";
       $("selectedResourceEmpty").hidden=false;
       $("selectedFacilityControls").innerHTML="";
@@ -1237,6 +1294,29 @@
     $("selectedHexSlots").textContent=selectedFacilities.length+" / "+Number(system?.slot_limit || 8);
     $("selectedHexPopulation").textContent=system ? fmt(system.population) : "--";
     $("selectedHexManpower").textContent=system ? fmt(system.manpower) : "--";
+    const conditions=hexConditions.find(h=>h.location_ref===selectedHex.ref);
+    const stability=Number(conditions?.stability_percent??65);
+    const difficulty=Number(conditions?.movement_difficulty??3);
+    $("selectedHexCapacity").textContent=system?.population_capacity!=null?fmt(system.population_capacity):"--";
+    $("selectedHexFood").textContent=system?fmt(system.food):"--";
+    $("selectedHexEnergy").textContent=system?fmt(system.energy):"--";
+    const citizens=Number(system?.population||0);
+    const dailyFood=citizens*Number(civilianBalanceConfig?.food_per_civilian_per_day||.001);
+    const dailyEnergy=citizens*Number(civilianBalanceConfig?.energy_per_civilian_per_day||.001);
+    const supplied=Number(system?.food||0)>=dailyFood&&Number(system?.energy||0)>=dailyEnergy;
+    $("selectedHexFoodCost").textContent=system?fmt(dailyFood)+" / DAY":"--";
+    $("selectedHexEnergyCost").textContent=system?fmt(dailyEnergy)+" / DAY":"--";
+    const stable=Number(hexConditions.find(h=>h.location_ref===selectedHex.ref)?.stability_percent??65);
+    const dailyTax=citizens*Number(civilianBalanceConfig?.tax_aureum_per_civilian_per_day||.02)*(stable/100)*(supplied?1:.5);
+    $("selectedHexTax").textContent=system?fmt(dailyTax)+" A / DAY":"--";
+    $("selectedHexStability").textContent=fmt(stability)+"%";
+    $("selectedHexDifficulty").textContent=difficulty+"/5";
+    $("selectedHexPiracy").textContent=fmt(Math.min(35,(100-stability)*.2+(difficulty-1)))+"% PIRACY CHANCE";
+    const nearby=civilianSignals.filter(event=>event.location_ref===selectedHex.ref);
+    $("selectedCivilianDiscoveries").innerHTML=nearby.length
+      ? nearby.map(event=>'<article class="notice map-list-row"><div><strong>'+esc(event.title)+'</strong><div class="section-code">'+
+        esc(event.rarity==="rare"?"★ RARE DISCOVERY":"DISCOVERY")+' // '+esc(event.description)+'</div></div></article>').join("")
+      : '<div class="empty-state">NO SIGNALS DISCOVERED.</div>';
 
     const deposits=(player.resourceDeposits || []).filter(row=>row.location_ref===selectedHex.ref);
     const resourceNames=new Map((player.resourceCatalog || []).map(row=>[row.code,row.name]));
@@ -1660,7 +1740,7 @@
         method:"POST",
         body:JSON.stringify({p_character_id:char.id,p_to_ref:selectedHex.ref})
       });
-      await refreshAll("TRAVELING // "+movementTimeLabel(result.travel_hours)+" // ETA "+arrivalTimeLabel(result.arrive_world_hour),$("mapTravelState"));
+      await refreshAll("TRAVELING // "+movementTimeLabel(result.travel_hours)+" // ETA "+arrivalTimeLabel(result.arrive_world_hour)+(result.piracy_incident?" // PIRACY DISRUPTION +"+fmt(result.piracy_delay_hours)+" HOURS":""),$("mapTravelState"));
     }catch(error){
       setState($("mapTravelState"),"TRAVEL FAILED // "+error.message,"error");
     }

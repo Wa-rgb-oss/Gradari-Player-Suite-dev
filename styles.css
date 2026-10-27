@@ -3344,7 +3344,7 @@ dialog::backdrop{background:rgba(0,0,0,.72);backdrop-filter:blur(2px)}
 .research-link{fill:none;stroke:rgba(116,141,151,.34);stroke-width:2;stroke-dasharray:5 5;marker-end:url(#researchArrow)}
 .research-link.active{stroke:rgba(134,215,232,.78);stroke-dasharray:none;filter:drop-shadow(0 0 4px rgba(79,212,232,.18))}
 .research-connections marker path{fill:rgba(116,141,151,.65)}
-.research-node-grid{position:relative;z-index:2;display:grid;grid-template-columns:repeat(3,minmax(260px,1fr));grid-template-rows:repeat(5,minmax(118px,auto));column-gap:92px;row-gap:14px;min-height:650px}
+.research-node-grid{position:relative;z-index:2;display:grid;grid-template-columns:repeat(3,minmax(260px,1fr));grid-auto-rows:minmax(118px,auto);column-gap:92px;row-gap:14px;min-height:650px}
 .research-node{position:relative;align-self:center;min-width:0;padding:14px 15px;border:1px solid rgba(116,141,151,.28);background:rgba(5,13,18,.94);transition:border-color .16s ease,background .16s ease,opacity .16s ease}
 .research-node::before{content:"";position:absolute;left:-1px;top:14px;bottom:14px;width:2px;background:rgba(116,141,151,.38)}
 .research-node.locked{opacity:.58}
