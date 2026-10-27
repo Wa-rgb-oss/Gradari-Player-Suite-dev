@@ -80,8 +80,7 @@ begin
     'arrive_world_hour',v_arrive,'travel_hours',v_distance*v_hours_per_hex*(0.75+0.25*v_difficulty)*v_navigation_modifier
   );
 end;
-$function$
-
+$function$;
 
 -- Server-authoritative proximity discovery, with one unique claim per player/event.
 create table if not exists public.civilian_discoveries (
