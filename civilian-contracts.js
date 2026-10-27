@@ -10,11 +10,12 @@
  const esc=v=>GMUI.esc(String(v??""));
  const amt=v=>Number(v||0).toLocaleString(undefined,{maximumFractionDigits:2});
  const careers={economic:"ECONOMIC",political:"POLITICAL",exploration:"EXPLORATION"};
- let fetching=false,working=false,available=[],assignments=[],party=null,roster=[],directory=new Map(),worldHour=null;
+ let fetching=false,working=false,available=[],assignments=[],party=null,roster=[],directory=new Map(),worldHour=null,clockAnchor=0,clockSpeed=0;
  const myUser=()=>window.GMPlayerSuiteState?.session?.user?.id||null;
  const api=(functionName,params={})=>GMAuth.api("rpc/"+functionName,{method:"POST",body:JSON.stringify(params)});
  function feedback(msg,bad=false){notice.textContent=msg;notice.style.color=bad?"#d99582":"";}
- function clockLeft(due){if(due==null)return "NO EXPIRATION";if(worldHour==null)return "WORLD CLOCK LOADING";const left=Math.max(0,Math.ceil(Number(due)-worldHour));return left+" GAME HOURS LEFT";}
+ function currentWorldHour(){return worldHour==null?null:worldHour+Math.max(0,Date.now()-clockAnchor)/3600000*clockSpeed;}
+ function clockLeft(due){if(due==null)return "NO EXPIRATION";const now=currentWorldHour();if(now==null)return "WORLD CLOCK LOADING";const left=Math.max(0,Math.ceil(Number(due)-now));return left+" GAME HOURS LEFT";}
  function labelFor(userId){return directory.get(userId)||"PLAYER "+String(userId).slice(0,8);}
  function completionLabel(c){if(c.objective_kind==="supply_system")return "DELIVER "+amt(c.objective_quantity)+" "+String(c.objective_resource_code||"").toUpperCase()+(c.location_ref?" TO "+c.location_ref:"");if(c.objective_kind==="political_activity")return "COMPLETE A NEW POLITICAL ACTIVITY";return "TRAVEL TO "+(c.location_ref||"DESIGNATED HEX");}
  function renderBoard(){
@@ -44,7 +45,7 @@
    return '<article class="hud-panel compact" style="margin-bottom:10px">'+
     '<div class="section-code">'+esc(String(a.status).replaceAll("_"," ").toUpperCase())+'</div>'+
     '<h3 style="margin:7px 0">'+esc(c?.title||"CONTRACT ASSIGNMENT")+'</h3>'+
-    (inProgress?'<p>'+esc(clockLeft(a.due_world_hour))+'</p>':'')+
+    (inProgress?'<p><span data-civilian-deadline="'+esc(a.due_world_hour??'')+'">'+esc(clockLeft(a.due_world_hour))+'</span></p>':'')+
     (supply?'<form class="form-shell" data-contract-action="supply" data-id="'+esc(a.id)+'">'+
       '<div class="form-grid"><label><span>Supply Amount</span><input type="number" name="quantity" min="0.01" max="1000000" step="any" required></label>'+
       '<label><span>Source</span><select name="source"><option value="player">PERSONAL INVENTORY</option><option value="faction">FACTION INVENTORY</option></select></label></div>'+
@@ -90,7 +91,7 @@
    ]);
    const state=window.GMPlayerSuiteState;
    directory=new Map((state?.directory||[]).map(p=>[p.user_id,p.display_name||p.user_id]));
-   available=cs||[];assignments=as||[];worldHour=Number(clk?.total_world_hours||0);
+   available=cs||[];assignments=as||[];worldHour=clk?.total_world_hours!=null?Number(clk.total_world_hours):null;clockAnchor=Date.now();clockSpeed=clk?.running?Number(clk?.speed||5):0;
    const partyId=owned?.[0]?.party_id;
    const [ps,ms]=partyId?await Promise.all([
     GMAuth.api("civilian_parties?id=eq."+partyId+"&select=*"),
@@ -141,6 +142,10 @@
   transact(api("respond_civilian_party_invite",{p_invite_id:b.dataset.id,p_accept:b.dataset.accept==="yes"}),"INVITATION UPDATED");
  });
  filter?.addEventListener("change",renderBoard);
+ setInterval(()=>{document.querySelectorAll("[data-civilian-deadline]").forEach(node=>{
+   const due=node.dataset.civilianDeadline;
+   node.textContent=clockLeft(due===""?null:Number(due));
+ });},1000);
  document.addEventListener("gm:player-state",load);
  if(window.GMPlayerSuiteState)load();
 })();
