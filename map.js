@@ -1298,7 +1298,7 @@
     $("selectedHexEnergy").textContent=system?fmt(system.energy):"--";
     $("selectedHexStability").textContent=fmt(stability)+"%";
     $("selectedHexDifficulty").textContent=difficulty+"/5";
-    $("selectedHexPiracy").textContent=fmt(Math.min(75,(100-stability)*.4+difficulty*3))+"% RISK INDEX";
+    $("selectedHexPiracy").textContent=fmt(Math.min(35,(100-stability)*.2+(difficulty-1)))+"% PIRACY CHANCE";
     const nearby=civilianSignals.filter(event=>event.location_ref===selectedHex.ref);
     $("selectedCivilianDiscoveries").innerHTML=nearby.length
       ? nearby.map(event=>'<article class="notice map-list-row"><div><strong>'+esc(event.title)+'</strong><div class="section-code">'+
@@ -1727,7 +1727,7 @@
         method:"POST",
         body:JSON.stringify({p_character_id:char.id,p_to_ref:selectedHex.ref})
       });
-      await refreshAll("TRAVELING // "+movementTimeLabel(result.travel_hours)+" // ETA "+arrivalTimeLabel(result.arrive_world_hour),$("mapTravelState"));
+      await refreshAll("TRAVELING // "+movementTimeLabel(result.travel_hours)+" // ETA "+arrivalTimeLabel(result.arrive_world_hour)+(result.piracy_incident?" // PIRACY DISRUPTION +"+fmt(result.piracy_delay_hours)+" HOURS":""),$("mapTravelState"));
     }catch(error){
       setState($("mapTravelState"),"TRAVEL FAILED // "+error.message,"error");
     }
