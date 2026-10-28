@@ -110,16 +110,15 @@
   }
 
   async function requestPasswordReset(email) {
-    return request("/auth/v1/recover?redirect_to=" + encodeURIComponent(new URL("login/#reset", CONFIG.siteUrl).href), {
+    return request("/auth/v1/recover?redirect_to=" + encodeURIComponent(new URL("login/", CONFIG.siteUrl).href), {
       method: "POST", body: JSON.stringify({ email: email.trim() })
     });
   }
 
   async function resendConfirmation(email) {
-    return request("/auth/v1/resend", {
+    return request("/auth/v1/resend?redirect_to=" + encodeURIComponent(new URL("login/", CONFIG.siteUrl).href), {
       method: "POST", body: JSON.stringify({
-        type: "signup", email: email.trim(),
-        options: { emailRedirectTo: new URL("login/", CONFIG.siteUrl).href }
+        type: "signup", email: email.trim()
       })
     });
   }
