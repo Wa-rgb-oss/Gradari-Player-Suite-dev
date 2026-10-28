@@ -834,6 +834,30 @@
           <section class="admin-map-canvas-shell">
             <canvas id="adminGalaxyMap" aria-label="Admin galaxy map editor"></canvas>
           </section>
+          <aside class="gm-editor-properties" aria-label="Map properties inspector">
+            <div class="gm-editor-properties-heading">PROPERTIES <span>/ INSPECTOR</span></div>
+            <div class="gm-editor-properties-section">
+              <div class="gm-editor-field-label">ACTIVE SELECTION</div>
+              <strong id="gmEditorInspectHex">NO HEX SELECTED</strong>
+              <div id="gmEditorInspectName" class="gm-editor-small">Select a hex in the map</div>
+            </div>
+            <div class="gm-editor-properties-section">
+              <div class="gm-editor-field-label">WORKSPACE MODE</div>
+              <strong id="gmEditorInspectMode">SELECT</strong>
+            </div>
+            <div class="gm-editor-properties-section">
+              <div class="gm-editor-field-label">WORLD CONTENTS</div>
+              <div class="gm-editor-property-row"><span>Hexes</span><b id="gmEditorInspectCount">0</b></div>
+              <div class="gm-editor-property-row"><span>Claims</span><b id="gmEditorInspectClaims">0</b></div>
+              <div class="gm-editor-property-row"><span>Labels</span><b id="gmEditorInspectLabels">0</b></div>
+              <div class="gm-editor-property-row"><span>Facilities</span><b id="gmEditorInspectBuildings">0</b></div>
+            </div>
+            <div class="gm-editor-properties-section">
+              <div class="gm-editor-field-label">EDIT SELECTED SYSTEM</div>
+              <button type="button" class="hud-button secondary" data-map-ribbon="system">OPEN SYSTEM PROPERTIES</button>
+              <div class="gm-editor-small">Changes are saved using the existing system editor. This panel is read-only.</div>
+            </div>
+          </aside>
         </section>
       </section>
     </section>
