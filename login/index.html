@@ -274,9 +274,26 @@
       else if (key === "terms-of-use" || key === "privacy-policy") openLegalDocument(key);
     }
     window.addEventListener("hashchange", applyAccessHash);
+    const authReturn = new URLSearchParams(window.location.hash.slice(1));
+    const returnedError = authReturn.get("error_description") || authReturn.get("error");
     GMAuth.consumeAuthRedirect();
-    if (GMAuth.isPasswordRecovery()) showAccessView("reset");
-    else {applyAccessHash();GMAuth.redirectIfAuthenticated("home/");}
+    if (GMAuth.isPasswordRecovery()) {
+      showAccessView("reset");
+      GMAuth.getSession().then(session => {
+        if (!session?.access_token) {
+          sessionStorage.removeItem("gm_recovery_pending");
+          showAccessView("recover");
+          document.getElementById("recoverState").textContent = "RESET LINK EXPIRED // REQUEST A NEW LINK";
+        }
+      });
+    } else {
+      applyAccessHash();
+      if (returnedError) {
+        showAccessView("recover");
+        document.getElementById("recoverState").textContent = "AUTHENTICATION LINK INVALID OR EXPIRED // REQUEST A NEW LINK";
+        history.replaceState(null, "", location.pathname);
+      } else GMAuth.redirectIfAuthenticated("home/");
+    }
   </script>
 </body>
 </html>
