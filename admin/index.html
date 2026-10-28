@@ -8,6 +8,7 @@
   <meta name="robots" content="noindex,nofollow">
   <title>GM Administration | Gradari Mireris</title>
   <link rel="stylesheet" href="styles.css?v=three-slots-20261007">
+  <link rel="stylesheet" href="admin-map-workspace.css">
 
   <link rel="icon" type="image/png" sizes="192x192" href="/favicon.png">
   <link rel="icon" type="image/x-icon" sizes="16x16 32x32 48x48 64x64" href="/favicon.ico">
@@ -640,6 +641,18 @@
       </section>
 
       <section class="panel" id="admin-map" data-tab-panel>
+        <div class="gm-editor-ribbon" role="toolbar" aria-label="Map editor workspace">
+          <div class="gm-editor-ribbon-title">GALAXY CARTOGRAPH <span> / ADMIN WORKSPACE</span></div>
+          <div class="gm-editor-ribbon-tools">
+            <button type="button" data-map-ribbon="world" class="active">TERRITORY</button>
+            <button type="button" data-map-ribbon="system">SYSTEMS</button>
+            <button type="button" data-map-ribbon="industry">INDUSTRY</button>
+            <button type="button" data-map-ribbon="ships">SHIPS</button>
+            <button type="button" data-map-ribbon="labels">ANNOTATE</button>
+            <button type="button" data-map-ribbon="tools">UTILITIES</button>
+            <button type="button" id="gmEditorTogglePanels">HIDE TOOLS</button>
+          </div>
+        </div>
         <section class="admin-map-editor admin-map-editor-v2">
           <aside class="admin-map-tools admin-map-command">
             <div class="admin-map-editor-title"><h1>GRADARI MIRERIS</h1><div class="subtitle">Strategic Galaxy Cartograph</div></div>
@@ -834,5 +847,6 @@
   <script src="admin-systems.js"></script>
   <script src="admin-politics.js"></script>
   <script src="admin-map.js"></script>
+  <script src="admin-map-workspace.js"></script>
 </body>
 </html>
