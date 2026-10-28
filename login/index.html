@@ -39,6 +39,7 @@
             <button class="hud-button" type="submit">ENTER PLAYER SUITE</button>
             <div class="auth-status" id="loginState" role="status" aria-live="polite"></div>
           </form>
+          <div class="auth-switch"><button type="button" id="showRecover">FORGOT PASSWORD?</button></div>
           <div class="auth-switch">No player account? <button id="showSignup" type="button">CREATE ACCOUNT</button></div>
         </section>
 
@@ -55,6 +56,33 @@
           <div class="auth-switch">Already registered? <button id="showLogin" type="button">RETURN TO SIGN IN</button></div>
         </section>
 
+        <section id="recoverView" hidden>
+          <h2>Recover Access</h2><p>Enter your account email to receive a secure password reset link.</p>
+          <form id="recoverForm" class="form-shell">
+            <label><span>Email</span><input name="email" type="email" autocomplete="email" required></label>
+            <button class="hud-button" type="submit">SEND RESET LINK</button>
+            <div class="auth-status" id="recoverState" role="status" aria-live="polite"></div>
+          </form>
+          <div class="auth-switch"><button type="button" data-back-login>RETURN TO SIGN IN</button></div>
+        </section>
+        <section id="resetView" hidden>
+          <h2>Set New Password</h2><p>Choose a new password for your player account.</p>
+          <form id="resetForm" class="form-shell">
+            <label><span>New Password</span><input name="password" type="password" minlength="8" autocomplete="new-password" required></label>
+            <label><span>Confirm Password</span><input name="confirm" type="password" minlength="8" autocomplete="new-password" required></label>
+            <button class="hud-button" type="submit">UPDATE PASSWORD</button>
+            <div class="auth-status" id="resetState" role="status" aria-live="polite"></div>
+          </form>
+        </section>
+        <section id="verifyView" hidden>
+          <h2>Verify Your Email</h2><p>Check your inbox and spam folder. You must follow the confirmation link before signing in.</p>
+          <form id="verifyForm" class="form-shell">
+            <label><span>Account Email</span><input name="email" type="email" autocomplete="email" required></label>
+            <button class="hud-button" type="submit">RESEND CONFIRMATION</button>
+            <div class="auth-status" id="verifyState" role="status" aria-live="polite"></div>
+          </form>
+          <div class="auth-switch"><button type="button" data-back-login>RETURN TO SIGN IN</button></div>
+        </section>
         <div class="auth-legal-notice" aria-label="Legal agreement notice">
           <div class="auth-legal-code">SERVICE ACCESS // LEGAL NOTICE</div>
           <p>By selecting <strong>ENTER PLAYER SUITE</strong>, creating an account, or continuing to access or use Gradari Mireris, you agree to the <button type="button" class="auth-legal-link" data-legal-open="terms-of-use">Terms of Use</button> and acknowledge the <button type="button" class="auth-legal-link" data-legal-open="privacy-policy">Privacy Policy</button>. If you do not agree to the Terms of Use, do not access or use the Service.</p>
@@ -80,6 +108,13 @@
     const loginState = document.getElementById("loginState");
     const signupState = document.getElementById("signupState");
 
+    const extraViews = ["recoverView","resetView","verifyView"];
+    function showAccessView(view) {
+      loginView.hidden = view !== "login";
+      signupView.hidden = view !== "signup";
+      extraViews.forEach(id => document.getElementById(id).hidden = id !== view + "View");
+      document.querySelectorAll(".auth-status").forEach(el => {el.textContent = "";el.className = "auth-status";});
+    }
     function swap(showSignup) {
       loginView.hidden = showSignup;
       signupView.hidden = !showSignup;
@@ -87,6 +122,44 @@
       signupState.textContent = "";
     }
 
+    document.getElementById("showRecover").addEventListener("click", () => showAccessView("recover"));
+    document.querySelectorAll("[data-back-login]").forEach(button => button.addEventListener("click", () => showAccessView("login")));
+    async function emailAction(formId, stateId, action, message) {
+      const form = document.getElementById(formId);
+      const state = document.getElementById(stateId);
+      form.addEventListener("submit", async event => {
+        event.preventDefault();
+        const button = form.querySelector("[type=submit]");
+        const email = new FormData(form).get("email").trim();
+        state.textContent = "PROCESSING REQUEST...";
+        button.disabled = true;
+        try {
+          await action(email);
+          state.className = "auth-status success";
+          state.textContent = message;
+        } catch(error) {
+          state.className = "auth-status error";
+          state.textContent = error.status === 429 ? "EMAIL LIMIT REACHED // TRY AGAIN LATER" : "REQUEST FAILED // " + error.message;
+        } finally { window.setTimeout(() => {button.disabled = false;}, 60000); }
+      });
+    }
+    emailAction("recoverForm","recoverState",GMAuth.requestPasswordReset,"IF THIS ACCOUNT EXISTS, A RECOVERY EMAIL HAS BEEN REQUESTED.");
+    emailAction("verifyForm","verifyState",GMAuth.resendConfirmation,"IF ELIGIBLE, A NEW CONFIRMATION EMAIL HAS BEEN REQUESTED.");
+    document.getElementById("resetForm").addEventListener("submit", async event => {
+      event.preventDefault();
+      const form = event.currentTarget, data = Object.fromEntries(new FormData(form));
+      const state = document.getElementById("resetState");
+      if(data.password !== data.confirm) {state.textContent = "PASSWORDS DO NOT MATCH";return;}
+      const button = form.querySelector("[type=submit]"); button.disabled=true;
+      try {
+        await GMAuth.updatePassword(data.password);
+        sessionStorage.removeItem("gm_recovery_pending");
+        state.className="auth-status success";
+        state.textContent="PASSWORD UPDATED // RETURNING TO SIGN IN";
+        await GMAuth.signOut();
+        window.setTimeout(()=> {history.replaceState(null,"",location.pathname);showAccessView("login");},500);
+      } catch(error) {state.className="auth-status error";state.textContent=error.message;button.disabled=false;}
+    });
     document.getElementById("showSignup").addEventListener("click", () => swap(true));
     document.getElementById("showLogin").addEventListener("click", () => swap(false));
 
@@ -135,7 +208,8 @@
           window.setTimeout(() => window.location.replace(GMAuth.siteHref("home/")), 250);
         } else {
           signupState.classList.add("success");
-          signupState.textContent = "ACCOUNT CREATED // CHECK YOUR EMAIL TO CONFIRM ACCESS";
+          showAccessView("verify");
+          document.querySelector("#verifyForm [name=email]").value = data.email.trim();
           button.disabled = false;
         }
       } catch (error) {
@@ -198,11 +272,14 @@
       const key = window.location.hash.slice(1);
       if (key === "signup") swap(true);
       else if (key === "login") swap(false);
+      else if (key === "recover") showAccessView("recover");
+      else if (key === "reset") showAccessView("reset");
       else if (key === "terms-of-use" || key === "privacy-policy") openLegalDocument(key);
     }
     window.addEventListener("hashchange", applyAccessHash);
-    applyAccessHash();
-    GMAuth.redirectIfAuthenticated("home/");
+    GMAuth.consumeAuthRedirect();
+    if (GMAuth.isPasswordRecovery()) showAccessView("reset");
+    else {applyAccessHash();GMAuth.redirectIfAuthenticated("home/");}
   </script>
 </body>
 </html>
