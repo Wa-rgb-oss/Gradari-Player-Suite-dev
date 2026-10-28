@@ -1,1 +1,16 @@
 .gm-editor-ribbon{border:1px solid #355768;background:#12202b;padding:10px 14px;display:flex;align-items:center;gap:18px;flex-wrap:wrap}.gm-editor-ribbon-title{font-family:var(--mono);font-size:12px;color:var(--amber);white-space:nowrap}.gm-editor-ribbon-title span{color:var(--muted)}.gm-editor-ribbon-tools{display:flex;flex:1;gap:5px;flex-wrap:wrap}.gm-editor-ribbon-tools button{background:#1e3441;border:1px solid #355768;color:var(--text);padding:10px 14px;font:600 12px var(--ui);letter-spacing:.06em}.gm-editor-ribbon-tools button:hover,.gm-editor-ribbon-tools button.active{border-color:var(--cyan);color:var(--cyan);background:#234459}.admin-map-editor-v2{height:calc(100vh - 290px);min-height:570px}.admin-map-editor-v2 .admin-map-command{border-right:1px solid #355768}.admin-map-editor-v2 .admin-map-canvas-shell{box-shadow:inset 0 0 0 1px #355768}.gm-editor-collapsed .admin-map-command{display:none!important}.gm-editor-collapsed.admin-map-editor-v2{grid-template-columns:minmax(0,1fr)!important}@media(max-width:900px){.gm-editor-ribbon{gap:8px}.gm-editor-ribbon-tools button{padding:9px}.admin-map-editor-v2{height:70vh;min-height:500px}}
+/* Revit-inspired non-destructive properties inspector */
+@media(min-width:1101px){
+  .admin-map-editor-v2{grid-template-columns:minmax(260px,325px) minmax(0,1fr) minmax(220px,270px);gap:8px}
+  .gm-editor-collapsed.admin-map-editor-v2{grid-template-columns:minmax(0,1fr) minmax(220px,270px)!important}
+}
+.gm-editor-properties{background:#101d27;border:1px solid #355768;min-width:0;overflow-y:auto;padding:14px;color:var(--text);max-height:calc(100vh - 160px)}
+.gm-editor-properties-heading{font:600 13px var(--mono);letter-spacing:.08em;padding-bottom:12px;border-bottom:1px solid #355768}
+.gm-editor-properties-heading span{font-size:10px;color:var(--muted)}
+.gm-editor-properties-section{padding:16px 0;border-bottom:1px solid #294551;display:grid;gap:8px}
+.gm-editor-field-label{font:10px var(--mono);letter-spacing:.12em;color:var(--muted)}
+.gm-editor-properties-section strong{font:600 13px var(--mono);overflow-wrap:anywhere}
+.gm-editor-property-row{display:flex;justify-content:space-between;gap:8px;font:12px var(--mono)}
+.gm-editor-property-row span,.gm-editor-small{color:var(--muted);font-size:11px;line-height:1.5}
+.gm-editor-properties .hud-button{width:100%;white-space:normal}
+@media(max-width:1100px){.gm-editor-properties{max-height:none}.admin-map-editor-v2{height:auto}}
