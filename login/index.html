@@ -116,10 +116,7 @@
       document.querySelectorAll(".auth-status").forEach(el => {el.textContent = "";el.className = "auth-status";});
     }
     function swap(showSignup) {
-      loginView.hidden = showSignup;
-      signupView.hidden = !showSignup;
-      loginState.textContent = "";
-      signupState.textContent = "";
+      showAccessView(showSignup ? "signup" : "login");
     }
 
     document.getElementById("showRecover").addEventListener("click", () => showAccessView("recover"));
