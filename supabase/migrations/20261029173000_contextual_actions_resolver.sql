@@ -121,7 +121,7 @@ begin
   return jsonb_build_object('kind',p_kind,'title',v_title,'location_ref',p_location_ref,
     'target_id',p_target_id,'actions',v_actions,'version',1);
 end;
-$function$
+$function$;
 
 REVOKE ALL ON FUNCTION public.get_contextual_actions(text,text,uuid) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.get_contextual_actions(text,text,uuid) TO authenticated;
