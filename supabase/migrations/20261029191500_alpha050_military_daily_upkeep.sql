@@ -38,6 +38,7 @@ begin
   for v_army in
     select a.id,a.faction_id,a.strength
     from public.armies a where a.status='active' and a.strength>0
+      and floor(private.world_total_hours_at(a.created_at)/36.0)::bigint <= p_world_day
     order by a.faction_id,a.id
   loop
     if exists(select 1 from public.military_upkeep_log
