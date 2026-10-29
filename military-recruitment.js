@@ -7,7 +7,7 @@
   const mode=$("gmRecruitMode"), army=$("gmRecruitArmy"),name=$("gmRecruitName");
   const count=$("gmRecruitCount"), cost=$("gmRecruitCost"),status=$("gmRecruitStatus");
   const civilians=$("gmRecruitCivilians"),military=$("gmRecruitMilitary"), treasury=$("gmRecruitTreasury");
-  const units=$("gmRecruitUnitList");
+  const units=$("gmRecruitUnitList"), upkeep=$("gmRecruitUpkeep"), history=$("gmRecruitHistory");
   const clean=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
   let request=0,context=null,roster=[];
   function render(){
@@ -60,6 +60,14 @@
       roster=armies.filter(a=>a.faction_id===factionId&&a.status==="active");
       army.replaceChildren(new Option("SELECT ARMY",""));
       roster.filter(a=>a.movement_status==="stationary").forEach(a=>army.add(new Option(a.name+" // "+a.strength,a.id)));
+      if(upkeep)upkeep.textContent=roster.reduce((sum,a)=>sum+Number(a.strength||0)*0.5,0).toLocaleString(undefined,{maximumFractionDigits:2})+" A / WORLD DAY";
+      if(history) {
+        try {
+          const logs=await GMAuth.api("military_upkeep_log?faction_id=eq."+encodeURIComponent(factionId)+"&select=world_day,personnel,due_aureum,paid_aureum,status&order=world_day.desc&limit=6");
+          if(request===id)history.innerHTML=logs.length?logs.map(entry=>'<div class="telemetry-row"><span>DAY '+Number(entry.world_day)+' / '+clean(entry.status).toUpperCase()+'</span><strong>'+Number(entry.paid_aureum).toLocaleString()+' / '+Number(entry.due_aureum).toLocaleString()+' A</strong></div>').join(""):
+          '<div class="empty-state">NO ARMY UPKEEP ASSESSED YET.</div>';
+        }catch(error){if(request===id)history.textContent="UPKEEP HISTORY UNAVAILABLE.";}
+      }
       units.innerHTML=roster.length?roster.map(a=>'<div class="telemetry-row"><span>'+clean(a.name)+'</span><strong>'+Number(a.strength).toLocaleString()+' PERSONNEL</strong></div>').join(""):
         '<div class="empty-state">NO FACTION ARMIES STATIONED HERE.</div>';
       status.textContent=permitted?"RECRUITMENT AUTHORIZED // "+faction.name:
