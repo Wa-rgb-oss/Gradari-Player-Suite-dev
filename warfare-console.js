@@ -19,7 +19,12 @@
   $("gmArmyOrderForm").querySelector('button[type="submit"]').disabled=!canCommand||!army||army.movement_status!=="stationary"||!hex;
   const blueprint=blueprints.find(b=>b.id===$("gmShipBlueprint").value);
   $("gmShipBuildDetails").textContent=blueprint?
-   "COST "+format(Number(blueprint.strength)*20)+" A · CREW "+format(blueprint.manpower_cost)+" · RESOURCES "+JSON.stringify(blueprint.resource_costs||{})+" · BUILD "+format(blueprint.build_cycles*36)+" WORLD HOURS":"NO BLUEPRINT SELECTED";
+   (blueprint.description||"CANON NAVAL VESSEL")+"\n"+
+   "DOCTRINE / "+(blueprint.doctrine_function||"UNSPECIFIED")+"\n"+
+   "CREW / "+format(blueprint.crew_min)+"–"+format(blueprint.crew_max)+" · TROOP CAPACITY / "+format(blueprint.troops_capacity)+" · STRIKE CRAFT / "+format(blueprint.strike_craft_min)+"–"+format(blueprint.strike_craft_max)+"\n"+
+   "PROVISIONAL GAME BALANCE / "+format(Number(blueprint.strength)*20)+" A · "+JSON.stringify(blueprint.resource_costs||{})+" · "+format(blueprint.build_cycles*36)+" WORLD HOURS"+
+   (blueprint.deployment_restriction?"\nDOCTRINAL RESTRICTION / "+blueprint.deployment_restriction:"")
+   :"SELECT A CANONICAL SHIP BLUEPRINT.";
   const fleet=fleets.find(f=>f.id===$("gmFleetSelect").value);
   const member=ships.filter(s=>s.fleet_id===fleet?.id&&s.status==="active");
   $("gmFleetDetails").textContent=fleet?"LOCATION "+fleet.location_ref+" · "+fleet.movement_status.toUpperCase()+" · "+member.length+" SHIPS · UPKEEP "+format(member.reduce((sum,ship)=>sum+Number(ship.strength)*.05,0))+" A / DAY":"NO FLEET SELECTED";
@@ -44,7 +49,7 @@
     GMAuth.api("territories?location_ref=eq."+q+"&select=faction_id"),
     GMAuth.api("facilities?location_ref=eq."+q+"&select=id,name,owner_faction_id,facility_type_id,status"),
     GMAuth.api("facility_types?select=id,name"),
-    GMAuth.api("ship_blueprints?player_visible=eq.true&select=id,name,strength,manpower_cost,build_cycles,resource_costs"),
+    GMAuth.api("ship_blueprints?player_visible=eq.true&select=id,name,description,doctrine_function,crew_min,crew_max,troops_capacity,strike_craft_min,strike_craft_max,deployment_restriction,strength,manpower_cost,build_cycles,resource_costs"),
     GMAuth.api("fleets?status=eq.active&select=id,name,faction_id,location_ref,movement_status"),
     GMAuth.api("ships?status=eq.active&select=id,name,faction_id,location_ref,fleet_id,strength"),
     GMAuth.api("shipyard_orders?location_ref=eq."+q+"&select=id,ship_name,status,cycles_remaining,build_ready_world_hour&order=created_at.desc&limit=10"),
