@@ -14,6 +14,7 @@
     const n=Number(count.value)||0;
     cost.textContent=(n*25).toLocaleString()+" A";
     name.closest("label").hidden=mode.value==="reinforce";
+    name.required=mode.value!=="reinforce";
     army.closest("label").hidden=mode.value!=="reinforce";
     const enough=context&&Number(context.pop)>=n+100&&n>=10&&n<=5000&&
       Number(context.mil)+n<=Math.floor((Number(context.pop)+Number(context.mil))*.2);
