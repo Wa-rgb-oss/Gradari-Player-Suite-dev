@@ -22,6 +22,7 @@
   $("gmShipyardForm").querySelector('button[type="submit"]').disabled=!canCommand||!yards.length||!blueprint;
   $("gmFleetForm").querySelector('button[type="submit"]').disabled=!canCommand||!hex||!faction;
   $("gmFleetMoveForm").querySelector('button[type="submit"]').disabled=!canCommand||!fleet||fleet.movement_status!=="stationary"||fleet.location_ref===hex||!member.length;
+  options($("gmShipSelect"),ships.filter(ship=>!ship.fleet_id&&ship.location_ref===fleet?.location_ref),ship=>ship.name,"NO UNASSIGNED SHIPS");
   $("gmShipAssignForm").querySelector('button[type="submit"]').disabled=!canCommand||!fleet||fleet.movement_status!=="stationary"||!$("gmShipSelect").value;
  }
  async function load(){
@@ -51,7 +52,7 @@
    const factionRecords=candidateIds.length?
     await GMAuth.api("factions?id=in.("+candidateIds.map(encodeURIComponent).join(",")+")&select=id,name,leader_user_id"):[];
    if(id!==seq)return;
-   faction=factionRecords.find(f=>f.id===currentFaction)||null;
+   faction=factionRecords.find(f=>f.id===currentFaction&&(f.leader_user_id===me||memberships.some(m=>m.faction_id===f.id&&m.permissions?.includes("military"))))||factionRecords.find(f=>f.leader_user_id===me||memberships.some(m=>m.faction_id===f.id&&m.permissions?.includes("military")))||null;
    if(faction)faction.memberPermissions=memberships.find(m=>m.faction_id===faction.id)?.permissions||[];
    canCommand=Boolean(auth());
    const typesById=new Map(types.map(t=>[t.id,t.name]));
@@ -62,7 +63,7 @@
    options($("gmShipyardSelect"),yards,y=>y.name,"NO AVAILABLE YARD");
    options($("gmShipBlueprint"),blueprints,b=>b.name,"SELECT BLUEPRINT");
    options($("gmFleetSelect"),fleets,f=>f.name+" / "+f.location_ref,"NO FLEET");
-   options($("gmShipSelect"),ships.filter(s=>!s.fleet_id&&s.location_ref===hex),s=>s.name,"NO UNASSIGNED SHIPS");
+   
    $("gmShipOrders").innerHTML=orders.length?orders.map(o=>'<div class="telemetry-row"><span>'+esc(o.ship_name)+' / '+esc(o.status)+'</span><strong>'+format(o.cycles_remaining)+' CYCLES</strong></div>').join(""):'<div class="empty-state">NO SHIPYARD ORDERS.</div>';
    $("gmBattleReports").innerHTML=battles.length?battles.map(b=>'<article class="notice"><strong>'+esc(b.narrative||"STRATEGIC BATTLE")+'</strong><div class="section-code">LOSSES / ATTACKER '+format(b.attacker_losses)+' · DEFENDER '+format(b.defender_losses)+'</div></article>').join(""):'<div class="empty-state">NO BATTLE REPORTS FOR THIS HEX.</div>';
    $("gmWarfareWars").innerHTML=wars.length?wars.map(w=>{
