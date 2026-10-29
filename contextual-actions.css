@@ -18,3 +18,11 @@
 @media(max-width:420px){.gm-context-grid{grid-template-columns:1fr}}
 
 .gm-context-object-switch{margin:8px 0 12px}.gm-context-object-switch label{display:flex;flex-direction:column;gap:6px;font:10px var(--mono);color:var(--muted)}.gm-context-object-switch select{width:100%;background:var(--panel2);color:var(--text);border:1px solid var(--line);padding:9px;font:12px var(--ui)}
+/* The new contextual market action replaces the legacy second OPEN MARKET button.
+   Only hide the old shortcut after the contextual action has been resolved. */
+#map-tab-location:has(#gmMapContext [data-context-action="market"]:not(:disabled))
+  #selectedFacilityControls a[href="exchange-markets/"]{display:none!important}
+/* Retain specialized refinery/factory controls, but label them as operations,
+   not as a second competing action-discovery system. */
+#selectedFacilityControls .location-actions-heading{font-size:0!important}
+#selectedFacilityControls .location-actions-heading::after{content:"FACILITY OPERATIONS";font-size:11px;letter-spacing:.08em}
