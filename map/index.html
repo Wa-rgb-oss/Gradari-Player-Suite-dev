@@ -150,6 +150,18 @@
               </div>
               <div class="form-state" id="mapMilitaryState"></div>
               <section class="gm-warfare-console" aria-label="Fleet and warfare command" style="border-top:1px solid var(--line);margin-top:18px;padding-top:18px">
+                <div class="section-code">ALPHA 0.5 / COMBINED MILITARY COMMAND</div>
+                <h2>Army Operations</h2>
+                <form id="gmArmyOrderForm" class="form-shell" style="margin-bottom:18px">
+                  <label><span>Faction Formation</span><select id="gmArmyCommandSelect"><option value="">NO AVAILABLE ARMIES</option></select></label>
+                  <div class="section-code" id="gmArmyCommandDetails">SELECT A CONTROLLED ARMY.</div>
+                  <label><span>Order to Selected Hex</span><select id="gmArmyOrderType">
+                    <option value="move">Move Formation</option>
+                    <option value="raid">Launch Raid</option>
+                    <option value="conquest">Launch Conquest</option>
+                  </select></label>
+                  <button type="submit" class="hud-button secondary">ISSUE ARMY ORDER</button>
+                </form>
                 <div class="section-code">ALPHA 0.5 / FLEET COMMAND</div>
                 <h2>Naval Operations</h2>
                 <div id="gmFleetState" class="form-state" role="status">SELECT A HEX TO INSPECT NAVAL ASSETS.</div>
@@ -274,8 +286,8 @@
   <script src="map.js?v=alpha050-context"></script>
   <script src="map-context-hook.js?v=alpha050-war2"></script>
   <script src="map-object-context.js?v=alpha050-war2"></script>
-  <script src="military-recruitment.js?v=alpha050-phase2b"></script>
-  <script src="warfare-console.js?v=alpha050-war2"></script>
+  <script src="military-recruitment.js?v=alpha050-war3"></script>
+  <script src="warfare-console.js?v=alpha050-war3"></script>
   <script src="game-chat.js"></script>
 </body>
 </html>
