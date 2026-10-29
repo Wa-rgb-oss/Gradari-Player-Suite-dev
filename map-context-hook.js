@@ -10,11 +10,11 @@
     switch(action.id){
       case "travel":openTab("map-tab-character");document.getElementById("mapTravelBtn")?.focus();break;
       case "build":openTab("map-tab-build");document.getElementById("mapFacilityType")?.focus();break;
-      case "military":openTab("map-tab-military");document.getElementById("mapArmySelect")?.focus();break;
+      case "fleet":case "military":openTab("map-tab-military");document.getElementById("mapArmySelect")?.focus();break;
       case "inspect":
         if(context.kind==="hex"){openTab("map-tab-location");break;}
         if(context.kind==="facility"){location.href=GMAuth.siteHref("player-suite/#economy");break;}
-        if(context.kind==="army"){openTab("map-tab-military");break;}
+        if(context.kind==="army"||context.kind==="fleet"){openTab("map-tab-military");break;}
         if(context.kind==="faction"){location.href=GMAuth.siteHref("player-suite/#faction");break;}
         break;
       case "facilities":openTab("map-tab-location");document.getElementById("selectedFacilityList")?.scrollIntoView({block:"nearest"});break;
