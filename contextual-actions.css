@@ -26,3 +26,12 @@
    not as a second competing action-discovery system. */
 #selectedFacilityControls .location-actions-heading{font-size:0!important}
 #selectedFacilityControls .location-actions-heading::after{content:"FACILITY OPERATIONS";font-size:11px;letter-spacing:.08em}
+
+/* The combined military console replaces duplicate legacy Army Orders controls
+   only after all new command data loads. Existing DOM handlers remain intact as fallback. */
+#map-tab-military[data-modern-military-ready="true"] > .section-code:first-child,
+#map-tab-military[data-modern-military-ready="true"] > h2:first-of-type,
+#map-tab-military[data-modern-military-ready="true"] > label:first-of-type,
+#map-tab-military[data-modern-military-ready="true"] > .telemetry-stack:first-of-type,
+#map-tab-military[data-modern-military-ready="true"] > .map-button-grid:first-of-type,
+#map-tab-military[data-modern-military-ready="true"] > #mapMilitaryState {display:none!important}
