@@ -178,6 +178,12 @@
                   <label><span>Available Commissioned Ship</span><select id="gmShipSelect"></select></label>
                   <button type="submit" class="hud-button secondary">ASSIGN SHIP TO SELECTED FLEET</button>
                 </form>
+                <form id="gmNavalEngageForm" class="form-shell" style="margin-top:12px">
+                  <label><span>Hostile Naval Faction At Fleet Location</span><select id="gmNavalEnemy"><option value="">NO HOSTILE FLEETS</option></select></label>
+                  <button type="submit" class="hud-button danger">LAUNCH NAVAL ENGAGEMENT</button>
+                </form>
+                <div class="section-code" style="margin-top:14px">RECENT NAVAL BATTLES</div>
+                <div id="gmNavalReports" class="stack"></div>
                 <div class="section-code" style="margin-top:16px">STRATEGIC WARFARE / WARSCORE</div>
                 <div id="gmWarfareWars" class="stack"></div>
                 <div class="section-code" style="margin-top:14px">RECENT BATTLE REPORTS</div>
@@ -266,10 +272,10 @@
   <script src="player-data.js?v=faction-foundation-20261010"></script>
   <script src="contextual-actions.js?v=alpha050-context"></script>
   <script src="map.js?v=alpha050-context"></script>
-  <script src="map-context-hook.js?v=alpha050-context2"></script>
-  <script src="map-object-context.js?v=alpha050-context2"></script>
+  <script src="map-context-hook.js?v=alpha050-war2"></script>
+  <script src="map-object-context.js?v=alpha050-war2"></script>
   <script src="military-recruitment.js?v=alpha050-phase2b"></script>
-  <script src="warfare-console.js?v=alpha050-war1"></script>
+  <script src="warfare-console.js?v=alpha050-war2"></script>
   <script src="game-chat.js"></script>
 </body>
 </html>
