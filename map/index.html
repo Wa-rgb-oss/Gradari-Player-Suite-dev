@@ -168,6 +168,7 @@
                 <div class="section-code" style="margin:12px 0">LOCAL SHIPYARD / CONSTRUCTION</div>
                 <form id="gmShipyardForm" class="form-shell">
                   <label><span>Faction Shipyard</span><select id="gmShipyardSelect"></select></label>
+                  <label><span>Ship Category</span><select id="gmShipCategory"><option value="all">ALL CLASSES</option><option value="warship">IMPERIAL WARSHIPS</option><option value="military_support">SUPPORT VESSELS</option><option value="strike_craft">STRIKE CRAFT</option><option value="civilian">CIVILIAN VESSELS</option></select></label>
                   <label><span>Blueprint</span><select id="gmShipBlueprint"></select></label>
                   <label><span>Ship Name</span><input id="gmShipName" maxlength="80" required placeholder="Imperial vessel name"></label>
                   <div class="section-code" id="gmShipBuildDetails" style="white-space:pre-line;line-height:1.65">SELECT AN AVAILABLE SHIP BLUEPRINT.</div>
@@ -175,6 +176,23 @@
                 </form>
                 <div class="section-code" style="margin-top:14px">SHIPYARD ORDERS</div>
                 <div class="telemetry-stack" id="gmShipOrders"></div>
+                <section class="gm-vessel-operations" style="margin-top:16px;border-top:1px solid var(--line);padding-top:14px">
+                  <div class="section-code">VESSEL OPERATIONS / CARGO & HANGARS</div>
+                  <form id="gmVesselCargoForm" class="form-shell">
+                    <label><span>Cargo-Capable Vessel</span><select id="gmCargoShip"><option value="">SELECT VESSEL</option></select></label>
+                    <label><span>Resource</span><select id="gmCargoResource"><option value="">SELECT RESOURCE</option></select></label>
+                    <label><span>Quantity</span><input id="gmCargoQuantity" type="number" min="0.01" max="100000" step="any" value="10" required></label>
+                    <label><span>Transfer</span><select id="gmCargoDirection"><option value="load">LOAD FROM FACTION STOCKPILE</option><option value="unload">UNLOAD INTO FACTION STOCKPILE</option></select></label>
+                    <div id="gmCargoManifest" class="section-code" style="white-space:pre-line"></div>
+                    <button type="submit" class="hud-button secondary">CONFIRM CARGO TRANSFER</button>
+                  </form>
+                  <form id="gmHangarForm" class="form-shell" style="margin-top:16px">
+                    <label><span>Host Vessel</span><select id="gmHangarHost"><option value="">SELECT CARRIER</option></select></label>
+                    <label><span>Unassigned Strike Craft</span><select id="gmHangarCraft"><option value="">SELECT CRAFT</option></select></label>
+                    <button type="submit" class="hud-button secondary">EMBARK STRIKE CRAFT</button>
+                  </form>
+                  <div class="form-state" id="gmVesselOpsState" role="status"></div>
+                </section>
                 <div class="section-code" style="margin-top:16px">FLEET FORMATION</div>
                 <form id="gmFleetForm" class="form-shell">
                   <label><span>New Fleet Name</span><input id="gmFleetName" maxlength="80" required placeholder="e.g. Spireblade Wing"></label>
@@ -287,7 +305,8 @@
   <script src="map-context-hook.js?v=alpha050-war2"></script>
   <script src="map-object-context.js?v=alpha050-war2"></script>
   <script src="military-recruitment.js?v=alpha050-war3"></script>
-  <script src="warfare-console.js?v=alpha050-canon-ships-20261029"></script>
+  <script src="warfare-console.js?v=alpha050-expanded-vessels"></script>
+  <script src="vessel-operations.js?v=alpha050-vesselops"></script>
   <script src="game-chat.js"></script>
 </body>
 </html>
