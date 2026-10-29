@@ -17,10 +17,22 @@
   const supply=supplyLogs.find(l=>l.army_id===army?.id);
   $("gmArmyCommandDetails").textContent=army?"STRENGTH "+format(army.strength)+" · LOCATION "+army.location_ref+" · "+String(army.movement_status).toUpperCase()+" · SUPPLY "+(supply?String(supply.status).toUpperCase()+" / "+(supply.supply_ref||"NO CORRIDOR"):"AWAITING FIRST DAILY TICK"):"NO ARMY SELECTED";
   $("gmArmyOrderForm").querySelector('button[type="submit"]').disabled=!canCommand||!army||army.movement_status!=="stationary"||!hex;
-  const blueprint=blueprints.find(b=>b.id===$("gmShipBlueprint").value);
+  const category=$("gmShipCategory").value;
+  const previous=$("gmShipBlueprint").value;
+  const visibleBlueprints=blueprints.filter(b=>category==="all"||b.vessel_category===category);
+  const blueprintPicker=$("gmShipBlueprint");
+  const changed=visibleBlueprints.some(b=>b.id===previous)?previous:null;
+  if(blueprintPicker.dataset.category!==category){
+   options(blueprintPicker,visibleBlueprints,b=>b.name,"SELECT BLUEPRINT");
+   blueprintPicker.dataset.category=category;
+   if(changed)blueprintPicker.value=changed;
+  }
+  const blueprint=blueprints.find(b=>b.id===blueprintPicker.value);
   $("gmShipBuildDetails").textContent=blueprint?
    (blueprint.description||"CANON NAVAL VESSEL")+"\n"+
    "DOCTRINE / "+(blueprint.doctrine_function||"UNSPECIFIED")+"\n"+
+   "CATEGORY / "+(blueprint.vessel_category||"WARSHIP").toUpperCase()+" · "+(blueprint.lore_status==="primary_canon"?"CANON":"GRADARI GAME EXPANSION")+"\n"+
+   "CARGO / "+format(blueprint.cargo_capacity)+" · HANGARS / "+format(blueprint.hangar_slots)+"\n"+
    "CREW / "+format(blueprint.crew_min)+"–"+format(blueprint.crew_max)+" · TROOP CAPACITY / "+format(blueprint.troops_capacity)+" · STRIKE CRAFT / "+format(blueprint.strike_craft_min)+"–"+format(blueprint.strike_craft_max)+"\n"+
    "PROVISIONAL GAME BALANCE / "+format(Number(blueprint.strength)*20)+" A · "+JSON.stringify(blueprint.resource_costs||{})+" · "+format(blueprint.build_cycles*36)+" WORLD HOURS"+
    (blueprint.deployment_restriction?"\nDOCTRINAL RESTRICTION / "+blueprint.deployment_restriction:"")
@@ -49,7 +61,7 @@
     GMAuth.api("territories?location_ref=eq."+q+"&select=faction_id"),
     GMAuth.api("facilities?location_ref=eq."+q+"&select=id,name,owner_faction_id,facility_type_id,status"),
     GMAuth.api("facility_types?select=id,name"),
-    GMAuth.api("ship_blueprints?player_visible=eq.true&select=id,name,description,doctrine_function,crew_min,crew_max,troops_capacity,strike_craft_min,strike_craft_max,deployment_restriction,strength,manpower_cost,build_cycles,resource_costs"),
+    GMAuth.api("ship_blueprints?player_visible=eq.true&select=id,name,description,doctrine_function,crew_min,crew_max,troops_capacity,strike_craft_min,strike_craft_max,deployment_restriction,strength,manpower_cost,build_cycles,resource_costs,vessel_category,cargo_capacity,hangar_slots,lore_status"),
     GMAuth.api("fleets?status=eq.active&select=id,name,faction_id,location_ref,movement_status"),
     GMAuth.api("ships?status=eq.active&select=id,name,faction_id,location_ref,fleet_id,strength"),
     GMAuth.api("shipyard_orders?location_ref=eq."+q+"&select=id,ship_name,status,cycles_remaining,build_ready_world_hour&order=created_at.desc&limit=10"),
@@ -91,6 +103,7 @@
    wars=warData.filter(w=>w.attacker_faction_id===faction?.id||w.defender_faction_id===faction?.id);
    offers=allOffers;
    options($("gmShipyardSelect"),yards,y=>y.name,"NO AVAILABLE YARD");
+   $("gmShipBlueprint").dataset.category="";
    options($("gmShipBlueprint"),blueprints,b=>b.name,"SELECT BLUEPRINT");
    options($("gmFleetSelect"),fleets,f=>f.name+" / "+f.location_ref,"NO FLEET");
    
@@ -152,7 +165,7 @@
    await load(true);
   }catch(err){state.textContent="PEACE NEGOTIATION FAILED // "+err.message;}
  });
- ["gmArmyCommandSelect","gmArmyOrderType","gmShipBlueprint","gmFleetSelect","gmShipSelect","gmShipyardSelect"].forEach(id=>$(id).addEventListener("change",selection));
+ ["gmArmyCommandSelect","gmArmyOrderType","gmShipCategory","gmShipBlueprint","gmFleetSelect","gmShipSelect","gmShipyardSelect"].forEach(id=>$(id).addEventListener("change",selection));
  new MutationObserver(()=>load(false)).observe(loc,{childList:true,subtree:true,characterData:true});
  load(true);
 })();
