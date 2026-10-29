@@ -8,7 +8,7 @@ Audited the active GitHub Pages entry points (public landing, login, home, map, 
 | Older/redundant implementation | Current implementation | Action |
 | --- | --- | --- |
 | Standalone `legacy-player-suite/index.html` with separate styling and form experience | `player-suite/` with account, characters, facilities, factions, contracts and Contextual Actions | Retired old interactive page; replaced with a canonical redirect. Existing bookmarks still work. |
-| Duplicate authentication library `auth-20261007-v3.js` beside outdated `auth.js` | One `auth.js`, including password reset, account confirmation, and existing sessions | Updated all nine inspected active entry pages to load the unified library and removed duplicate file. |
+| Duplicate authentication library `auth-20261007-v3.js` beside outdated `auth.js` | One `auth.js`, including password reset, account confirmation, and existing sessions | Updated all ten inspected active player/admin entry pages to load the unified library and removed duplicate file. |
 | Second row of map-editor category tabs (`.admin-map-subtabs`) below the modern ribbon | Current Revit-inspired editor ribbon (`data-map-ribbon`) | Suppressed duplicate visible nav while keeping its original buttons in DOM for existing JS event handlers and state sync. |
 | Additional `OPEN MARKET` button in the old Map location-control card | Contextual `Open Market` action with RPC eligibility | Concealed redundant button **only if** a permitted contextual market action is rendered; old button remains as a fallback if action discovery fails. |
 | Generic `LOCATION ACTIONS` heading for specialized refinery/factory/shipyard controls | Contextual Actions for selection; `FACILITY OPERATIONS` for specialized management | Updated presentation label; retained functional control forms and their existing backend paths. |
@@ -23,9 +23,9 @@ Audited the active GitHub Pages entry points (public landing, login, home, map, 
 - Supabase tables, migration history, triggers, RLS policies, characters, and player records: none were dropped or rewritten in this UI audit.
 
 ## Verification performed
-- Inspected live repository file contents and active page script references.
+- Inspected live repository file contents and active page script references, including `factions/create/`.
 - Confirmed new authentication library contains both existing session/API methods and current recovery methods.
-- Confirmed nine inspected active pages no longer reference retired auth filename prior to deletion.
+- Confirmed the inspected active pages no longer reference the retired auth filename prior to deletion; subsequently checked and updated the faction creation route too.
 - Verified legacy Player Suite redirects to the current route.
 - Verified current Admin Map ribbon includes all six underlying editor categories: World, System, Industry, Ships, Labels, Tools.
 - Preserved the original event-handling tab controls in the DOM.
