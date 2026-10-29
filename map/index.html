@@ -8,6 +8,7 @@
   <meta name="robots" content="noindex,nofollow">
   <title>Map | Gradari Mireris</title>
   <link rel="stylesheet" href="styles.css?v=alpha050-phase1">
+  <link rel="stylesheet" href="contextual-actions.css?v=alpha050-context">
 
   <link rel="icon" type="image/png" sizes="192x192" href="/favicon.png">
   <link rel="icon" type="image/x-icon" sizes="16x16 32x32 48x48 64x64" href="/favicon.ico">
@@ -99,6 +100,7 @@
               <div id="selectedModifierList" class="stack"></div>
               <div class="empty-state map-mini-empty" id="selectedModifierEmpty">NO ACTIVE LOCATION EFFECTS.</div>
             
+              <section class="gm-context-panel" aria-label="Available contextual actions"><div class="section-code">AVAILABLE ACTIONS</div><div id="gmMapContext" aria-live="polite"></div></section>
               <div class="section-code">SELECTED / HOLDINGS</div>
               <h2>Facilities</h2>
               <div id="selectedFacilityList" class="stack"></div>
@@ -203,7 +205,8 @@
   <script src="auth.js"></script>
   <script src="ui.js"></script>
   <script src="player-data.js?v=faction-foundation-20261010"></script>
-  <script src="map.js?v=alpha050-automatic-route-20261027"></script>
+  <script src="contextual-actions.js?v=alpha050-context"></script>
+  <script src="map.js?v=alpha050-context"></script>
   <script src="game-chat.js"></script>
 </body>
 </html>
