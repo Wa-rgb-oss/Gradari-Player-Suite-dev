@@ -191,6 +191,20 @@
                     <label><span>Unassigned Strike Craft</span><select id="gmHangarCraft"><option value="">SELECT CRAFT</option></select></label>
                     <button type="submit" class="hud-button secondary">EMBARK STRIKE CRAFT</button>
                   </form>
+                  <form id="gmTroopTransportForm" class="form-shell" style="margin-top:16px">
+                    <div class="section-code">ARMY / TRANSPORT OPERATIONS</div>
+                    <label><span>Transport Ship</span><select id="gmTroopShip"><option value="">SELECT TRANSPORT</option></select></label>
+                    <label><span>Army</span><select id="gmTroopArmy"><option value="">SELECT ARMY</option></select></label>
+                    <label><span>Operation</span><select id="gmTroopAction"><option value="embark">EMBARK ARMY</option><option value="disembark">DISEMBARK ARMY</option></select></label>
+                    <button type="submit" class="hud-button secondary">CONFIRM TROOP TRANSFER</button>
+                  </form>
+                  <form id="gmRepairTenderForm" class="form-shell" style="margin-top:16px">
+                    <div class="section-code">REPAIR TENDER / HULL MAINTENANCE</div>
+                    <label><span>Repair Tender</span><select id="gmRepairTender"><option value="">SELECT TENDER</option></select></label>
+                    <label><span>Damaged Vessel</span><select id="gmRepairTarget"><option value="">SELECT DAMAGED VESSEL</option></select></label>
+                    <label><span>Strength to Restore</span><input id="gmRepairPoints" type="number" min="1" max="1000" value="10" step="1" required></label>
+                    <button type="submit" class="hud-button secondary">REPAIR HULL</button>
+                  </form>
                   <div class="form-state" id="gmVesselOpsState" role="status"></div>
                 </section>
                 <div class="section-code" style="margin-top:16px">FLEET FORMATION</div>
@@ -306,7 +320,7 @@
   <script src="map-object-context.js?v=alpha050-war2"></script>
   <script src="military-recruitment.js?v=alpha050-war3"></script>
   <script src="warfare-console.js?v=alpha050-expanded-vessels"></script>
-  <script src="vessel-operations.js?v=alpha050-vesselops"></script>
+  <script src="vessel-operations.js?v=alpha050-vesselops2"></script>
   <script src="game-chat.js"></script>
 </body>
 </html>
