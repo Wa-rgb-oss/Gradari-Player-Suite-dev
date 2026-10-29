@@ -4,7 +4,7 @@
  if(!loc||!$("gmFleetState"))return;
  const esc=x=>String(x??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
  const state=$("gmFleetState");let seq=0,me=null,hex="",faction=null,canCommand=false;
- let blueprints=[],yards=[],fleets=[],ships=[],wars=[],offers=[],hostileAtFleet=[],armies=[];let lastRef=null;
+ let blueprints=[],yards=[],fleets=[],ships=[],wars=[],offers=[],hostileAtFleet=[],armies=[],supplyLogs=[];let lastRef=null;
  const req=(path,params)=>GMAuth.api("rpc/"+path,{method:"POST",body:JSON.stringify(params)});
  const options=(element,rows,lab,placeholder)=>{element.replaceChildren(new Option(placeholder||"SELECT",""));rows.forEach(x=>element.add(new Option(lab(x),x.id)));};
  function auth(){
@@ -14,14 +14,15 @@
  function format(n){return Number(n||0).toLocaleString(undefined,{maximumFractionDigits:2});}
  function selection(){
   const army=armies.find(a=>a.id===$("gmArmyCommandSelect").value);
-  $("gmArmyCommandDetails").textContent=army?"STRENGTH "+format(army.strength)+" · LOCATION "+army.location_ref+" · "+String(army.movement_status).toUpperCase():"NO ARMY SELECTED";
+  const supply=supplyLogs.find(l=>l.army_id===army?.id);
+  $("gmArmyCommandDetails").textContent=army?"STRENGTH "+format(army.strength)+" · LOCATION "+army.location_ref+" · "+String(army.movement_status).toUpperCase()+" · SUPPLY "+(supply?String(supply.status).toUpperCase()+" / "+(supply.supply_ref||"NO CORRIDOR"):"AWAITING FIRST DAILY TICK"):"NO ARMY SELECTED";
   $("gmArmyOrderForm").querySelector('button[type="submit"]').disabled=!canCommand||!army||army.movement_status!=="stationary"||!hex;
   const blueprint=blueprints.find(b=>b.id===$("gmShipBlueprint").value);
   $("gmShipBuildDetails").textContent=blueprint?
    "COST "+format(Number(blueprint.strength)*20)+" A · CREW "+format(blueprint.manpower_cost)+" · RESOURCES "+JSON.stringify(blueprint.resource_costs||{})+" · BUILD "+format(blueprint.build_cycles*36)+" WORLD HOURS":"NO BLUEPRINT SELECTED";
   const fleet=fleets.find(f=>f.id===$("gmFleetSelect").value);
   const member=ships.filter(s=>s.fleet_id===fleet?.id&&s.status==="active");
-  $("gmFleetDetails").textContent=fleet?"LOCATION "+fleet.location_ref+" · "+fleet.movement_status.toUpperCase()+" · "+member.length+" SHIPS":"NO FLEET SELECTED";
+  $("gmFleetDetails").textContent=fleet?"LOCATION "+fleet.location_ref+" · "+fleet.movement_status.toUpperCase()+" · "+member.length+" SHIPS · UPKEEP "+format(member.reduce((sum,ship)=>sum+Number(ship.strength)*.05,0))+" A / DAY":"NO FLEET SELECTED";
   $("gmShipyardForm").querySelector('button[type="submit"]').disabled=!canCommand||!yards.length||!blueprint;
   $("gmFleetForm").querySelector('button[type="submit"]').disabled=!canCommand||!hex||!faction;
   $("gmFleetMoveForm").querySelector('button[type="submit"]').disabled=!canCommand||!fleet||fleet.movement_status!=="stationary"||fleet.location_ref===hex||!member.length;
@@ -39,7 +40,7 @@
   try{
    const session=await GMAuth.getSession();me=session?.user?.id;
    const q=encodeURIComponent(hex);
-   const [tr,fac,types,bp,fl,sp,orders,warData,battles,allOffers,memberships,localShips,navalReports,allArmies]=await Promise.all([
+   const [tr,fac,types,bp,fl,sp,orders,warData,battles,allOffers,memberships,localShips,navalReports,allArmies,armySupplies]=await Promise.all([
     GMAuth.api("territories?location_ref=eq."+q+"&select=faction_id"),
     GMAuth.api("facilities?location_ref=eq."+q+"&select=id,name,owner_faction_id,facility_type_id,status"),
     GMAuth.api("facility_types?select=id,name"),
@@ -53,7 +54,8 @@
     GMAuth.api("faction_memberships?user_id=eq."+encodeURIComponent(me||"00000000-0000-0000-0000-000000000000")+"&status=eq.active&select=faction_id,permissions"),
     GMAuth.api("ships?status=eq.active&select=faction_id,location_ref"),
     GMAuth.api("naval_battle_reports?select=attacker_before,defender_before,attacker_after,defender_after,created_at&order=created_at.desc&limit=8"),
-    GMAuth.api("armies?status=eq.active&select=id,name,faction_id,location_ref,strength,movement_status")
+    GMAuth.api("armies?status=eq.active&select=id,name,faction_id,location_ref,strength,movement_status"),
+    GMAuth.api("army_supply_log?select=army_id,status,supply_ref,world_day&order=world_day.desc&limit=100")
    ]);
    if(id!==seq)return;
    const currentFaction=tr[0]?.faction_id;
@@ -78,6 +80,7 @@
    yards=fac.filter(f=>f.owner_faction_id===faction?.id&&f.status==="active"&&/yard/i.test(typesById.get(f.facility_type_id)||""));
    blueprints=bp;fleets=fl.filter(f=>f.faction_id===faction?.id);ships=sp.filter(s=>s.faction_id===faction?.id);
    hostileAtFleet=localShips;
+   supplyLogs=armySupplies;
    armies=allArmies.filter(a=>a.faction_id===faction?.id);
    options($("gmArmyCommandSelect"),armies,a=>a.name+" / "+a.location_ref,"NO CONTROLLED ARMIES");
    wars=warData.filter(w=>w.attacker_faction_id===faction?.id||w.defender_faction_id===faction?.id);
