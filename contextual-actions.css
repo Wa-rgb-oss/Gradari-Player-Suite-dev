@@ -16,3 +16,5 @@
 .gm-context-state{color:var(--muted)}
 .gm-context-empty{font:11px var(--mono);color:var(--muted)}
 @media(max-width:420px){.gm-context-grid{grid-template-columns:1fr}}
+
+.gm-context-object-switch{margin:8px 0 12px}.gm-context-object-switch label{display:flex;flex-direction:column;gap:6px;font:10px var(--mono);color:var(--muted)}.gm-context-object-switch select{width:100%;background:var(--panel2);color:var(--text);border:1px solid var(--line);padding:9px;font:12px var(--ui)}
