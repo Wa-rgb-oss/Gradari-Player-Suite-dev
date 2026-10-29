@@ -149,6 +149,27 @@
                 <button class="hud-button secondary" id="mapConquestBtn" type="button">CONQUEST</button>
               </div>
               <div class="form-state" id="mapMilitaryState"></div>
+              <section class="gm-recruitment" aria-label="Recruit army personnel" style="border-top:1px solid var(--line);margin-top:18px;padding-top:18px">
+                <div class="section-code">MILITARY / RECRUITMENT</div>
+                <h2>Recruit Faction Troops</h2>
+                <div class="telemetry-stack">
+                  <div class="telemetry-row"><span>Civilian Population</span><strong id="gmRecruitCivilians">--</strong></div>
+                  <div class="telemetry-row"><span>Enlisted Population</span><strong id="gmRecruitMilitary">--</strong></div>
+                  <div class="telemetry-row"><span>Faction Treasury</span><strong id="gmRecruitTreasury">--</strong></div>
+                </div>
+                <form id="gmRecruitForm" class="form-shell" style="margin-top:14px">
+                  <label><span>Enlistment Type</span><select id="gmRecruitMode"><option value="new">New Formation</option><option value="reinforce">Reinforce Existing Army</option></select></label>
+                  <label id="gmRecruitNameLabel"><span>Formation Name</span><input id="gmRecruitName" maxlength="80" required placeholder="e.g. 397th Assault Legion"></label>
+                  <label hidden><span>Stationed Army</span><select id="gmRecruitArmy"><option value="">SELECT ARMY</option></select></label>
+                  <label><span>Personnel (10–5,000)</span><input id="gmRecruitCount" type="number" min="10" max="5000" step="1" value="100" required></label>
+                  <div class="telemetry-row"><span>Recruitment Cost</span><strong id="gmRecruitCost">2,500 A</strong></div>
+                  <p class="section-code">25 AUREUM / RECRUIT · UP TO 20% OF SYSTEM RESIDENTS · REQUIRES MILITARY AUTHORITY</p>
+                  <button type="submit" class="hud-button amber" disabled>CONFIRM RECRUITMENT</button>
+                  <div id="gmRecruitStatus" class="form-state" role="status"></div>
+                </form>
+                <div class="section-code" style="margin-top:14px">STATIONED FACTION ARMIES</div>
+                <div class="telemetry-stack" id="gmRecruitUnitList">SELECT A FACTION SYSTEM.</div>
+              </section>
             </div>
               <div class="map-command-page" id="map-tab-build">
               <div class="hud-kicker amber">INDUSTRY</div>
@@ -210,6 +231,7 @@
   <script src="map.js?v=alpha050-context"></script>
   <script src="map-context-hook.js?v=alpha050-context2"></script>
   <script src="map-object-context.js?v=alpha050-context2"></script>
+  <script src="military-recruitment.js?v=alpha050-phase2a"></script>
   <script src="game-chat.js"></script>
 </body>
 </html>
