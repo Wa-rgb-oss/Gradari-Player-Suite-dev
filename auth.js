@@ -109,6 +109,36 @@
     return data;
   }
 
+  async function requestPasswordReset(email) {
+    return request("/auth/v1/recover?redirect_to=" + encodeURIComponent(new URL("login/", CONFIG.siteUrl).href), {
+      method: "POST", body: JSON.stringify({ email: email.trim() })
+    });
+  }
+
+  async function resendConfirmation(email) {
+    return request("/auth/v1/resend?redirect_to=" + encodeURIComponent(new URL("login/", CONFIG.siteUrl).href), {
+      method: "POST", body: JSON.stringify({
+        type: "signup", email: email.trim()
+      })
+    });
+  }
+
+  async function updatePassword(password) {
+    const session = await getSession();
+    if (!session?.access_token) throw new Error("Reset link expired. Request another password reset.");
+    return request("/auth/v1/user", {
+      method: "PUT",
+      headers: { Authorization: "Bearer " + session.access_token },
+      body: JSON.stringify({ password })
+    });
+  }
+
+  function isPasswordRecovery() {
+    const params = new URLSearchParams(window.location.hash.slice(1));
+    return params.get("type") === "recovery" || window.location.hash === "#reset" ||
+      sessionStorage.getItem("gm_recovery_pending") === "1";
+  }
+
   function consumeAuthRedirect() {
     if (!window.location.hash || window.location.hash.length < 2) return null;
 
@@ -117,6 +147,7 @@
     const refreshToken = params.get("refresh_token");
     if (!accessToken || !refreshToken) return null;
 
+    if (params.get("type") === "recovery") sessionStorage.setItem("gm_recovery_pending", "1");
     const session = saveSession({
       access_token: accessToken,
       refresh_token: refreshToken,
@@ -296,6 +327,10 @@
     clearSession,
     signIn,
     signUp,
+    requestPasswordReset,
+    resendConfirmation,
+    updatePassword,
+    isPasswordRecovery,
     consumeAuthRedirect,
     recordAuthActivity,
     signOut,
