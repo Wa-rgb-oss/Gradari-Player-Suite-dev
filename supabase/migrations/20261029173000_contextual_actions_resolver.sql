@@ -39,6 +39,7 @@ begin
       where user_id=v_uid and status='active' and
         ('military'=any(permissions) or 'all'=any(permissions)))
       into v_can_military;
+    v_can_military := v_can_military or exists(select 1 from public.factions f where f.leader_user_id=v_uid and f.status='active');
     v_can_build := v_char.id is not null and v_char.location_ref=p_location_ref
       and coalesce(v_char.movement_status,'stationary') <> 'traveling';
     v_title := coalesce(v_hex.display_name,p_location_ref);
@@ -69,7 +70,7 @@ begin
       where user_id=v_uid and faction_id=v_fac.owner_faction_id and status='active'
       and ('facilities'=any(permissions) or 'economy'=any(permissions) or 'all'=any(permissions)))
       into v_member;
-    v_allowed := v_fac.owner_user_id=v_uid or v_member;
+    v_allowed := v_fac.owner_user_id=v_uid or v_member or exists(select 1 from public.factions f where f.id=v_fac.owner_faction_id and f.leader_user_id=v_uid);
     v_actions := jsonb_build_array(
       jsonb_build_object('id','inspect','label','Inspect Facility','category','general','enabled',true),
       jsonb_build_object('id','manage','label','Manage Production','category','economy','enabled',v_allowed,
@@ -85,7 +86,7 @@ begin
     select exists(select 1 from public.faction_memberships
       where user_id=v_uid and faction_id=v_arm.faction_id and status='active'
       and ('military'=any(permissions) or 'all'=any(permissions))) into v_member;
-    v_allowed := v_member or v_arm.commander_character_id=v_char.id and v_char.id is not null;
+    v_allowed := v_member or (v_arm.commander_character_id=v_char.id and v_char.id is not null) or exists(select 1 from public.factions f where f.id=v_arm.faction_id and f.leader_user_id=v_uid);
     v_actions := jsonb_build_array(
       jsonb_build_object('id','inspect','label','Inspect Army','category','general','enabled',true),
       jsonb_build_object('id','military','label','Issue Military Orders','category','military','enabled',v_allowed,
@@ -98,6 +99,7 @@ begin
     v_title := v_faction.name;
     select exists(select 1 from public.faction_memberships
       where user_id=v_uid and faction_id=p_target_id and status='active') into v_member;
+    v_member := v_member or v_faction.leader_user_id=v_uid;
     v_actions := jsonb_build_array(
       jsonb_build_object('id','inspect','label','Faction Directory','category','general','enabled',true),
       jsonb_build_object('id','faction','label','Faction Administration','category','politics','enabled',v_member,
@@ -122,6 +124,5 @@ begin
     'target_id',p_target_id,'actions',v_actions,'version',1);
 end;
 $function$;
-
 REVOKE ALL ON FUNCTION public.get_contextual_actions(text,text,uuid) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.get_contextual_actions(text,text,uuid) TO authenticated;
