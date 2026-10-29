@@ -13,12 +13,12 @@
       case "character": case "inspect":
         showTab(context.kind==="faction"?"suite-faction":
                 context.kind==="facility"?"suite-economy":
-                context.kind==="army"?"suite-actions":"suite-characters");
+                context.kind==="army"||context.kind==="fleet"?"suite-actions":"suite-characters");
         break;
       case "manage":case "economy":showTab("suite-economy");break;
       case "faction":showTab("suite-faction");break;
       case "social":showTab("suite-friends");break;
-      case "military":location.href=GMAuth.siteHref("map/");break;
+      case "fleet":case "military":location.href=GMAuth.siteHref("map/");break;
     }
   });
   const refreshObjects=async()=>{
@@ -32,7 +32,8 @@
         GMAuth.api("characters?user_id=eq."+uid+"&select=id,name"),
         GMAuth.api("facilities?owner_user_id=eq."+uid+"&select=id,name"),
         GMAuth.api("faction_memberships?user_id=eq."+uid+"&status=eq.active&select=faction_id"),
-        GMAuth.api("armies?select=id,name,faction_id")
+        GMAuth.api("armies?select=id,name,faction_id"),
+        GMAuth.api("fleets?status=eq.active&select=id,name,faction_id")
       ]);
       const rows=fetches.map(x=>x.status==="fulfilled"&&Array.isArray(x.value)?x.value:[]);
       const options=[];
@@ -45,6 +46,7 @@
         if(r.status==="fulfilled")r.value.forEach(x=>options.push({kind:"faction",id:x.id,name:x.name||"Faction"}));
       });
       rows[3].filter(x=>factionIds.has(x.faction_id)).forEach(x=>options.push({kind:"army",id:x.id,name:x.name||"Army"}));
+      rows[4].filter(x=>factionIds.has(x.faction_id)).forEach(x=>options.push({kind:"fleet",id:x.id,name:x.name||"Fleet"}));
       picker.replaceChildren(new Option("SELECT AN OBJECT",""));
       options.forEach(x=>{
         const opt=new Option(x.kind.toUpperCase()+" // "+x.name,x.kind+":"+x.id);
