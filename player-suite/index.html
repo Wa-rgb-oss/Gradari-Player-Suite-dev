@@ -8,6 +8,7 @@
   <meta name="robots" content="noindex,nofollow">
   <title>Player Suite | Gradari Mireris</title>
   <link rel="stylesheet" href="styles.css?v=facility-schedule-20261019">
+  <link rel="stylesheet" href="contextual-actions.css?v=alpha050-context">
 
   <link rel="icon" type="image/png" sizes="192x192" href="/favicon.png">
   <link rel="icon" type="image/x-icon" sizes="16x16 32x32 48x48 64x64" href="/favicon.ico">
@@ -49,6 +50,15 @@
           <p class="hero-copy" style="margin:0">Manage your identity, character, economy, inventory, faction information, and actions. Faction tools appear according to your current role and permissions.</p>
         </section>
 
+        <section class="hud-panel compact gm-context-panel" aria-label="Contextual actions">
+          <div class="section-code">UNIVERSAL / CONTEXTUAL ACTIONS</div>
+          <div class="split-actions" style="margin:12px 0">
+            <label style="flex:1;min-width:180px"><span>Selected Object</span><select id="gmSuiteContextPicker"><option value="">Loading...</option></select></label>
+            <button type="button" class="hud-button secondary" id="gmSuiteContextRefresh">REFRESH OBJECTS</button>
+          </div>
+          <div class="form-state" id="gmSuiteContextState" role="status"></div>
+          <div id="gmSuiteContext" aria-live="polite"></div>
+        </section>
         <div class="tabs" data-tabs>
           <button class="tab active" type="button" data-tab-target="suite-account">ACCOUNT</button>
           <button class="tab" type="button" data-tab-target="suite-economy">ECONOMY &amp; FACILITIES</button>
@@ -539,7 +549,9 @@
   <script src="auth.js"></script>
   <script src="ui.js"></script>
   <script src="player-data.js?v=faction-foundation-20261010"></script>
+  <script src="contextual-actions.js?v=alpha050-context"></script>
   <script src="player-suite.js?v=facility-schedule-20261019"></script>
+  <script src="suite-context-hook.js?v=alpha050-context"></script>
   <script src="artifacts.js?v=artifacts-clean-20261007"></script>
   <script src="player-systems.js?v=faction-foundation-20261010"></script>
   <script src="civilian-contracts.js?v=alpha050-phase1-20261026"></script>
