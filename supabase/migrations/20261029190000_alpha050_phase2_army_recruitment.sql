@@ -119,7 +119,7 @@ create or replace function public.recruit_faction_army(
  p_army_name text default null,
  p_reinforce_army_id uuid default null
 ) returns jsonb
-language sql set search_path=''
+language sql security definer set search_path=''
 as $function$
  select private.recruit_faction_army($1,$2,$3,$4);
 $function$;
