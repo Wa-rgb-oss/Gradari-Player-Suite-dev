@@ -4,7 +4,7 @@
  if(!loc||!$("gmFleetState"))return;
  const esc=x=>String(x??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
  const state=$("gmFleetState");let seq=0,me=null,hex="",faction=null,canCommand=false;
- let blueprints=[],yards=[],fleets=[],ships=[],wars=[],offers=[],hostileAtFleet=[];
+ let blueprints=[],yards=[],fleets=[],ships=[],wars=[],offers=[],hostileAtFleet=[],armies=[];let lastRef=null;
  const req=(path,params)=>GMAuth.api("rpc/"+path,{method:"POST",body:JSON.stringify(params)});
  const options=(element,rows,lab,placeholder)=>{element.replaceChildren(new Option(placeholder||"SELECT",""));rows.forEach(x=>element.add(new Option(lab(x),x.id)));};
  function auth(){
@@ -13,6 +13,9 @@
  }
  function format(n){return Number(n||0).toLocaleString(undefined,{maximumFractionDigits:2});}
  function selection(){
+  const army=armies.find(a=>a.id===$("gmArmyCommandSelect").value);
+  $("gmArmyCommandDetails").textContent=army?"STRENGTH "+format(army.strength)+" · LOCATION "+army.location_ref+" · "+String(army.movement_status).toUpperCase():"NO ARMY SELECTED";
+  $("gmArmyOrderForm").querySelector('button[type="submit"]').disabled=!canCommand||!army||army.movement_status!=="stationary"||!hex;
   const blueprint=blueprints.find(b=>b.id===$("gmShipBlueprint").value);
   $("gmShipBuildDetails").textContent=blueprint?
    "COST "+format(Number(blueprint.strength)*20)+" A · CREW "+format(blueprint.manpower_cost)+" · RESOURCES "+JSON.stringify(blueprint.resource_costs||{})+" · BUILD "+format(blueprint.build_cycles*36)+" WORLD HOURS":"NO BLUEPRINT SELECTED";
@@ -28,14 +31,15 @@
   $("gmNavalEngageForm").querySelector('button[type="submit"]').disabled=!canCommand||!fleet||fleet.movement_status!=="stationary"||!member.length||!enemies.length;
   $("gmShipAssignForm").querySelector('button[type="submit"]').disabled=!canCommand||!fleet||fleet.movement_status!=="stationary"||!$("gmShipSelect").value;
  }
- async function load(){
-  const ref=loc.textContent.trim(),id=++seq;hex=/^HEX_-?\d+_-?\d+$/.test(ref)?ref:"";
+ async function load(force=false){
+  const ref=loc.textContent.trim();if(!force&&ref===lastRef)return;lastRef=ref;
+  const id=++seq;hex=/^HEX_-?\d+_-?\d+$/.test(ref)?ref:"";
   faction=null;canCommand=false;state.textContent="LOADING NAVAL OPERATIONS...";
   if(!hex){state.textContent="SELECT A HEX";return;}
   try{
    const session=await GMAuth.getSession();me=session?.user?.id;
    const q=encodeURIComponent(hex);
-   const [tr,fac,types,bp,fl,sp,orders,warData,battles,allOffers,memberships,localShips,navalReports]=await Promise.all([
+   const [tr,fac,types,bp,fl,sp,orders,warData,battles,allOffers,memberships,localShips,navalReports,allArmies]=await Promise.all([
     GMAuth.api("territories?location_ref=eq."+q+"&select=faction_id"),
     GMAuth.api("facilities?location_ref=eq."+q+"&select=id,name,owner_faction_id,facility_type_id,status"),
     GMAuth.api("facility_types?select=id,name"),
@@ -48,7 +52,8 @@
     GMAuth.api("military_peace_proposals?status=eq.pending&select=id,war_id,proposed_by_faction_id,terms"),
     GMAuth.api("faction_memberships?user_id=eq."+encodeURIComponent(me||"00000000-0000-0000-0000-000000000000")+"&status=eq.active&select=faction_id,permissions"),
     GMAuth.api("ships?status=eq.active&select=faction_id,location_ref"),
-    GMAuth.api("naval_battle_reports?select=attacker_before,defender_before,attacker_after,defender_after,created_at&order=created_at.desc&limit=8")
+    GMAuth.api("naval_battle_reports?select=attacker_before,defender_before,attacker_after,defender_after,created_at&order=created_at.desc&limit=8"),
+    GMAuth.api("armies?status=eq.active&select=id,name,faction_id,location_ref,strength,movement_status")
    ]);
    if(id!==seq)return;
    const currentFaction=tr[0]?.faction_id;
@@ -65,6 +70,8 @@
    yards=fac.filter(f=>f.owner_faction_id===faction?.id&&f.status==="active"&&/yard/i.test(typesById.get(f.facility_type_id)||""));
    blueprints=bp;fleets=fl.filter(f=>f.faction_id===faction?.id);ships=sp.filter(s=>s.faction_id===faction?.id);
    hostileAtFleet=localShips;
+   armies=allArmies.filter(a=>a.faction_id===faction?.id);
+   options($("gmArmyCommandSelect"),armies,a=>a.name+" / "+a.location_ref,"NO CONTROLLED ARMIES");
    wars=warData.filter(w=>w.attacker_faction_id===faction?.id||w.defender_faction_id===faction?.id);
    offers=allOffers;
    options($("gmShipyardSelect"),yards,y=>y.name,"NO AVAILABLE YARD");
@@ -86,7 +93,18 @@
    selection();
   }catch(e){if(id===seq){state.textContent="FLEET DATA UNAVAILABLE // "+e.message;console.warn(e);}}
  }
- async function run(form,fn,params,message){const btn=form.querySelector('button[type="submit"]');btn.disabled=true;state.textContent=message+"...";try{const result=await req(fn,params);state.textContent=message+" COMPLETE";await load();state.textContent=message+" COMPLETE // "+esc(JSON.stringify(result));}catch(e){state.textContent="COMMAND FAILED // "+e.message;selection();}}
+ async function run(form,fn,params,message){const btn=form.querySelector('button[type="submit"]');btn.disabled=true;state.textContent=message+"...";try{const result=await req(fn,params);state.textContent=message+" COMPLETE";await load(true);state.textContent=message+" COMPLETE // "+esc(JSON.stringify(result));}catch(e){state.textContent="COMMAND FAILED // "+e.message;selection();}}
+ $("gmArmyOrderForm").addEventListener("submit",e=>{
+  e.preventDefault();if(!canCommand)return;
+  const id=$("gmArmyCommandSelect").value,mode=$("gmArmyOrderType").value;
+  const a=armies.find(x=>x.id===id);if(!a||!hex)return;
+  if(!confirm("Issue "+mode.toUpperCase()+" order for "+a.name+" at "+hex+"?"))return;
+  if(mode==="move"){
+    run(e.currentTarget,"order_army_movement",{p_army_id:id,p_to_ref:hex},"ARMY MOVEMENT");
+  }else{
+    run(e.currentTarget,"launch_military_operation",{p_army_id:id,p_target_ref:hex,p_operation_type:mode},"MILITARY OPERATION");
+  }
+ });
  $("gmShipyardForm").addEventListener("submit",e=>{e.preventDefault();if(!canCommand)return;const form=e.currentTarget;
  const yard=$("gmShipyardSelect").value,blueprint=$("gmShipBlueprint").value,name=$("gmShipName").value.trim();
  if(!yard||!blueprint||!name)return; if(!confirm("Queue this vessel for faction shipyard construction?"))return;
@@ -112,10 +130,10 @@
     if(!terms)return;await req("offer_war_peace",{p_war:offer.dataset.warOffer,p_terms:terms});}
    else if(confirm("Accept this peace proposal and end the war?")){
     await req("respond_war_peace",{p_proposal:accept.dataset.warAccept,p_accept:true});}
-   await load();
+   await load(true);
   }catch(err){state.textContent="PEACE NEGOTIATION FAILED // "+err.message;}
  });
- ["gmShipBlueprint","gmFleetSelect","gmShipSelect","gmShipyardSelect"].forEach(id=>$(id).addEventListener("change",selection));
- new MutationObserver(load).observe(loc,{childList:true,subtree:true,characterData:true});
- load();
+ ["gmArmyCommandSelect","gmArmyOrderType","gmShipBlueprint","gmFleetSelect","gmShipSelect","gmShipyardSelect"].forEach(id=>$(id).addEventListener("change",selection));
+ new MutationObserver(()=>load(false)).observe(loc,{childList:true,subtree:true,characterData:true});
+ load(true);
 })();
