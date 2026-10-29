@@ -62,9 +62,17 @@
    const factionRecords=candidateIds.length?
     await GMAuth.api("factions?id=in.("+candidateIds.map(encodeURIComponent).join(",")+")&select=id,name,leader_user_id"):[];
    if(id!==seq)return;
-   faction=factionRecords.find(f=>f.id===currentFaction)||factionRecords.find(f=>f.leader_user_id===me||memberships.some(m=>m.faction_id===f.id&&m.permissions?.includes("military")))||null;
+   const permissions=await Promise.all(factionRecords.map(async f=>({
+     faction:f,
+     allowed:Boolean(await req("can_command_faction",{p_faction_id:f.id}))
+   })));
+   if(id!==seq)return;
+   const chosen=permissions.find(x=>x.faction.id===currentFaction&&x.allowed)||
+     permissions.find(x=>x.allowed)||
+     permissions.find(x=>x.faction.id===currentFaction);
+   faction=chosen?.faction||null;
+   canCommand=Boolean(chosen?.allowed);
    if(faction)faction.memberPermissions=memberships.find(m=>m.faction_id===faction.id)?.permissions||[];
-   canCommand=Boolean(faction && await req("can_command_faction",{p_faction_id:faction.id}));
    if(id!==seq)return;
    const typesById=new Map(types.map(t=>[t.id,t.name]));
    yards=fac.filter(f=>f.owner_faction_id===faction?.id&&f.status==="active"&&/yard/i.test(typesById.get(f.facility_type_id)||""));
@@ -87,9 +95,10 @@
     '<div class="section-code">ATTACKER '+format(w.attacker_score)+' · DEFENDER '+format(w.defender_score)+'</div>'+
     '<div class="map-button-grid" style="margin-top:8px">'+
     '<button type="button" class="hud-button secondary" data-war-offer="'+esc(w.id)+'">PROPOSE PEACE</button>'+
-    ownProposals.map(o=>'<button type="button" class="hud-button secondary" data-war-accept="'+esc(o.id)+'">ACCEPT '+esc(o.terms)+'</button>').join("")+'</div></article>';
+    ownProposals.map(o=>'<button type="button" class="hud-button secondary" data-war-accept="'+esc(o.id)+'">ACCEPT '+esc(o.terms)+'</button><button type="button" class="hud-button secondary" data-war-reject="'+esc(o.id)+'">REJECT</button>').join("")+'</div></article>';
    }).join(""):'<div class="empty-state">NO ACTIVE WARS FOR THE SELECTED FACTION.</div>';
-   state.textContent=canCommand?"FACTION NAVAL AUTHORITY VERIFIED":"VIEW ONLY / SELECT A HEX OWNED BY A FACTION YOU COMMAND";
+   state.textContent=canCommand?"FACTION MILITARY AUTHORITY VERIFIED":"VIEW ONLY / MILITARY COMMAND PERMISSION REQUIRED";
+   document.getElementById("map-tab-military")?.setAttribute("data-modern-military-ready","true");
    selection();
   }catch(e){if(id===seq){state.textContent="FLEET DATA UNAVAILABLE // "+e.message;console.warn(e);}}
  }
@@ -123,13 +132,15 @@
   run(e.currentTarget,"launch_naval_engagement",{p_fleet:$("gmFleetSelect").value,p_enemy_faction:$("gmNavalEnemy").value},"NAVAL ENGAGEMENT");
  });
  $("gmWarfareWars").addEventListener("click",async e=>{
-  const offer=e.target.closest("[data-war-offer]"),accept=e.target.closest("[data-war-accept]");
-  if(!canCommand||(!offer&&!accept))return;
+  const offer=e.target.closest("[data-war-offer]"),accept=e.target.closest("[data-war-accept]"),reject=e.target.closest("[data-war-reject]");
+  if(!canCommand||(!offer&&!accept&&!reject))return;
   try{
    if(offer){const terms=prompt("Peace terms: white_peace, attacker_victory, or defender_victory","white_peace");
     if(!terms)return;await req("offer_war_peace",{p_war:offer.dataset.warOffer,p_terms:terms});}
-   else if(confirm("Accept this peace proposal and end the war?")){
+   else if(accept&&confirm("Accept this peace proposal and end the war?")){
     await req("respond_war_peace",{p_proposal:accept.dataset.warAccept,p_accept:true});}
+   else if(reject&&confirm("Reject this peace offer?")){
+    await req("respond_war_peace",{p_proposal:reject.dataset.warReject,p_accept:false});}
    await load(true);
   }catch(err){state.textContent="PEACE NEGOTIATION FAILED // "+err.message;}
  });
