@@ -64,10 +64,10 @@ The frontend does not rely on hidden buttons for security.
 - `news/` — project overview
 - `admin/` — restricted Game Master backend
 - `admin.js` — admin controls
-- `auth.js` — persistent Supabase session handling
+- `auth.js` — unified Supabase authentication, sessions, recovery, confirmation and API handling
 - `ui.js` — shared UI helpers
 - `styles.css` — shared command-console visual system
-- `legacy-player-suite/` — preserved original Player Suite
+- `legacy-player-suite/` — compatibility redirect to the current Player Suite (old interactive UI retired)
 
 ## Visual direction
 
@@ -127,3 +127,7 @@ The restricted admin console includes a visual MAP tab modeled on the original G
 - Place and edit faction-owned facilities using the live facility catalog and production/upkeep rules.
 - Initial setup facilities can be placed without charging faction treasury; live construction can optionally charge the configured build cost.
 - The player map reads the same faction claims, map labels, and facilities, so admin map edits become the actual game map rather than a separate localStorage copy.
+
+## Legacy UI cleanup
+
+The 2026-10-29 audit consolidated duplicate authentication clients, retired the standalone legacy Player Suite, and suppressed duplicate map administration and market navigation while preserving active backend gameplay workflows. See `docs/ui-legacy-audit-20261029.md` for retention decisions, change list, and browser QA.
