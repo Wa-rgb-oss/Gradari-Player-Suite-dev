@@ -149,6 +149,40 @@
                 <button class="hud-button secondary" id="mapConquestBtn" type="button">CONQUEST</button>
               </div>
               <div class="form-state" id="mapMilitaryState"></div>
+              <section class="gm-warfare-console" aria-label="Fleet and warfare command" style="border-top:1px solid var(--line);margin-top:18px;padding-top:18px">
+                <div class="section-code">ALPHA 0.5 / FLEET COMMAND</div>
+                <h2>Naval Operations</h2>
+                <div id="gmFleetState" class="form-state" role="status">SELECT A HEX TO INSPECT NAVAL ASSETS.</div>
+                <div class="section-code" style="margin:12px 0">LOCAL SHIPYARD / CONSTRUCTION</div>
+                <form id="gmShipyardForm" class="form-shell">
+                  <label><span>Faction Shipyard</span><select id="gmShipyardSelect"></select></label>
+                  <label><span>Blueprint</span><select id="gmShipBlueprint"></select></label>
+                  <label><span>Ship Name</span><input id="gmShipName" maxlength="80" required placeholder="Imperial vessel name"></label>
+                  <div class="section-code" id="gmShipBuildDetails">SELECT AN AVAILABLE SHIP BLUEPRINT.</div>
+                  <button type="submit" class="hud-button amber">QUEUE SHIP CONSTRUCTION</button>
+                </form>
+                <div class="section-code" style="margin-top:14px">SHIPYARD ORDERS</div>
+                <div class="telemetry-stack" id="gmShipOrders"></div>
+                <div class="section-code" style="margin-top:16px">FLEET FORMATION</div>
+                <form id="gmFleetForm" class="form-shell">
+                  <label><span>New Fleet Name</span><input id="gmFleetName" maxlength="80" required placeholder="e.g. Spireblade Wing"></label>
+                  <button class="hud-button secondary" type="submit">CREATE FLEET HERE</button>
+                </form>
+                <div class="section-code" style="margin-top:16px">FLEET COMMAND & SHIP ASSIGNMENT</div>
+                <form id="gmFleetMoveForm" class="form-shell">
+                  <label><span>Controlled Fleet</span><select id="gmFleetSelect"></select></label>
+                  <div class="section-code" id="gmFleetDetails"></div>
+                  <button type="submit" class="hud-button secondary">MOVE SELECTED FLEET TO HEX</button>
+                </form>
+                <form id="gmShipAssignForm" class="form-shell" style="margin-top:10px">
+                  <label><span>Available Commissioned Ship</span><select id="gmShipSelect"></select></label>
+                  <button type="submit" class="hud-button secondary">ASSIGN SHIP TO SELECTED FLEET</button>
+                </form>
+                <div class="section-code" style="margin-top:16px">STRATEGIC WARFARE / WARSCORE</div>
+                <div id="gmWarfareWars" class="stack"></div>
+                <div class="section-code" style="margin-top:14px">RECENT BATTLE REPORTS</div>
+                <div id="gmBattleReports" class="stack"></div>
+              </section>
               <section class="gm-recruitment" aria-label="Recruit army personnel" style="border-top:1px solid var(--line);margin-top:18px;padding-top:18px">
                 <div class="section-code">MILITARY / RECRUITMENT</div>
                 <h2>Recruit Faction Troops</h2>
@@ -235,6 +269,7 @@
   <script src="map-context-hook.js?v=alpha050-context2"></script>
   <script src="map-object-context.js?v=alpha050-context2"></script>
   <script src="military-recruitment.js?v=alpha050-phase2b"></script>
+  <script src="warfare-console.js?v=alpha050-war1"></script>
   <script src="game-chat.js"></script>
 </body>
 </html>
