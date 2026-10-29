@@ -16,18 +16,21 @@
     if(!/^HEX_-?\d+_-?\d+$/.test(current))return;
     try{
       const term=encodeURIComponent(current);
-      const [fac,arm,ter]=await Promise.allSettled([
+      const [fac,arm,ter,fleets]=await Promise.allSettled([
         GMAuth.api("facilities?location_ref=eq."+term+"&select=id,name"),
         GMAuth.api("armies?location_ref=eq."+term+"&select=id,name"),
-        GMAuth.api("territories?location_ref=eq."+term+"&select=faction_id")
+        GMAuth.api("territories?location_ref=eq."+term+"&select=faction_id"),
+        GMAuth.api("fleets?location_ref=eq."+term+"&status=eq.active&select=id,name")
       ]);
       if(id!==requestId)return;
       const facilities=fac.status==="fulfilled"?fac.value:[];
       const armies=arm.status==="fulfilled"?arm.value:[];
       const territories=ter.status==="fulfilled"?ter.value:[];
+      const localFleets=fleets.status==="fulfilled"?fleets.value:[];
       const targets=[
         ...facilities.map(x=>({kind:"facility",id:x.id,name:x.name||"Facility"})),
-        ...armies.map(x=>({kind:"army",id:x.id,name:x.name||"Army"}))
+        ...armies.map(x=>({kind:"army",id:x.id,name:x.name||"Army"})),
+        ...localFleets.map(x=>({kind:"fleet",id:x.id,name:x.name||"Fleet"}))
       ];
       const factionId=territories[0]?.faction_id;
       if(factionId)targets.push({kind:"faction",id:factionId,name:"Controlling Faction"});
