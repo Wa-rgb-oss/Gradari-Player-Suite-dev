@@ -14,3 +14,9 @@
 .gm-editor-property-row span,.gm-editor-small{color:var(--muted);font-size:11px;line-height:1.5}
 .gm-editor-properties .hud-button{width:100%;white-space:normal}
 @media(max-width:1100px){.gm-editor-properties{max-height:none}.admin-map-editor-v2{height:auto}}
+
+/* 0.5.0 UI audit: the ribbon is the single visible editor navigation.
+   Retain hidden legacy tab controls as internal targets for admin-map.js,
+   so existing editing tools and active-panel synchronization remain intact. */
+#admin-map .admin-map-editor-v2 .admin-map-subtabs{display:none}
+#admin-map .admin-map-editor-v2 .admin-map-editor-title{margin-bottom:12px}
