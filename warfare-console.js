@@ -53,13 +53,14 @@
    if(id!==seq)return;
    const currentFaction=tr[0]?.faction_id;
    const own=memberships.map(m=>m.faction_id);
-   const candidateIds=[...new Set([...own,...fl.map(f=>f.faction_id)])];
+   const candidateIds=[...new Set([...own,...fl.map(f=>f.faction_id),currentFaction].filter(Boolean))];
    const factionRecords=candidateIds.length?
     await GMAuth.api("factions?id=in.("+candidateIds.map(encodeURIComponent).join(",")+")&select=id,name,leader_user_id"):[];
    if(id!==seq)return;
-   faction=factionRecords.find(f=>f.id===currentFaction&&(f.leader_user_id===me||memberships.some(m=>m.faction_id===f.id&&m.permissions?.includes("military"))))||factionRecords.find(f=>f.leader_user_id===me||memberships.some(m=>m.faction_id===f.id&&m.permissions?.includes("military")))||null;
+   faction=factionRecords.find(f=>f.id===currentFaction)||factionRecords.find(f=>f.leader_user_id===me||memberships.some(m=>m.faction_id===f.id&&m.permissions?.includes("military")))||null;
    if(faction)faction.memberPermissions=memberships.find(m=>m.faction_id===faction.id)?.permissions||[];
-   canCommand=Boolean(auth());
+   canCommand=Boolean(faction && await req("can_command_faction",{p_faction_id:faction.id}));
+   if(id!==seq)return;
    const typesById=new Map(types.map(t=>[t.id,t.name]));
    yards=fac.filter(f=>f.owner_faction_id===faction?.id&&f.status==="active"&&/yard/i.test(typesById.get(f.facility_type_id)||""));
    blueprints=bp;fleets=fl.filter(f=>f.faction_id===faction?.id);ships=sp.filter(s=>s.faction_id===faction?.id);
