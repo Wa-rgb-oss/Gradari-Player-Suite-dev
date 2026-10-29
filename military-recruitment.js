@@ -50,8 +50,7 @@
       const sess=await GMAuth.getSession();
       const uid=sess?.user?.id;
       const member=memberships.find(x=>x.user_id===uid);
-      const permitted=faction?.leader_user_id===uid||member?.permissions?.includes("military")||
-        member?.permissions?.includes("all");
+      const permitted=faction?Boolean(await GMAuth.api("rpc/can_command_faction",{method:"POST",body:JSON.stringify({p_faction_id:faction.id})})):false;
       context={ref,pop:systems[0].population,mil:systems[0].military_population,
         treasury:faction?.treasury??0,authorized:Boolean(permitted)};
       civilians.textContent=Number(context.pop).toLocaleString();
