@@ -11,12 +11,12 @@ const setOptions=(id,items,label,empty="NONE AVAILABLE")=>{
 };
 const panels=[
  ["army","Army Command","Army movement and recruitment",["gmArmyOrderForm","gmRecruitForm","gmRecruitUnitList","gmRecruitHistory"]],
- ["fleet","Fleet Command","Fleet formation, movement and hangars",["gmFleetForm","gmFleetMoveForm","gmShipAssignForm","gmHangarForm"]],
+ ["fleet","Fleet Command","Fleet formation, movement and hangars",["gmFleetState","gmFleetForm","gmFleetMoveForm","gmShipAssignForm","gmHangarForm"]],
  ["shipyards","Shipyards","Naval and civilian construction",["gmShipyardForm","gmShipOrders","gmCivilianBuildForm"]],
- ["logistics","Logistics","Cargo, transports, maintenance and supply",["gmVesselCargoForm","gmTroopTransportForm","gmRepairTenderForm","gmResupplyForm"]],
+ ["logistics","Logistics","Cargo, transports, maintenance and supply",["gmVesselCargoForm","gmTroopTransportForm","gmRepairTenderForm","gmResupplyForm","gmVesselOpsState"]],
  ["warfare","Warfare","Naval engagements, war score and peace",["gmNavalEngageForm","gmWarfareWars"]],
  ["records","Military Records","Combat reports and reconnaissance",["gmNavalReports","gmBattleReports","gmReconForm"]],
- ["commerce","Civilian Shipping","Personal vessels and trade routes",["gmCivilianMoveForm","gmCivilianCargoForm","gmCivilianFleetList"]]
+ ["commerce","Civilian Shipping","Personal vessels and trade routes",["gmCivilianState","gmCivilianMoveForm","gmCivilianCargoForm","gmCivilianFleetList"]]
 ];
 const shell=document.createElement("div");shell.id="gmNavalRefinement";
 shell.className="gm-naval-refinement";
@@ -32,8 +32,9 @@ for(const [key,title,subtitle,ids] of panels){
  content.append(pane);
 }
 shell.append(nav,content);
+const market=document.createElement("p");market.className="section-code";market.textContent="Load from your personal inventory, navigate to another governed system, then unload and trade through the existing Exchange Markets.";const link=document.createElement("a");link.href="exchange-markets/";link.textContent="Open Exchange Markets";market.append(document.createTextNode(" · "),link);content.querySelector('[data-naval-pane="commerce"]')?.append(market);
 root.prepend(shell);
-const saved=window.sessionStorage?.getItem("gmNavalTab")||"army";
+let saved="army";try{saved=window.sessionStorage?.getItem("gmNavalTab")||"army"}catch(_){}
 const show=(key)=>{
  for(const tab of nav.querySelectorAll("[data-naval-tab]")){const active=tab.dataset.navalTab===key;tab.classList.toggle("is-active",active);tab.setAttribute("aria-pressed",String(active))}
  for(const pane of content.querySelectorAll("[data-naval-pane]"))pane.hidden=pane.dataset.navalPane!==key;
@@ -44,7 +45,7 @@ show(panels.some(p=>p[0]===saved)?saved:"army");
 // Existing logic continues using original element IDs; only their presentation containers moved.
 const state=$("gmCivilianState"),reconResult=$("gmReconResult");
 let run=0,hex="",owner=null,ships=[],yards=[],bps=[],resources=[],militaryShips=[],commandableFactions=[],movingIds=new Set(),shipyards=[];
-const permittedYard=b=>yards.some(y=>y.level>=b.required_yard_level);
+const permittedYard=b=>yards.some(y=>y.id===$("gmCivilianYard").value&&y.level>=b.required_yard_level);
 function update(){
  const bp=bps.find(b=>b.id===$("gmCivilianBlueprint").value);
  $("gmCivilianBuildCost").textContent=bp?
@@ -66,14 +67,15 @@ async function refresh(){
  try{
   const session=await GMAuth.getSession();owner=session?.user?.id;
   if(!owner)throw Error("Sign in to manage shipping");
-  const [allShips,ownYards,allBp,rs,voyages,allFactions,memberships]=await Promise.all([
+  const [allShips,ownYards,allBp,rs,voyages,allFactions,memberships,territories]=await Promise.all([
    GMAuth.api("ships?select=id,name,location_ref,owner_user_id,faction_id,blueprint_id,cargo_manifest,status,fleet_id&status=eq.active"),
    GMAuth.api("facilities?owner_user_id=eq."+owner+"&status=eq.active&select=id,name,level,location_ref,facility_type_id"),
    GMAuth.api("ship_blueprints?player_visible=eq.true&select=id,name,code,vessel_category,strength,resource_costs,required_yard_level,required_yard_kind,special_role"),
    GMAuth.api("resource_catalog?player_visible=eq.true&select=code,name&order=name"),
    GMAuth.api("civilian_ship_movements?status=eq.moving&select=ship_id"),
    GMAuth.api("factions?status=eq.active&select=id,leader_user_id"),
-   GMAuth.api("faction_memberships?user_id=eq."+owner+"&status=eq.active&select=faction_id")
+   GMAuth.api("faction_memberships?user_id=eq."+owner+"&status=eq.active&select=faction_id"),
+   GMAuth.api("territories?location_ref=eq."+encodeURIComponent(hex)+"&select=faction_id")
   ]);
   if(token!==run)return;
   const types=await GMAuth.api("facility_types?select=id,code");
@@ -85,7 +87,7 @@ async function refresh(){
   bps=allBp.filter(b=>b.vessel_category==="civilian");
   resources=rs;
   movingIds=new Set(voyages.map(v=>v.ship_id));
-  const candidates=allFactions.filter(f=>f.leader_user_id===owner||memberships.some(m=>m.faction_id===f.id));
+  const candidates=allFactions.filter(f=>f.leader_user_id===owner||memberships.some(m=>m.faction_id===f.id)||territories.some(t=>t.faction_id===f.id));
   commandableFactions=[];
   for(const f of candidates)if(await rpc("can_command_faction",{p_faction_id:f.id}))commandableFactions.push(f.id);
   if(token!==run)return;
