@@ -149,6 +149,31 @@
                 <button class="hud-button secondary" id="mapConquestBtn" type="button">CONQUEST</button>
               </div>
               <div class="form-state" id="mapMilitaryState"></div>
+              <section id="gmCivilianShippingSection" class="gm-civilian-shipping" style="margin-top:14px">
+                <div class="section-code">CIVILIAN COMMERCE / PLAYER-OWNED VESSELS</div>
+                <h2>Merchant Shipping</h2>
+                <div class="form-state" id="gmCivilianState" role="status">SELECT A SYSTEM TO VIEW CIVILIAN SHIPYARDS.</div>
+                <form id="gmCivilianBuildForm" class="form-shell">
+                  <label><span>Owned Civilian Shipyard</span><select id="gmCivilianYard"></select></label>
+                  <label><span>Civilian Blueprint</span><select id="gmCivilianBlueprint"></select></label>
+                  <label><span>Vessel Name</span><input id="gmCivilianName" maxlength="80" required></label>
+                  <div class="section-code" id="gmCivilianBuildCost"></div>
+                  <button type="submit" class="hud-button secondary">ORDER PERSONAL VESSEL</button>
+                </form>
+                <form id="gmCivilianMoveForm" class="form-shell" style="margin-top:14px">
+                  <label><span>Owned Civilian Vessel</span><select id="gmCivilianShip"></select></label>
+                  <div class="section-code" id="gmCivilianShipState"></div>
+                  <button type="submit" class="hud-button secondary">SAIL TO SELECTED HEX</button>
+                </form>
+                <form id="gmCivilianCargoForm" class="form-shell" style="margin-top:14px">
+                  <label><span>Resource</span><select id="gmCivilianResource"></select></label>
+                  <label><span>Quantity</span><input type="number" id="gmCivilianQuantity" step="any" min="0.01" max="100000" value="10" required></label>
+                  <label><span>Transfer</span><select id="gmCivilianDirection"><option value="load">LOAD PERSONAL RESOURCES</option><option value="unload">UNLOAD TO PERSONAL RESOURCES</option></select></label>
+                  <button type="submit" class="hud-button secondary">TRANSFER PERSONAL CARGO</button>
+                </form>
+                <div class="section-code" style="margin-top:12px">MY CIVILIAN VESSELS</div>
+                <div id="gmCivilianFleetList" class="telemetry-stack"></div>
+              </section>
               <section class="gm-warfare-console" aria-label="Fleet and warfare command" style="border-top:1px solid var(--line);margin-top:18px;padding-top:18px">
                 <div class="section-code">ALPHA 0.5 / COMBINED MILITARY COMMAND</div>
                 <h2>Army Operations</h2>
@@ -204,6 +229,19 @@
                     <label><span>Damaged Vessel</span><select id="gmRepairTarget"><option value="">SELECT DAMAGED VESSEL</option></select></label>
                     <label><span>Strength to Restore</span><input id="gmRepairPoints" type="number" min="1" max="1000" value="10" step="1" required></label>
                     <button type="submit" class="hud-button secondary">REPAIR HULL</button>
+                  </form>
+                  <form id="gmResupplyForm" class="form-shell" style="margin-top:14px">
+                    <div class="section-code">LOGISTICS TENDER / SYSTEM RESUPPLY</div>
+                    <label><span>Supply Tender at Selected Hex</span><select id="gmResupplyTender"></select></label>
+                    <label><span>Resource</span><select id="gmResupplyResource"><option value="food">FOOD</option><option value="energy">ENERGY</option></select></label>
+                    <label><span>Quantity</span><input id="gmResupplyAmount" type="number" min="0.01" max="100000" value="10" step="any" required></label>
+                    <button type="submit" class="hud-button secondary">DELIVER SYSTEM SUPPLIES</button>
+                  </form>
+                  <form id="gmReconForm" class="form-shell" style="margin-top:14px">
+                    <div class="section-code">RECONNAISSANCE / SCAN SELECTED HEX</div>
+                    <label><span>Scout Vessel (Range 3 Hexes)</span><select id="gmReconShip"></select></label>
+                    <button type="submit" class="hud-button secondary">SCAN SELECTED HEX</button>
+                    <div class="form-state" id="gmReconResult" role="status"></div>
                   </form>
                   <div class="form-state" id="gmVesselOpsState" role="status"></div>
                 </section>
@@ -320,7 +358,8 @@
   <script src="map-object-context.js?v=alpha050-war2"></script>
   <script src="military-recruitment.js?v=alpha050-war3"></script>
   <script src="warfare-console.js?v=alpha050-expanded-vessels"></script>
-  <script src="vessel-operations.js?v=alpha050-vesselops2"></script>
+  <script src="vessel-operations.js?v=alpha050-naval-refine"></script>
+  <script src="naval-refinement.js?v=alpha050-refine-1"></script>
   <script src="game-chat.js"></script>
 </body>
 </html>
