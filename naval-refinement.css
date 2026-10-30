@@ -1,0 +1,25 @@
+/* Alpha 0.5.0 Naval Refinement — compact, responsive command sections */
+#map-tab-military:has(#gmNavalRefinement) > .gm-warfare-console,
+#map-tab-military:has(#gmNavalRefinement) > .gm-recruitment,
+#map-tab-military:has(#gmNavalRefinement) > .gm-civilian-shipping,
+#map-tab-military:has(#gmNavalRefinement) > .section-code,
+#map-tab-military:has(#gmNavalRefinement) > h2,
+#map-tab-military:has(#gmNavalRefinement) > label,
+#map-tab-military:has(#gmNavalRefinement) > .telemetry-stack,
+#map-tab-military:has(#gmNavalRefinement) > .map-button-grid,
+#map-tab-military:has(#gmNavalRefinement) > #mapMilitaryState{display:none!important}
+.gm-naval-refinement{width:100%;min-width:0}
+.gm-naval-nav{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-bottom:16px}
+.gm-naval-nav button{font-size:10px;min-width:0;min-height:38px;line-height:1.25;padding:8px 5px;white-space:normal;text-align:center}
+.gm-naval-nav button.is-active{border-color:#d3a46b;background:rgba(195,144,75,.16);color:#f2cb92}
+.gm-naval-content{min-width:0}
+.gm-naval-pane[hidden]{display:none!important}
+.gm-naval-pane>h2{margin:0 0 5px;font-size:18px}
+.gm-naval-pane>.section-code{margin:0 0 14px;opacity:.85}
+.gm-naval-pane>.form-shell,.gm-naval-pane>form{margin:0 0 15px}
+.gm-naval-pane .telemetry-stack{white-space:pre-line}
+.gm-naval-pane .section-code{white-space:pre-line;overflow-wrap:anywhere}
+.gm-naval-pane input,.gm-naval-pane select{max-width:100%;min-width:0}
+.gm-naval-pane button{max-width:100%;overflow-wrap:anywhere}
+@media(min-width:1000px){.gm-naval-nav{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:500px){.gm-naval-nav{grid-template-columns:repeat(2,minmax(0,1fr));gap:5px}.gm-naval-nav button{font-size:9px;padding:7px 4px;min-height:42px}}
