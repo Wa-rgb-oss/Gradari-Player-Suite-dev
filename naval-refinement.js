@@ -67,7 +67,7 @@ async function refresh(){
  try{
   const session=await GMAuth.getSession();owner=session?.user?.id;
   if(!owner)throw Error("Sign in to manage shipping");
-  const [allShips,ownYards,allBp,rs,voyages,allFactions,memberships,territories]=await Promise.all([
+  const [allShips,ownYards,allBp,rs,voyages,allFactions,memberships,territories,history]=await Promise.all([
    GMAuth.api("ships?select=id,name,location_ref,owner_user_id,faction_id,blueprint_id,cargo_manifest,status,fleet_id&status=eq.active"),
    GMAuth.api("facilities?owner_user_id=eq."+owner+"&status=eq.active&select=id,name,level,location_ref,facility_type_id"),
    GMAuth.api("ship_blueprints?player_visible=eq.true&select=id,name,code,vessel_category,strength,resource_costs,required_yard_level,required_yard_kind,special_role"),
@@ -75,7 +75,8 @@ async function refresh(){
    GMAuth.api("civilian_ship_movements?status=eq.moving&select=ship_id"),
    GMAuth.api("factions?status=eq.active&select=id,leader_user_id"),
    GMAuth.api("faction_memberships?user_id=eq."+owner+"&status=eq.active&select=faction_id"),
-   GMAuth.api("territories?location_ref=eq."+encodeURIComponent(hex)+"&select=faction_id")
+   GMAuth.api("territories?location_ref=eq."+encodeURIComponent(hex)+"&select=faction_id"),
+   GMAuth.api("civilian_ship_movements?select=ship_id,from_ref,to_ref,status,arrive_world_hour&order=created_at.desc&limit=12")
   ]);
   if(token!==run)return;
   const types=await GMAuth.api("facility_types?select=id,code");
@@ -98,7 +99,7 @@ async function refresh(){
   setOptions("gmCivilianBlueprint",bps,b=>b.name,"NO CIVILIAN DESIGNS");
   setOptions("gmCivilianShip",ships,s=>s.name+" / "+s.location_ref,"NO PERSONAL SHIPS");
   setOptions("gmCivilianResource",resources,r=>r.name,"SELECT RESOURCE");
-  $("gmCivilianFleetList").textContent=ships.length?ships.map(s=>s.name+" | "+s.location_ref+(movingIds.has(s.id)?" | TRAVELING":"")).join("\n"):"NO OWNED VESSELS";
+  $("gmCivilianFleetList").textContent=(ships.length?ships.map(s=>s.name+" | "+s.location_ref+(movingIds.has(s.id)?" | TRAVELING":"")).join("\n"):"NO OWNED VESSELS")+ (history.length?"\n\nRECENT VOYAGES\n"+history.map(v=>v.from_ref+" → "+v.to_ref+" / "+v.status.toUpperCase()).join("\n"):"");
   state.textContent="CIVILIAN SHIPYARDS: "+shipyards.length+" · PERSONAL SHIPS: "+ships.length;
   update();
  }catch(e){if(token===run){state.textContent="SHIPPING UNAVAILABLE // "+e.message;console.warn(e)}}
