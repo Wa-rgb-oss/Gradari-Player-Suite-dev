@@ -34,13 +34,13 @@
    "CATEGORY / "+(blueprint.vessel_category||"WARSHIP").toUpperCase()+" · "+(blueprint.lore_status==="primary_canon"?"CANON":"GRADARI GAME EXPANSION")+"\n"+
    "CARGO / "+format(blueprint.cargo_capacity)+" · HANGARS / "+format(blueprint.hangar_slots)+"\n"+
    "CREW / "+format(blueprint.crew_min)+"–"+format(blueprint.crew_max)+" · TROOP CAPACITY / "+format(blueprint.troops_capacity)+" · STRIKE CRAFT / "+format(blueprint.strike_craft_min)+"–"+format(blueprint.strike_craft_max)+"\n"+
-   "PROVISIONAL GAME BALANCE / "+format(Number(blueprint.strength)*20)+" A · "+JSON.stringify(blueprint.resource_costs||{})+" · "+format(blueprint.build_cycles*36)+" WORLD HOURS"+
+   "REQUIRES NAVAL YARD LEVEL "+format(blueprint.required_yard_level)+" · PROVISIONAL GAME BALANCE / "+format(Number(blueprint.strength)*20)+" A · "+JSON.stringify(blueprint.resource_costs||{})+" · "+format(blueprint.build_cycles*36)+" WORLD HOURS"+
    (blueprint.deployment_restriction?"\nDOCTRINAL RESTRICTION / "+blueprint.deployment_restriction:"")
    :"SELECT A CANONICAL SHIP BLUEPRINT.";
   const fleet=fleets.find(f=>f.id===$("gmFleetSelect").value);
   const member=ships.filter(s=>s.fleet_id===fleet?.id&&s.status==="active");
   $("gmFleetDetails").textContent=fleet?"LOCATION "+fleet.location_ref+" · "+fleet.movement_status.toUpperCase()+" · "+member.length+" SHIPS · UPKEEP "+format(member.reduce((sum,ship)=>sum+Number(ship.strength)*.05,0))+" A / DAY":"NO FLEET SELECTED";
-  $("gmShipyardForm").querySelector('button[type="submit"]').disabled=!canCommand||!yards.length||!blueprint;
+  $("gmShipyardForm").querySelector('button[type="submit"]').disabled=!canCommand||!yards.some(y=>y.id===$("gmShipyardSelect").value && y.level>=Number(blueprint?.required_yard_level||999))||!blueprint;
   $("gmFleetForm").querySelector('button[type="submit"]').disabled=!canCommand||!hex||!faction;
   $("gmFleetMoveForm").querySelector('button[type="submit"]').disabled=!canCommand||!fleet||fleet.movement_status!=="stationary"||fleet.location_ref===hex||!member.length;
   options($("gmShipSelect"),ships.filter(ship=>!ship.fleet_id&&ship.location_ref===fleet?.location_ref),ship=>ship.name,"NO UNASSIGNED SHIPS");
@@ -59,9 +59,9 @@
    const q=encodeURIComponent(hex);
    const [tr,fac,types,bp,fl,sp,orders,warData,battles,allOffers,memberships,localShips,navalReports,allArmies,armySupplies]=await Promise.all([
     GMAuth.api("territories?location_ref=eq."+q+"&select=faction_id"),
-    GMAuth.api("facilities?location_ref=eq."+q+"&select=id,name,owner_faction_id,facility_type_id,status"),
+    GMAuth.api("facilities?location_ref=eq."+q+"&select=id,name,level,owner_faction_id,facility_type_id,status"),
     GMAuth.api("facility_types?select=id,name"),
-    GMAuth.api("ship_blueprints?player_visible=eq.true&select=id,name,description,doctrine_function,crew_min,crew_max,troops_capacity,strike_craft_min,strike_craft_max,deployment_restriction,strength,manpower_cost,build_cycles,resource_costs,vessel_category,cargo_capacity,hangar_slots,lore_status"),
+    GMAuth.api("ship_blueprints?player_visible=eq.true&select=id,name,description,doctrine_function,crew_min,crew_max,troops_capacity,strike_craft_min,strike_craft_max,deployment_restriction,strength,manpower_cost,build_cycles,resource_costs,vessel_category,cargo_capacity,hangar_slots,lore_status,required_yard_level,required_yard_kind"),
     GMAuth.api("fleets?status=eq.active&select=id,name,faction_id,location_ref,movement_status"),
     GMAuth.api("ships?status=eq.active&select=id,name,faction_id,location_ref,fleet_id,strength"),
     GMAuth.api("shipyard_orders?location_ref=eq."+q+"&select=id,ship_name,status,cycles_remaining,build_ready_world_hour&order=created_at.desc&limit=10"),
@@ -94,15 +94,15 @@
    if(faction)faction.memberPermissions=memberships.find(m=>m.faction_id===faction.id)?.permissions||[];
    if(id!==seq)return;
    const typesById=new Map(types.map(t=>[t.id,t.name]));
-   yards=fac.filter(f=>f.owner_faction_id===faction?.id&&f.status==="active"&&/yard/i.test(typesById.get(f.facility_type_id)||""));
-   blueprints=bp;fleets=fl.filter(f=>f.faction_id===faction?.id);ships=sp.filter(s=>s.faction_id===faction?.id);
+   yards=fac.filter(f=>f.owner_faction_id===faction?.id&&f.status==="active"&&/naval yard/i.test(typesById.get(f.facility_type_id)||""));
+   blueprints=bp.filter(b=>b.vessel_category!=="civilian");fleets=fl.filter(f=>f.faction_id===faction?.id);ships=sp.filter(s=>s.faction_id===faction?.id);
    hostileAtFleet=localShips;
    supplyLogs=armySupplies;
    armies=allArmies.filter(a=>a.faction_id===faction?.id);
    options($("gmArmyCommandSelect"),armies,a=>a.name+" / "+a.location_ref,"NO CONTROLLED ARMIES");
    wars=warData.filter(w=>w.attacker_faction_id===faction?.id||w.defender_faction_id===faction?.id);
    offers=allOffers;
-   options($("gmShipyardSelect"),yards,y=>y.name,"NO AVAILABLE YARD");
+   options($("gmShipyardSelect"),yards,y=>y.name+" / LEVEL "+y.level,"NO AVAILABLE NAVAL YARD");
    $("gmShipBlueprint").dataset.category="";
    options($("gmShipBlueprint"),blueprints,b=>b.name,"SELECT BLUEPRINT");
    options($("gmFleetSelect"),fleets,f=>f.name+" / "+f.location_ref,"NO FLEET");
