@@ -9,6 +9,7 @@
   <title>Map | Gradari Mireris</title>
   <link rel="stylesheet" href="styles.css?v=alpha050-phase1">
   <link rel="stylesheet" href="contextual-actions.css?v=alpha050-military-final1">
+  <link rel="stylesheet" href="naval-refinement.css?v=alpha050-ship-ui">
 
   <link rel="icon" type="image/png" sizes="192x192" href="/favicon.png">
   <link rel="icon" type="image/x-icon" sizes="16x16 32x32 48x48 64x64" href="/favicon.ico">
@@ -193,7 +194,7 @@
                 <div class="section-code" style="margin:12px 0">LOCAL SHIPYARD / CONSTRUCTION</div>
                 <form id="gmShipyardForm" class="form-shell">
                   <label><span>Faction Shipyard</span><select id="gmShipyardSelect"></select></label>
-                  <label><span>Ship Category</span><select id="gmShipCategory"><option value="all">ALL CLASSES</option><option value="warship">IMPERIAL WARSHIPS</option><option value="military_support">SUPPORT VESSELS</option><option value="strike_craft">STRIKE CRAFT</option><option value="civilian">CIVILIAN VESSELS</option></select></label>
+                  <label><span>Ship Category</span><select id="gmShipCategory"><option value="all">ALL CLASSES</option><option value="warship">IMPERIAL WARSHIPS</option><option value="military_support">SUPPORT VESSELS</option><option value="strike_craft">STRIKE CRAFT</option></select></label>
                   <label><span>Blueprint</span><select id="gmShipBlueprint"></select></label>
                   <label><span>Ship Name</span><input id="gmShipName" maxlength="80" required placeholder="Imperial vessel name"></label>
                   <div class="section-code" id="gmShipBuildDetails" style="white-space:pre-line;line-height:1.65">SELECT AN AVAILABLE SHIP BLUEPRINT.</div>
@@ -357,7 +358,7 @@
   <script src="map-context-hook.js?v=alpha050-war2"></script>
   <script src="map-object-context.js?v=alpha050-war2"></script>
   <script src="military-recruitment.js?v=alpha050-war3"></script>
-  <script src="warfare-console.js?v=alpha050-expanded-vessels"></script>
+  <script src="warfare-console.js?v=alpha050-shipyard-tier"></script>
   <script src="vessel-operations.js?v=alpha050-naval-refine"></script>
   <script src="naval-refinement.js?v=alpha050-refine-1"></script>
   <script src="game-chat.js"></script>
