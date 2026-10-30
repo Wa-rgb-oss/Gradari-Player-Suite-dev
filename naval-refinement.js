@@ -132,7 +132,7 @@ $("gmReconForm").addEventListener("submit",async e=>{e.preventDefault();
  const result=await execute("scan_with_recon",{p_ship:ship,p_target:hex},"RECON SCAN");
  if(result){reconResult.textContent="TARGET "+result.target_ref+" · HOSTILE SHIPS "+fmt(result.hostile_ships)+" · THREAT STRENGTH "+fmt(result.hostile_strength);show("records")}
 });
-["gmCivilianShip","gmCivilianBlueprint","gmCivilianYard"].forEach(id=>$(id).addEventListener("change",update));
+["gmCivilianShip","gmCivilianBlueprint","gmCivilianYard","gmResupplyTender","gmReconShip"].forEach(id=>$(id).addEventListener("change",update));
 new MutationObserver(()=>{if(hex!==loc.textContent.trim())refresh()}).observe(loc,{childList:true,subtree:true,characterData:true});
 refresh();
 })();
