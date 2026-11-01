@@ -727,6 +727,16 @@
               <input id="adminTradeStock" type="number" min="0" step="0.01" placeholder="Blank = unlimited">
               <button class="hud-button secondary" id="adminTradeResourceSaveBtn" type="button">SAVE LISTING</button>
               <button class="hud-button secondary" id="adminMapSaveSystemBtn" type="button" style="margin-top:10px">SAVE SYSTEM</button>
+              <div class="section-code" style="margin-top:18px">SYSTEM RELOCATION / ADMINISTRATIVE ACTIONS</div>
+              <p class="section-code">Select the source hex in the map, then enter or select a destination. Territory borders are never reassigned by these actions.</p>
+              <label><span>Destination Hex</span><input id="adminSystemDestination" placeholder="HEX_0_-4" spellcheck="false"></label>
+              <div class="map-button-grid" style="margin:10px 0">
+                <button class="hud-button secondary" id="adminSystemChooseDestination" type="button">CHOOSE DESTINATION ON MAP</button>
+                <button class="hud-button secondary" id="adminSystemMoveIdentity" type="button">MOVE IDENTITY ONLY</button>
+                <button class="hud-button amber" id="adminSystemMoveEntire" type="button">MOVE ENTIRE SYSTEM</button>
+                <button class="hud-button danger" id="adminSystemDelete" type="button">DELETE SYSTEM</button>
+              </div>
+              <div class="form-state" id="adminSystemOperationState" role="status">Identity-only preserves source facilities and economic records. Entire moves live system assets and population. Delete is blocked by dependent records.</div>
             </article></div><div class="admin-map-tool-panel" data-admin-map-tool-panel="industry" hidden><article class="hud-panel compact admin-map-panel">
               <label>Purchasing Faction</label>
               <select id="adminMapIndustryFaction"></select>
