@@ -865,7 +865,7 @@
       choosingSystemDestination=false;
       $("adminSystemDestination").value="";
       setState(state,"SUCCESS / "+action.toUpperCase()+" / OPERATION "+output.operation_id);
-      await fetchData();
+      if(typeof window.GMAdminRefresh==="function")await window.GMAdminRefresh("SYSTEM "+action.toUpperCase()+" COMPLETE");
       if(action!=="delete"&&dest)loadSystemFields(dest);else loadSystemFields(source);
       draw();
     }catch(error){setState(state,"SYSTEM OPERATION BLOCKED / "+error.message,"error")}
