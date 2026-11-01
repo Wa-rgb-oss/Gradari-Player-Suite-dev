@@ -48,14 +48,16 @@
   };
 
   const dirs = [[1,0],[1,-1],[0,-1],[-1,0],[-1,1],[0,1]];
+  // Canon seats track the current world registry, not the pre-faction-map positions.
+  // Names are supplied by map_hexes.display_name; these entries only add seat/type metadata.
   const canonLocations = {
     "HEX_-2_-2":{name:"VIRETHON PRIMARIS",type:"IMPERIAL CAPITAL",tier:"developed",seat:"VIRETHON PRIMARIS",faction:"GRADARI MIRERIS"},
-    "HEX_-6_-2":{name:"NAEXUS ARC",type:"IMPERIAL SYSTEM",tier:"developed",seat:"NAEXUS ULTIM",faction:"GRADARI MIRERIS"},
-    "HEX_-5_2":{name:"SYRETHIAN REACH",type:"IMPERIAL SYSTEM",tier:"developed",seat:"SYRETH NULL",faction:"GRADARI MIRERIS"},
-    "HEX_-4_-3":{name:"VARN'CATH EXPANSE",type:"IMPERIAL SYSTEM",tier:"developed",seat:"KURN VARETHIS",faction:"GRADARI MIRERIS"},
-    "HEX_-3_3":{name:"ZENTHORI VANE",type:"IMPERIAL SYSTEM",tier:"developed",seat:"ZEVRAN HOLD",faction:"GRADARI MIRERIS"},
-    "HEX_0_-2":{name:"LORAK'S CHAIN",type:"IMPERIAL SYSTEM",tier:"developed",seat:"LORAK TERTIARY",faction:"GRADARI MIRERIS"},
-    "HEX_0_1":{name:"AURIS SOMNARIUM",type:"IMPERIAL SYSTEM",tier:"developed",seat:"AURIS NINE",faction:"GRADARI MIRERIS"}
+    "HEX_0_-4":{name:"NAEXUS ARC",type:"IMPERIAL SYSTEM",tier:"developed",seat:"NAEXUS ULTIM",faction:"THE BASTION FRONT"},
+    "HEX_-7_-3":{name:"SYRETHIAN REACH",type:"IMPERIAL SYSTEM",tier:"developed",seat:"SYRETH NULL",faction:"ACCORDANT SPIRAL"},
+    "HEX_-7_3":{name:"VARN'CATH EXPANSE",type:"IMPERIAL SYSTEM",tier:"developed",seat:"KURN VARETHIS",faction:"THE VEILED CONCORD"},
+    "HEX_-3_3":{name:"ZENTHORI VANE",type:"IMPERIAL SYSTEM",tier:"developed",seat:"ZEVRAN HOLD",faction:"THE DOCTRINE PURE"},
+    "HEX_2_-5":{name:"LORAK'S CHAIN",type:"IMPERIAL SYSTEM",tier:"developed",seat:"LORAK TERTIARY",faction:"THE BASTION FRONT"},
+    "HEX_-8_-3":{name:"AURIS SOMNARIUM",type:"IMPERIAL SYSTEM",tier:"developed",seat:"AURIS NINE",faction:"ACCORDANT SPIRAL"}
   };
 
   function refFor(q,r) {
