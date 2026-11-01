@@ -525,8 +525,9 @@
 
   function drawSystems() {
     const refs=new Set([
-      ...(mapHexes || []).filter(row=>Number(row.habitable_systems||0)>0).map(row=>row.ref),
-      ...(player?.systemEconomies || []).map(row=>row.location_ref)
+      ...(mapHexes || []).filter(row=>Number(row.habitable_systems||0)>0 || Boolean(row.display_name?.trim())).map(row=>row.ref)
+      // System economies alone do not create visible systems: retired hexes may
+      // retain historical economics, trade stations, or player-owned assets.
     ]);
     ctx.save();
     ctx.textAlign="center";
