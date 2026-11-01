@@ -852,7 +852,7 @@
     const descriptions={
       identity:"Move only the system name and map identity. Source facilities, population, production and resources remain at "+source+".",
       entire:"Transfer population, economy and live infrastructure to "+dest+". Historical events remain at their original coordinates. Destination must be empty and under the same faction.",
-      delete:"Remove the selected system designation and economy. This is prohibited if facilities, characters, armies, contracts, or historical records depend on it."
+      delete:"Retire the selected system marker and designation while preserving all player assets, economic records, and history at the hex."
     };
     if(!window.confirm("ADMIN SYSTEM OPERATION: "+action.toUpperCase()+"\n\n"+name+" ("+source+")"+(dest?" → "+dest:"")+
      "\n\n"+descriptions[action]+"\n\nProceed?"))return;
@@ -868,7 +868,7 @@
       if(typeof window.GMAdminRefresh==="function")await window.GMAdminRefresh("SYSTEM "+action.toUpperCase()+" COMPLETE");
       if(action!=="delete"&&dest)loadSystemFields(dest);else loadSystemFields(source);
       draw();
-    }catch(error){setState(state,"SYSTEM OPERATION BLOCKED / "+error.message,"error")}
+    }catch(error){setState(state,"SYSTEM OPERATION BLOCKED / "+(typeof error.message==="string"&&error.message.startsWith("{")?(()=>{try{return JSON.parse(error.message).message||error.message}catch{return error.message}})():error.message),"error")}
   }
   $("adminSystemMoveIdentity").addEventListener("click",()=>performSystemOperation("identity"));
   $("adminSystemMoveEntire").addEventListener("click",()=>performSystemOperation("entire"));
