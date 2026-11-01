@@ -22,6 +22,7 @@
   let selectedLabelId=null;
   let selectedBuildingId=null;
   let selectedSystemRef=null;
+  let choosingSystemDestination=false;
   let firstVisibleResize=true;
 
   const dirs=[[1,0],[1,-1],[0,-1],[-1,0],[-1,1],[0,1]];
@@ -763,6 +764,14 @@
   }
 
   function handleCanvasClick(mx,my){
+    if(choosingSystemDestination){
+      const h=pixelToHex(mx,my),ref=refFor(h.q,h.r);
+      if(!mapHexSet.has(ref))return;
+      $("adminSystemDestination").value=ref;
+      choosingSystemDestination=false;
+      setState($("adminSystemOperationState"),"DESTINATION SELECTED: "+ref+" / SOURCE: "+selectedSystemRef);
+      return;
+    }
     if(mode==="label"){placeLabel(mx,my);return}
     if(mode==="select"){
       const l=getLabelAt(mx,my);
@@ -826,6 +835,45 @@
   $("adminMapImportBtn").addEventListener("click",()=>$("adminMapImportFile").click());
   $("adminMapImportFile").addEventListener("change",event=>importMap(event.target.files?.[0]));
   $("adminMapSaveSystemBtn").addEventListener("click",saveSystem);
+  $("adminSystemChooseDestination").addEventListener("click",()=>{
+    if(!selectedSystemRef)return setState($("adminSystemOperationState"),"Select a source system first","error");
+    choosingSystemDestination=true;
+    mode="select";
+    setState($("adminSystemOperationState"),"Click the destination hex on the map. Source remains "+selectedSystemRef);
+  });
+  async function performSystemOperation(action){
+    const state=$("adminSystemOperationState"),source=selectedSystemRef;
+    const dest=action==="delete"?null:$("adminSystemDestination").value.trim().toUpperCase();
+    if(!source)return setState(state,"Select an existing source system","error");
+    if(action!=="delete"&&!/^HEX_-?\d+_-?\d+$/.test(dest||""))
+      return setState(state,"Enter a valid destination (HEX_q_r)","error");
+    const current=(data?.mapHexes||[]).find(x=>x.location_ref===source);
+    const name=current?.display_name||source;
+    const descriptions={
+      identity:"Move only the system name and map identity. Source facilities, population, production and resources remain at "+source+".",
+      entire:"Transfer population, economy and live infrastructure to "+dest+". Historical events remain at their original coordinates. Destination must be empty and under the same faction.",
+      delete:"Remove the selected system designation and economy. This is prohibited if facilities, characters, armies, contracts, or historical records depend on it."
+    };
+    if(!window.confirm("ADMIN SYSTEM OPERATION: "+action.toUpperCase()+"\n\n"+name+" ("+source+")"+(dest?" → "+dest:"")+
+     "\n\n"+descriptions[action]+"\n\nProceed?"))return;
+    if(action==="delete"&&!window.confirm("FINAL CONFIRMATION: Delete "+name+" from "+source+"? This cannot be undone from this panel."))return;
+    setState(state,"PROCESSING "+action.toUpperCase()+"...");
+    try{
+      const output=await GMAuth.api("rpc/admin_manage_map_system",{
+        method:"POST",body:JSON.stringify({p_source:source,p_destination:dest,p_action:action})
+      });
+      choosingSystemDestination=false;
+      $("adminSystemDestination").value="";
+      setState(state,"SUCCESS / "+action.toUpperCase()+" / OPERATION "+output.operation_id);
+      await fetchData();
+      if(action!=="delete"&&dest)loadSystemFields(dest);else loadSystemFields(source);
+      draw();
+    }catch(error){setState(state,"SYSTEM OPERATION BLOCKED / "+error.message,"error")}
+  }
+  $("adminSystemMoveIdentity").addEventListener("click",()=>performSystemOperation("identity"));
+  $("adminSystemMoveEntire").addEventListener("click",()=>performSystemOperation("entire"));
+  $("adminSystemDelete").addEventListener("click",()=>performSystemOperation("delete"));
+
   $("adminTradeStationMarket").addEventListener("change",renderTradeResourceEditor);
   $("adminTradeResourceSaveBtn").addEventListener("click",saveTradeResource);
   $("adminRunIndustryCycleBtn").addEventListener("click",runIndustryCycle);
