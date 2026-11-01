@@ -767,6 +767,7 @@
     if(choosingSystemDestination){
       const h=pixelToHex(mx,my),ref=refFor(h.q,h.r);
       if(!mapHexSet.has(ref))return;
+      if(ref===selectedSystemRef){setState($("adminSystemOperationState"),"Select a destination different from the source","error");return;}
       $("adminSystemDestination").value=ref;
       choosingSystemDestination=false;
       setState($("adminSystemOperationState"),"DESTINATION SELECTED: "+ref+" / SOURCE: "+selectedSystemRef);
@@ -864,9 +865,9 @@
       });
       choosingSystemDestination=false;
       $("adminSystemDestination").value="";
-      setState(state,"SUCCESS / "+action.toUpperCase()+" / OPERATION "+output.operation_id);
       if(typeof window.GMAdminRefresh==="function")await window.GMAdminRefresh("SYSTEM "+action.toUpperCase()+" COMPLETE");
       if(action!=="delete"&&dest)loadSystemFields(dest);else loadSystemFields(source);
+      setState(state,"SUCCESS / "+action.toUpperCase()+" / "+(dest||source)+" / OPERATION "+output.operation_id,"success");
       draw();
     }catch(error){setState(state,"SYSTEM OPERATION BLOCKED / "+(typeof error.message==="string"&&error.message.startsWith("{")?(()=>{try{return JSON.parse(error.message).message||error.message}catch{return error.message}})():error.message),"error")}
   }
@@ -883,6 +884,15 @@
     if(event.pointerType==="mouse"&&event.button!==0)return;
     canvas.setPointerCapture(event.pointerId);
     const rect=canvas.getBoundingClientRect(),mx=event.clientX-rect.left,my=event.clientY-rect.top;
+    // Destination picking takes precedence over draggable labels.
+    if(choosingSystemDestination){
+      draggingLabel=false;
+      dragging=true;
+      dragMoved=false;
+      dragStart={x:event.clientX,y:event.clientY};
+      cameraStart={...camera};
+      return;
+    }
     if(mode==="select"){
       const l=getLabelAt(mx,my);
       if(l){selectedLabelId=l.id;loadSelectedLabelFields();draggingLabel=true;dragging=true;dragMoved=false;draw();return}
